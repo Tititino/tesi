@@ -1,0 +1,73 @@
+\usepackage{amsfonts, amssymb, amsmath, amsthm}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[english]{babel}
+\usepackage{bussproofs}
+\usepackage{caption}
+\usepackage{subcaption}
+% \usepackage{embedall}\embedfile{\jobname.tex}
+\usepackage[bookmarks]{hyperref}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{url}
+\usepackage{epsfig}
+\usepackage{setspace}
+% \usepackage{tesi}
+\usepackage{tabularray}
+\usepackage{todonotes}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\usepackage[utf8]{inputenc}
+
+\theoremstyle{plain}
+\newtheorem{teor}{Theorem}[section]
+\newtheorem{fact}{Fact}[section]
+\theoremstyle{definition}
+\newtheorem{define}{Definition}% [section]
+\newenvironment{myteor}{\begin{teor}\sl}{\end{teor}}
+
+% \renewcommand{\baselinestretch}{1.5}
+
+\definecolor{codegray}{gray}{0.95}
+\lstdefinestyle{mystyle}{
+  % frame=lines,
+  numberstyle=\tiny\color{black},
+  basicstyle=\footnotesize,
+  % breakatwhitespace=false,
+  % breaklines=true,
+  % captionpos=b, keepspaces=true,
+  numbers=left,
+  numbersep=5pt,
+  % showspaces=false,
+  % showstringspaces=false,
+  % showtabs=false,
+  % tabsize=2
+}
+\lstset{style=mystyle}
+\overfullrule=10pt
+
+\newcommand{\llpar}{\:\rotatebox[origin=c]{180}{\&}\:}
+\newcommand{\llten}{\otimes}
+\newcommand{\llwith}{\:\&\:}
+\newcommand{\llplus}{\oplus}
+\newcommand{\llbot}{\bot}
+\newcommand{\lltop}{\top}
+\newcommand{\llone}{1}
+\newcommand{\llzero}{0}
+\newcommand{\llnot}[1]{{#1}\,^{\llbot}}
+\newcommand{\llwn}[1]{? #1}
+\newcommand{\llbang}[1]{! #1}
+\newcommand{\lolli}{\multimap}
+\newcommand{\focus}[4]{\vdash #2 : #3 \Downarrow #4 \;\Vert\; #1}
+\newcommand{\async}[4]{\vdash #2 : #3 \Uparrow   #4 \;\Vert\; #1}
+\newcommand{\used}[1]{#1 \; \text{used}}
+\newcommand{\notUsed}[1]{#1 \; \text{not used}}
+\newcommand{\isAsy}[1]{#1 \; \text{asy}}
+\newcommand{\isNotAsy}[1]{#1 \; \text{not asy}}
+\newcommand{\isNegLit}[1]{#1 \; \text{neg lit}}
+\newcommand{\isNotNegLit}[1]{#1 \; \text{not neg lit}}
+\newcommand{\af}[2]{\text{af}(#1, #2)}
+\newcommand{\sat}[1]{#1\!\downarrow}
+\newcommand{\var}[1]{x_{#1}}
+\newcommand{\varNot}[1]{\overline{#1}}
+\newcommand{\varAnd}{\wedge}

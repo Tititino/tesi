@@ -1,0 +1,172 @@
+\documentclass[a4paper, 12pt, tesi, english]{report}
+\usepackage{tesi}
+
+\begin{document}
+
+\chapter{The focused calculus}
+
+\begin{define}
+	Given a boolean variable $x$, we use the following notation
+	\begin{itemize}
+		\item $\used{x}$ to state that the formula associated to the boolean variable $x$ gets consumed, this corresponds to saying the constraint $x$ is true
+		\item $\notUsed{x}$ to state that the formula associated to the boolean variable $x$ does not get consumed, this corresponds to saying the constraint $x$ is not true
+	\end{itemize}
+	We then extends these predicates to sequents
+	\begin{align*}
+		\used{\Delta} &= \{ \used{e_2} \mid e_2 \in \text{exp}(\Delta) \} \\
+		\notUsed{\Delta} &= \{ \notUsed{e_2} \mid e_2 \in \text{exp}(\Delta) \}
+	\end{align*}
+\end{define}
+
+\begin{define}
+	$\Pi$ represents a set of contraints.
+	Furthermore if the set $\Pi$ is satisfiable we write
+	$$ \sat{\Pi} \;\Longleftrightarrow\; \bigwedge_{\pi \in \Pi} \pi \text{ is \textit{sat}} $$
+\end{define}
+
+\begin{define}
+	An annotated formula is a formula associated to a boolean expression.
+	This is represented as
+	$$ \text{af}(\phi, x) $$
+	We will usually use $\phi$ to indicate formulas, and $x$ and $e$ to indicate respectively boolean variables and boolean expressions.
+\end{define}
+
+\begin{define}
+	Given a sequent of annotated formulae $\Delta$ we define the operation of splitting it as
+	$$ \text{split}(\Delta) \mapsto (\Delta^L, \Delta^R) $$
+	where, given a set $X$ of new variable names for each formula in $\Delta$
+	\begin{align*}
+		\Delta^L &= \{ \af{\phi_i}{x_i \wedge e_i} \mid i \in \{1, \dots, n\}\} \\
+		\Delta^R &= \{ \af{\phi_i}{\varNot{x_i} \wedge e_i} \mid i \in \{1, \dots, n\}\} \\
+	\end{align*}
+	with $n$ the cardinality of $\Delta$, and $\phi_i$ and $e_i$ respectively the formula and the variable of the $i$-eth annotated formula in $\Delta$ using an arbitrary order.
+\end{define}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{\textwidth}
+		\centering
+		\begin{tblr}{ colspec = { cc }, rows = {abovesep=10pt, belowsep=10pt}}
+			\SetCell[c=2]{c} {\small
+			\AxiomC{$\async{\used{e}, \Pi}{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi}$}
+			\LeftLabel{$[\llpar]$}
+			\UnaryInfC{$\async{\Pi}{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi}$}
+			\DisplayProof} \\
+			{\small
+			\AxiomC{$\async{\used{e}, \Pi}{\Psi}{\Delta}{\Phi}$}
+			\LeftLabel{$[\llbot]$}
+			\UnaryInfC{$\async{\Pi}{\Psi}{\Delta}{\af{\llbot}{e}, \Phi}$}
+			\DisplayProof}
+			&
+			{\small
+			\AxiomC{}
+			\LeftLabel{$[\lltop]$}
+			\UnaryInfC{$\async{\Pi}{\Psi}{\Delta}{\af{\lltop}{-}, \Phi}$}
+			\DisplayProof
+			}
+			\\
+			\SetCell[c=2]{c} {\small
+			\AxiomC{$\async{\used{e}, \Pi}{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi}$}
+			\AxiomC{$\async{\used{e}, \Pi}{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi}$}
+			\LeftLabel{$[\llwith]$}
+			\BinaryInfC{$\async{\Pi}{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi}$}
+			\DisplayProof}
+			\\
+			\SetCell[c=2]{c} {\small
+			\AxiomC{$\async{\Pi}{\Psi, \phi}{\Delta}{\Phi}$}
+			\LeftLabel{$[?]$}
+			\UnaryInfC{$\async{\Pi}{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi}$}
+			\DisplayProof} 
+			\\
+			\SetCell[c=2]{c} {\small
+			\AxiomC{$\isNotAsy{\phi}$}
+			\AxiomC{$\async{\Pi}{\Psi}{\Delta, \af{\phi}{e}}{\Phi}$}
+			\LeftLabel{$[R\!\Uparrow]$}
+			\BinaryInfC{$\async{\Pi}{\Psi}{\Delta}{\af{\phi}{e}, \Phi}$}
+			\DisplayProof
+			}
+		\end{tblr}
+		\caption{Asynchronous rules}
+	\end{subfigure}
+
+	\begin{subfigure}{\textwidth}
+		\centering
+		\begin{tblr}{colspec = { cc }, rows = {abovesep=10pt, belowsep=10pt}}
+			\SetCell[c=2]{c} {\small
+			\AxiomC{$\focus{\used{e}, \Pi}{\Psi}{\Delta^L}{\text{af}(\phi_1, e)}$}
+			\AxiomC{$\focus{\used{e}, \Pi}{\Psi}{\Delta^R}{\text{af}(\phi_2, e)}$}
+			\LeftLabel{$[\llten]$}
+			\BinaryInfC{$\focus{\Pi}{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)}$}
+			\DisplayProof}
+			\\ 
+			{\small
+			\AxiomC{$\focus{\used{e}, \Pi}{\Psi}{\Delta}{\af{\phi_1}{e}} $}
+			\LeftLabel{$[\llplus_L]$}
+			\UnaryInfC{$\focus{\Pi}{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}}$}
+			\DisplayProof}
+			&
+			{\small
+			\AxiomC{$\focus{\used{e}, \Pi}{\Psi}{\Delta}{\af{\phi_2}{e}}$}
+			\LeftLabel{$[\llplus_R]$}
+			\UnaryInfC{$\focus{\Pi}{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}}$}
+			\DisplayProof}
+			\\
+			{\small
+			\AxiomC{$\sat{ \used{e_1}, \notUsed{\Delta}, \Pi}$}
+			\LeftLabel{$[1]$}
+			\UnaryInfC{$\focus{\Pi}{\Psi}{\Delta}{\af{\llone}{e_1}}$}
+			\DisplayProof} 
+			&
+			{\small
+			\AxiomC{$\focus{\used{e_1}, \notUsed{\Delta}, \Pi}{\Psi}{\Delta}{\af{\phi}{e_1}}$}
+			\LeftLabel{$[!]$}
+			\UnaryInfC{$\focus{\Pi}{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}}$}
+			\DisplayProof
+			}
+			\\
+			\SetCell[c=2]{c} {\small
+			\AxiomC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
+			\AxiomC{$\async{\Pi}{\Psi}{\Delta}{\af{\phi}{e}}$}
+			\LeftLabel{$[R\!\Downarrow]$}
+			\BinaryInfC{$\focus{\Pi}{\Psi}{\Delta}{\af{\phi}{e}}$}
+			\DisplayProof
+			}
+		\end{tblr}
+		\caption{Synchronous rules}
+	\end{subfigure}
+
+	\begin{subfigure}{\textwidth}
+		\centering
+		\begin{tblr}{colspec = { cc }, rows = {abovesep=10pt, belowsep=10pt}}
+			{\small
+			\AxiomC{$ \sat{\used{e_1}, \used{e_2}, \notUsed{\Delta}, \Pi}$}
+			\LeftLabel{$[I_1]$}
+			\UnaryInfC{$\focus{\Pi}{\Psi}{\Delta, \af{\phi}{e_2}}{\af{\llnot{\phi}}{e_1}}$}
+			\DisplayProof}
+			&
+			{\small
+			\AxiomC{$\isNotNegLit{\phi}$}
+			\AxiomC{$\focus{\Pi}{\Psi}{\Delta}{\af{\phi}{e}}$}
+			\LeftLabel{$[D_1]$}
+			\BinaryInfC{$\async{\Pi}{\Psi}{\Delta, \af{\phi}{e}}{.}$}
+			\DisplayProof}
+			\\
+			{\small
+			\AxiomC{$ \sat{\used{e_1}, \notUsed{\Delta}, \Pi}$}
+			\LeftLabel{$[I_2]$}
+			\UnaryInfC{$\focus{\Pi}{\Psi, \phi}{\Delta}{\af{\llnot{\phi}}{e_1}}$}
+			\DisplayProof}
+			&
+			{\small
+			\AxiomC{$\isNotNegLit{\phi}$}
+			\AxiomC{$\focus{e\;new, \Pi}{\Psi}{\Delta}{\af{\phi}{e}} $}
+			\LeftLabel{$[D_2]$}
+			\BinaryInfC{$\async{\Pi}{\Psi, \phi}{\Delta}{.}$}
+			\DisplayProof}
+		\end{tblr}
+		\caption{Identity and decide rules}
+	\end{subfigure}
+
+\end{figure}
+
+\end{document}
