@@ -6,8 +6,75 @@
 \chapter{State of the art}
 \section{APLL}
 APLL is the underlying prover of click\&collect. % cit
-It implements 4 different algorithms, but we will focus on the backwards algorithm for classical logic.
-This 
+It actually provides 4 different searches, but we will focus on the backwards algorithm for classical linear logic.
+
+The program is written in OCaML and implements a focused proof search on normalized formulae.
+There are two noteworithy charateristics of this implementation:
+\begin{itemize}
+	\item Sequent splitting when encountering a tensor is done na\"ively by generating all the numbers up to $2^{|\Delta|}$ -- where $\Delta$ is the sequent -- and using the bit representation of those to create the two subsets.
+		This can be seen from the function \texttt{split\_list}, which in turn calls \texttt{split\_list\_aux}
+		\begin{lstlisting}[language=caml]
+let rec split_list_aux (acc1, acc2) l k = match l with
+  | [] -> acc1, acc2
+  | hd :: tl -> 
+      if k mod 2 = 0 then split_list_aux (acc1, hd :: acc2) tl (k / 2)
+      else split_list_aux (hd :: acc1, acc2) tl (k / 2)
+		\end{lstlisting}
+		where the argument $k$ is the number that determines the scomposition of the sequent.
+		This function is called recursively when a tensor is encountered during proof search starting with $2^{|\Delta|}$ and decreasing by one at each iteration
+		\begin{lstlisting}[language=caml]
+(* ... *)
+| Tensor (g, h) ->
+  let rec split_gamma k = 
+    if k = -1 then None
+    else
+      let gamma1, gamma2 = split_list gamma k in
+        try
+	  (* ... *)
+        with NoValue ->
+          split_gamma (k - 1) 
+  in
+    let k = fast_exp_2 (List.length gamma) - 1 in
+      (* ... *)
+		\end{lstlisting}
+
+		As we will see in the future %ref
+		this choice will hamper the prover on formulae with a high number of multiplicatives.
+	\item Dealing with exponentials is one of the main antagonists of proof searching in classical linear logic, since it makes the process unbounded.	% TODO: sistemo
+		Usually provers implement a bound system to limit this problem, and APLL's one is worth some more thorough analysis.
+		\begin{lstlisting}[language=caml]
+let rec apply_d2 select_d2 max_d2 =
+    let f = List.hd select_d2 in
+    try
+      let p = 
+        get_op (prove (Sync (theta, gamma, f)) 
+          (List.tl select_d2) max_d2) in
+      Some (Node (sequent, D2 f, [p]))
+    with NoValue ->
+      apply_d2' (List.tl select_d2) max_d2 
+  and apply_d2' select_d2 max_d2 = 
+    if select_d2 = [] then begin
+      (if max_d2 = 0 then (bl := true; raise NoValue));                    
+      let select_d2' = 
+        sort_whynot (List.filter (fun x -> not (is_neg x)) 
+        (Set_formula.elements theta)) in
+      if select_d2' = [] then None
+      else
+        apply_d2 select_d2' (max_d2 - 1) end
+    else
+      apply_d2 select_d2 max_d2 
+  in
+  begin try 
+    if Set_formula.for_all is_neg theta then None
+    else 
+      Some (get_op (apply_d2' select_d2 max_d2))
+  with NoValue -> None end end 
+\end{lstlisting}
+
+\end{itemize}
+
+\section{\texttt{llprover}}
+
 
 \chapter{The focused calculus}
 
@@ -26,25 +93,6 @@ This
 	\end{align*}
 \end{define}
 
-\begin{define}[Members of the sequent]
-	Given any sequent this can be in either two forms:
-	\begin{itemize}
-		\item focusing or synchronous phase, written:
-			$$\focus{\Lambda}{\Psi}{\Delta}{\phi}$$
-		\item asynchronous phase, written:
-			$$\async{\Lambda}{\Psi}{\Delta}{\Phi}$$
-	\end{itemize}
-	These two have more or less the same members, which are
-	\begin{itemize}
-		\item the set $\Psi$ of unrestricted formulae, or all formulae that can be freely discarded or duplicated.
-		\item the multiset $\Delta$ of linear formulae, or formulae that must be used exactly once and are -- during this phase of the proof -- put to the side.
-		\item the set $\Lambda$ of constraints, which is to be interpreted as the conjunction of its members, and the set $V$ of constraint solutions.
-			Furthermore if $\Lambda$ is satisfiable we write $\sat{\Lambda}{V}$, so:
-				$$ \sat{\Lambda}{V} \;\Longleftrightarrow\; \bigwedge_{e \in \Lambda} e \text{ is \textit{sat} by } V $$
-		\item another multiset $\Phi$ of linear formulas, or the working set of formulas during the asynchronous phase
-	\end{itemize}
-\end{define}
-
 \begin{figure}[h!]
 	\centering
 	\begin{tblr}{ colspec = {cccccccccr}, cells = { mode = math } }
@@ -58,13 +106,38 @@ This
 \end{figure}
 \begin{figure}[h!]
 	\centering
-	\begin{tblr}{ colspec = {cccccccccr}, cells = { mode = math } }
-		x & ::=  & x_i &\mid& \overline{x_i} \\
-		e & ::=  & x \wedge e    &\mid& x \\
+	\begin{tblr}{ colspec = {cccccr}, cells = { mode = math } }
+		x & ::=  & x_i &\mid& \overline{x_i} & \text{(Variable)}\\
+		e & ::=  & x \wedge e    &\mid& x & \text{(Expression)} \\
 	\end{tblr}
 	\caption{Definition of a boolean variable and expression}
 	\label{fig:var-name}
 \end{figure}
+
+\begin{define}[Members of the sequent]
+	Given any sequent this can be in either two forms:
+	\begin{itemize}
+		\item focusing or synchronous phase, written:
+			$$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\phi}$$
+		\item asynchronous phase, written:
+			$$\async{\constr{\Lambda}{V}}{\Psi}{\Delta}{\Phi}$$
+	\end{itemize}
+	These two have more or less the same members, which are
+	\begin{itemize}
+		\item the set $\Psi$ of unrestricted formulae, or all formulae that can be freely discarded or duplicated.
+		\item the multiset $\Delta$ of linear formulae, or formulae that must be used exactly once and are -- during this phase of the proof -- put to the side.
+		\item the set $\Lambda$ of constraints, which is to be interpreted as the conjunction of its members, and the set $V$ of constraint solutions.
+			Furthermore if $\Lambda$ is satisfiable we write $\sat{\Lambda}{V}$, so:
+				$$ \sat{\Lambda}{V} \;\Longleftrightarrow\; \bigwedge_{e \in \Lambda} e \text{ is \textit{sat} by } V $$
+			$V$ is in and of itself a boolean expression as in Figure \ref{fig:var-name}, in fact it can be seen as the conjuction of the variables assigned to true, and the negation of the variables assigned to false.
+			As such it can be used as a constraint, stating that a certain solution must be respected in a new one.
+			
+			This approach to constraints helps to make the flow of the variables and solutions through the proof tree more explicit and clear and leaves no ambiguity to where the constraints should be checked.
+
+			The choice of letters is mainly a mnemonic or visual one, coinstraint $\Lambda$ ``go-up'' the proof tree and solutions $V$ ``come down''.
+		\item another multiset $\Phi$ of linear formulas, or the working set of formulas during the asynchronous phase
+	\end{itemize}
+\end{define}
 \begin{define}[Annotated formula]
 	Given a formula $\phi$ defined as in Figure \ref{fig:ll-connectives} and a boolean term %???
 	$e$ defined as in Figure \ref{fig:var-name} an \textit{annotated formula} is simply a term 
@@ -89,6 +162,10 @@ The purpose of putting formulae and variables together in the annotated formula 
 	with $n$ the cardinality of $\Delta$, and $\phi_i$ and $e_i$ respectively the formula and the variable of the $i$-eth annotated formula in $\Delta$ using an arbitrary order.
 
 	It is worth noting that the variables $x_i \in X$ used for $\Delta^L$ and $\Delta^R$ must be the same, this condition is necessary for the mechanism ensuring that a formula used on the left side of a tensor proof is not used on the right side and viceversa.
+
+	With a slight abuse of notation we will write
+	$$\text{split}(\Delta)_L \; \text{and} \; \text{split}(\Delta)_R$$ 
+	respectively as the left projection and the right projection of the tuple $(\Delta_L, \Delta_R)$.
 \end{define}
 % example of splitting and variables
 
@@ -127,15 +204,15 @@ Or -- put differently -- all new variables introduced in any point of a path fro
 			}
 			\\
 			\SetCell[c=2]{c} {\small
-			\AxiomC{$\async{\constr{\used{e}, \Lambda}{-}}{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi}$}
-			\AxiomC{$\async{\constr{\used{e}, \Lambda}{V}}{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi}$}
+			\AxiomC{$\async{\constr{\used{e}, \Lambda}{V'}}{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi}$}
+			\AxiomC{$\async{\constr{\used{e}, \Lambda}{V''}}{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi}$}
 			\LeftLabel{$[\llwith]$}
-			\BinaryInfC{$\async{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi}$}	% capisco cosa fanno qui i constraint
+			\BinaryInfC{$\async{\constr{\Lambda}{V', V''}}{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi}$}	% capisco cosa fanno qui i constraint
 			\DisplayProof}
 			\\
 			\SetCell[c=2]{c} {\small
 			\AxiomC{$\async{\constr{\Lambda}{V}}{\Psi, \phi}{\Delta}{\Phi}$}
-			\LeftLabel{$[?]$}
+			\LeftLabel{$[\,?\,]$}
 			\UnaryInfC{$\async{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi}$}
 			\DisplayProof} 
 			\\
@@ -155,21 +232,21 @@ Or -- put differently -- all new variables introduced in any point of a path fro
 		\begin{tblr}{colspec = { cc }, rows = {abovesep=10pt, belowsep=10pt}}
 			\SetCell[c=2]{c} {\small
 			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{V'}}{\Psi}{\text{split}(\Delta)^L}{\text{af}(\phi_1, e)}$}
-			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{V''}}{\Psi}{\text{split}(\Delta)^R}{\text{af}(\phi_2, e)}$}
+			\AxiomC{$\focus{\constr{V'}{V''}}{\Psi}{\text{split}(\Delta)^R}{\text{af}(\phi_2, e)}$}
 			\LeftLabel{$[\llten]$}
-			\BinaryInfC{$\focus{\Lambda}{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)}$}	% capisco il movimento dei constraint
+			\BinaryInfC{$\focus{\constr{\Lambda}{V''}}{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)}$}	% capisco il movimento dei constraint
 			\DisplayProof}
 			\\ 
 			{\small
-			\AxiomC{$\focus{\used{e}, \Lambda}{\Psi}{\Delta}{\af{\phi_1}{e}} $}
+			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{V}}{\Psi}{\Delta}{\af{\phi_1}{e}} $}
 			\LeftLabel{$[\llplus_L]$}
-			\UnaryInfC{$\focus{\Lambda}{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}}$}
+			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}}$}
 			\DisplayProof}
 			&
 			{\small
-			\AxiomC{$\focus{\used{e}, \Lambda}{\Psi}{\Delta}{\af{\phi_2}{e}}$}
+			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{V}}{\Psi}{\Delta}{\af{\phi_2}{e}}$}
 			\LeftLabel{$[\llplus_R]$}
-			\UnaryInfC{$\focus{\Lambda}{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}}$}
+			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}}$}
 			\DisplayProof}
 			\\
 			{\small
@@ -179,17 +256,17 @@ Or -- put differently -- all new variables introduced in any point of a path fro
 			\DisplayProof} 
 			&
 			{\small
-			\AxiomC{$\focus{\used{e_1}, \notUsed{\Delta}, \Lambda}{\Psi}{\Delta}{\af{\phi}{e_1}}$}
-			\LeftLabel{$[!]$}
-			\UnaryInfC{$\focus{\Lambda}{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}}$}
+			\AxiomC{$\focus{\constr{\used{e_1}, \notUsed{\Delta}, \Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e_1}}$}
+			\LeftLabel{$[\,!\,]$}
+			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}}$}
 			\DisplayProof
 			}
 			\\
 			\SetCell[c=2]{c} {\small
 			\AxiomC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
-			\AxiomC{$\async{\Lambda}{\Psi}{\Delta}{\af{\phi}{e}}$}
+			\AxiomC{$\async{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e}}$}
 			\LeftLabel{$[R\!\Downarrow]$}
-			\BinaryInfC{$\focus{\Lambda}{\Psi}{\Delta}{\af{\phi}{e}}$}
+			\BinaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e}}$}
 			\DisplayProof
 			}
 		\end{tblr}
@@ -198,7 +275,10 @@ Or -- put differently -- all new variables introduced in any point of a path fro
 
 	\begin{subfigure}{\textwidth}
 		\centering
-		\begin{tblr}{colspec = { cc }, rows = {abovesep=10pt, belowsep=10pt}}
+		\begin{tblr}{ colspec = { cc }
+			    , rows = {abovesep=10pt, belowsep=10pt}
+			    , vborder{1-2} = { leftspace = -10pt, rightspace = -10pt } 
+			    }
 			{\small
 			\AxiomC{$ \sat{\used{e_1}, \used{e_2}, \notUsed{\Delta}, \Lambda}{V}$}
 			\LeftLabel{$[I_1]$}
@@ -207,9 +287,9 @@ Or -- put differently -- all new variables introduced in any point of a path fro
 			&
 			{\small
 			\AxiomC{$\isNotNegLit{\phi}$}
-			\AxiomC{$\focus{\Lambda}{\Psi}{\Delta}{\af{\phi}{e}}$}
+			\AxiomC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e}}$}
 			\LeftLabel{$[D_1]$}
-			\BinaryInfC{$\async{\Lambda}{\Psi}{\Delta, \af{\phi}{e}}{.}$}
+			\BinaryInfC{$\async{\constr{\Lambda}{V}}{\Psi}{\Delta, \af{\phi}{e}}{.}$}
 			\DisplayProof}
 			\\
 			{\small
@@ -220,9 +300,10 @@ Or -- put differently -- all new variables introduced in any point of a path fro
 			&
 			{\small
 			\AxiomC{$\isNotNegLit{\phi}$}
-			\AxiomC{$\focus{e\;new, \Lambda}{\Psi}{\Delta}{\af{\phi}{e}} $}
+			\AxiomC{$\new{e}$}
+			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e}} $}
 			\LeftLabel{$[D_2]$}
-			\BinaryInfC{$\async{\Lambda}{\Psi, \phi}{\Delta}{.}$}
+			\TrinaryInfC{$\async{\constr{\Lambda}{V}}{\Psi, \phi}{\Delta}{.}$}
 			\DisplayProof}
 		\end{tblr}
 		\caption{Identity and decide rules}
@@ -231,5 +312,8 @@ Or -- put differently -- all new variables introduced in any point of a path fro
 \end{figure}
 
 % proof of completeness
+\chapter{Implementation details}
+
+\chapter{Testing}
 
 \end{document}
