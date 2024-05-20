@@ -26,7 +26,7 @@ Before diving into the analysis of this prover, we give the definition of \texti
 \end{define}
 This measure is used in their particular way of dealing with uncontrained formulae, but is also used as a way to decide which branch to prove first for any normal operator.
 
-The program is written in OCaML and implements a pretty standard focused proof search on normalized formulae as seen in ...% cit.
+The program is written in OCaML and implements a pretty standard focused proof search on normalized formulae as seen in \cite{LiangMiller}.
 In this section we will illustrate two noteworthy charateristics of its implementation:
 \begin{itemize}
 	\item Sequent splitting when encountering a tensor is done by generating all the numbers up to $2^{|\Delta|}$ -- where $\Delta$ is the sequent -- and using the bit representation of those to create the two subsets.
@@ -361,5 +361,7 @@ We are now ready to present the full calculus.
 
 
 % \chapter{Testing}
+\bibliographystyle{plain}
+\bibliography{refs}
 
 \end{document}
