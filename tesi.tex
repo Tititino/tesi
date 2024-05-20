@@ -3,16 +3,33 @@
 
 \begin{document}
 
-\chapter{State of the art}
-\section{APLL}
-APLL is the underlying prover of click\&collect. % cit
-It actually provides 4 different searches, but we will focus on the backwards algorithm for classical linear logic.
+\chapter{Intro}
 
-The program is written in OCaML and implements a focused proof search on normalized formulae.
-There are two noteworithy charateristics of this implementation:
+\section{State of the art}
+\subsection{APLL}
+APLL is the underlying prover of click\&collect. % cit
+It provides 4 different searches -- forward and backwards for classic and intuitionistic linear logic. 
+We will focus on the backwards algorithm for classic linear logic.
+
+Before diving into the analysis of this prover, we give the definition of \textit{why-not height}
+\begin{define}[Why-not height]
+	Why-not height is the maximum number of nested ``why-not''s in a formlua, or
+	$$ \text{wnh}(\phi) = 
+	\begin{cases}	
+		0 & \text{se }\phi \in \{\llbot, \lltop, \llone, \llzero\} \\
+		\max(\text{wnh}(\phi_1), \text{wnh}(\phi_2)) & \text{se } \phi \in \{ \phi_1 \llten \phi_2, \phi_1 \llpar \phi_2, \phi_1 \llplus \phi_2, \phi_1 \llwith \phi_2 \} \\
+		\text{wnh}(\phi_1) & \text{se }\phi \in \{ \llnot{\phi_1}, \llbang{\phi_1}\} \\
+		1 + \text{wnh}(\phi_1) & \text{se }\phi \in \{ \llwn{\phi_1} \} 
+	\end{cases}
+	$$
+\end{define}
+This measure is used in their particular way of dealing with uncontrained formulae, but is also used as a way to decide which branch to prove first for any normal operator.
+
+The program is written in OCaML and implements a pretty standard focused proof search on normalized formulae as seen in ...% cit.
+In this section we will illustrate two noteworthy charateristics of its implementation:
 \begin{itemize}
-	\item Sequent splitting when encountering a tensor is done na\"ively by generating all the numbers up to $2^{|\Delta|}$ -- where $\Delta$ is the sequent -- and using the bit representation of those to create the two subsets.
-		This can be seen from the function \texttt{split\_list}, which in turn calls \texttt{split\_list\_aux}
+	\item Sequent splitting when encountering a tensor is done by generating all the numbers up to $2^{|\Delta|}$ -- where $\Delta$ is the sequent -- and using the bit representation of those to create the two subsets.
+		This can be seen in the function \texttt{split\_list}, which in turn calls \texttt{split\_list\_aux}
 		\begin{lstlisting}[language=caml]
 let rec split_list_aux (acc1, acc2) l k = match l with
   | [] -> acc1, acc2
@@ -20,8 +37,8 @@ let rec split_list_aux (acc1, acc2) l k = match l with
       if k mod 2 = 0 then split_list_aux (acc1, hd :: acc2) tl (k / 2)
       else split_list_aux (hd :: acc1, acc2) tl (k / 2)
 		\end{lstlisting}
-		where the argument $k$ is the number that determines the scomposition of the sequent.
-		This function is called recursively when a tensor is encountered during proof search starting with $2^{|\Delta|}$ and decreasing by one at each iteration
+		where the argument \texttt{k} is the number that determines the decomposition of the sequent.
+		This function is called recursively when a tensor is encountered during proof search, starting at $ k = 2^{|\Delta|}$ and decreasing by one at each iteration
 		\begin{lstlisting}[language=caml]
 (* ... *)
 | Tensor (g, h) ->
@@ -38,64 +55,84 @@ let rec split_list_aux (acc1, acc2) l k = match l with
       (* ... *)
 		\end{lstlisting}
 
-		As we will see in the future %ref
-		this choice will hamper the prover on formulae with a high number of multiplicatives.
-	\item Dealing with exponentials is one of the main antagonists of proof searching in classical linear logic, since it makes the process unbounded.	% TODO: sistemo
-		Usually provers implement a bound system to limit this problem, and APLL's one is worth some more thorough analysis.
-		\begin{lstlisting}[language=caml]
-let rec apply_d2 select_d2 max_d2 =
-    let f = List.hd select_d2 in
-    try
-      let p = 
-        get_op (prove (Sync (theta, gamma, f)) 
-          (List.tl select_d2) max_d2) in
-      Some (Node (sequent, D2 f, [p]))
-    with NoValue ->
-      apply_d2' (List.tl select_d2) max_d2 
-  and apply_d2' select_d2 max_d2 = 
-    if select_d2 = [] then begin
-      (if max_d2 = 0 then (bl := true; raise NoValue));                    
-      let select_d2' = 
-        sort_whynot (List.filter (fun x -> not (is_neg x)) 
-        (Set_formula.elements theta)) in
-      if select_d2' = [] then None
-      else
-        apply_d2 select_d2' (max_d2 - 1) end
-    else
-      apply_d2 select_d2 max_d2 
-  in
-  begin try 
-    if Set_formula.for_all is_neg theta then None
-    else 
-      Some (get_op (apply_d2' select_d2 max_d2))
-  with NoValue -> None end end 
-\end{lstlisting}
+		As we will see in ... %ref
+		this implementation choice will result in a degradation of performance on formulae with a high number of multiplicatives.
+	\item This prover does not use a simple limit to the number of applications of the contraction rule in a branch, instead an initially empty queue of unrestricted formulae (\texttt{select\_d2}) and a counter (\texttt{max\_d2}) are kept during the search.
+		Two cases arise:
+		\begin{itemize}
+			\item if \texttt{select\_d2 = []} and \texttt{max\_d2 > 0} then the sequent of unrestricted formulae is taken, negative terms are filtered out and it is sorted based on why-not height.	% cambio persona
+				\begin{lstlisting}[language=caml]
+(* ... *)
+if select_d2 = [] then begin
+  (if max_d2 = 0 then (bl := true; raise NoValue));                    
+  let select_d2' = 
+    sort_whynot (List.filter (fun x -> not (is_neg x)) 
+    (Set_formula.elements theta)) in
+  if select_d2' = [] then None
+  else
+    apply_d2 select_d2' (max_d2 - 1) end
+    (* ... *)
+				\end{lstlisting}
+				This new list of unrestricted formule becomes the new \texttt{select\_d2}.
+				Otherwise if \texttt{select\_d2} is still empty after being refilled (line 7) or if \texttt{max\_d2} is 0 (line 3) the branch fails.
+			\item if \texttt{select\_d2} is not empty, then the first formula in the queue is extracted and added to the working set.	% sistemo
+				If the branch fails the formula gets discarded and the next one in the queue is tried.	% sistemo
+		\end{itemize}
+		The main purpose of this whole process is to avoid infinite loops that always contract on the same formula.
+		Instead all the formulae are tried one by one, starting from the simplest (lower why-not height).
 
+		The counter \texttt{max\_d2} is a local bound, since decreasing it in a branch does not affect other branches.
 \end{itemize}
 
-\section{\texttt{llprover}}
+% \section{\texttt{llprover}}
+% iterative deepening, focused
+% \texttt{llprover}'s 
 
+\section{Prolog's choice}
+Prolog as a language and as an environment has been historically tied to automated theorem proving for its ability to express these king of algorithmns naturally.
+% In particular we chose SWI-Prolog because it offers a comprehensive and mature free Prolog environment.
+One particularly conventient characteristic of Prolog is its automatic managing of backtracking, in most other languages we would have had to use exceptions to walk down the stack, or a queue of unfinished computations, which would have made the code much less readable.
+
+Most Prolog implementations also support CLP or constraint logic programming.
+This allows to have constraints referencing some attributes of variables in the body of clauses, in our case we use CLP($\mathcal{B}$) for boolean constraints and an handy interface to a sat-solver.
+The library exposes operators to compose boolean formulas made of prolog variables
+\begin{lstlisting}[language=prolog, numbers=none]
+X = (X =:= 1),
+Y = (X * X)
+\end{lstlisting}
+and to check the satisfaiability of said formulas
+\begin{lstlisting}[language=prolog, numbers=none]
+?- sat(X * Y).
+X = Y, Y = 1.
+\end{lstlisting}
 
 \chapter{The focused calculus}
+Before describing the calculus we must give some definitions
 
-\begin{define}[Consuming formulas]
-	Given a boolean expression $e$ as in \ref{fig:var-name}, we use the following notation
-	\begin{itemize}
-		\item ``$\used{e}$'' to state that the formula associated to the boolean variable $e$ gets consumed in this branch of the proof,
-			this corresponds to saying the constraint $e$ is true
-		\item ``$\notUsed{e}$'' to state that the formula associated to the boolean variable $e$ does not get consumed in this branch of the proof,
-			this corresponds to saying the constraint $e$ is not true
-	\end{itemize}
-	We then extends these predicates to sequents
-	\begin{align*}
-		\used{\Delta} &= \{ \used{e_2} \mid e_2 \in \text{exp}(\Delta) \} \\
-		\notUsed{\Delta} &= \{ \notUsed{e_2} \mid e_2 \in \text{exp}(\Delta) \}
-	\end{align*}
+% Explaination on constraints why we use them ecc ecc ecc
+
+\begin{define}[Annotated formula]
+	Given a formula $\phi$ defined as in Figure \ref{fig:ll-connectives} and a boolean expression
+	$e$ defined as in Figure \ref{fig:var-name}, an \textit{annotated formula} is simply a term 
+	$$ \text{af}(\phi, e) $$
+	that associates the formula to the expression.
+	We denote 
+	$$ \text{exp}(\af{\phi}{e}) = e $$
+	and then extend this notation to sequents, such that $ \text{exp}(\Delta) $ is the set of all boolean expressions of $\Delta$.
 \end{define}
+As seen in Figure \ref{fig:ll-connectives} and \ref{fig:var-name} we will usually use $\phi$ to refer to formulas, $x$ to refer to boolean variables, and $e$ to refer to boolean expressions (conjuctions of variables).
 
-\begin{figure}[h!]
+The purpose of putting formulae and variables together in the annotated formula is twofold:
+\begin{itemize}
+	\item the actions taken on the formula determine the constraints that will be generated, and these depend on the variables associated to said formula;
+	\item after the constraints are solved we can query the assignement of the variables and find out if the associated formula is used or not in a certain branch of a proof.
+\end{itemize}
+\begin{figure}[H]
 	\centering
-	\begin{tblr}{ colspec = {cccccccccr}, cells = { mode = math } }
+	\begin{tblr}{ colspec = {cccccccccr}
+		    , cells = { mode = math } 
+		    % , vborder{1-4} = { leftspace = 0pt, rightspace = 0pt } 
+		    }
 		\phi & ::=  & 1             &\mid& \phi \llten \phi  &\mid& \bot &\mid& \phi \llpar \phi  & \text{(Multiplicatives and their constants)} \\
 		     & \mid & 0             &\mid& \phi \llplus \phi &\mid& \top &\mid& \phi \llwith \phi & \text{(Additives and their constants)} \\
 		     & \mid & \llbang{\phi} &\mid& \llwn{\phi}       &    &      &    &                   & \text{(Exponentials)} \\
@@ -104,7 +141,7 @@ let rec apply_d2 select_d2 max_d2 =
 	\caption{Linear logic connectives}
 	\label{fig:ll-connectives}
 \end{figure}
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\begin{tblr}{ colspec = {cccccr}, cells = { mode = math } }
 		x & ::=  & x_i &\mid& \overline{x_i} & \text{(Variable)}\\
@@ -114,47 +151,49 @@ let rec apply_d2 select_d2 max_d2 =
 	\label{fig:var-name}
 \end{figure}
 
+\begin{define}[Consuming formulae]
+	Given a boolean expression $e$ as in Figure \ref{fig:var-name}, we use the following notation
+	\begin{itemize}
+		\item ``$\used{e}$'' to state that the formula associated to the boolean expression $e$ gets consumed in this branch of the proof,
+			this corresponds to saying the constraint $e$ is true;
+		\item ``$\notUsed{e}$'' to state that the formula associated to the boolean variable $e$ does not get consumed in this branch of the proof,
+			this corresponds to saying the constraint $e$ is not true.
+	\end{itemize}
+	We then extends these predicates to sequents
+	\begin{align*}
+		\used{\Delta} &= \{ \used{e_2} \mid e_2 \in \text{exp}(\Delta) \} \\
+		\notUsed{\Delta} &= \{ \notUsed{e_2} \mid e_2 \in \text{exp}(\Delta) \}
+	\end{align*}
+\end{define}
+
 \begin{define}[Members of the sequent]
 	Given any sequent this can be in either two forms:
 	\begin{itemize}
-		\item focusing or synchronous phase, written:
+		\item focused or in the synchronous phase, written:
 			$$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\phi}$$
-		\item asynchronous phase, written:
+		\item in the asynchronous phase, written:
 			$$\async{\constr{\Lambda}{V}}{\Psi}{\Delta}{\Phi}$$
 	\end{itemize}
 	These two have more or less the same members, which are
 	\begin{itemize}
-		\item the set $\Psi$ of unrestricted formulae, or all formulae that can be freely discarded or duplicated.
-		\item the multiset $\Delta$ of linear formulae, or formulae that must be used exactly once and are -- during this phase of the proof -- put to the side.
-		\item the set $\Lambda$ of constraints, which is to be interpreted as the conjunction of its members, and the set $V$ of constraint solutions.
+		\item the set $\Psi$ of unrestricted formulae, or all formulae that can be freely discarded or duplicated;
+		\item the multisets $\Delta$ and $\Phi$ of linear (annotated) formulae, these are respectively the formulas ``put to the side'' and the formulae which are being ``worked on'' during a certain moment of the asynchronous phase;
+		\item the set $\Lambda$ of constraints, which is to be interpreted as the conjunction of its members, and the set $V$ which represents a propagated solution.
 			Furthermore if $\Lambda$ is satisfiable we write $\sat{\Lambda}{V}$, so:
 				$$ \sat{\Lambda}{V} \;\Longleftrightarrow\; \bigwedge_{e \in \Lambda} e \text{ is \textit{sat} by } V $$
-			$V$ is in and of itself a boolean expression as in Figure \ref{fig:var-name}, in fact it can be seen as the conjuction of the variables assigned to true, and the negation of the variables assigned to false.
+			$V$ is in and of itself a boolean expression as in Figure \ref{fig:var-name}, in fact it can be seen as the conjunction of the variables assigned to true and the negation of the variables assigned to false.
 			As such it can be used as a constraint, stating that a certain solution must be respected in a new one.
 			
 			This approach to constraints helps to make the flow of the variables and solutions through the proof tree more explicit and clear and leaves no ambiguity to where the constraints should be checked.
 
-			The choice of letters is mainly a mnemonic or visual one, coinstraint $\Lambda$ ``go-up'' the proof tree and solutions $V$ ``come down''.
-		\item another multiset $\Phi$ of linear formulas, or the working set of formulas during the asynchronous phase
+			The choice of letters is mainly a mnemonic or visual one, constraints $\Lambda$ ``go-up'' the proof tree and solutions $V$ ``come down'' from the leaves.
 	\end{itemize}
 \end{define}
-\begin{define}[Annotated formula]
-	Given a formula $\phi$ defined as in Figure \ref{fig:ll-connectives} and a boolean term %???
-	$e$ defined as in Figure \ref{fig:var-name} an \textit{annotated formula} is simply a term 
-	$$ \text{af}(\phi, e) $$
-	that associates the formula to the variable.
-\end{define}
-As seen in Figure \ref{fig:ll-connectives} and \ref{fig:var-name} we will usually use $\phi$ to refer to formulas, $x$ to refer to boolean variables, and $e$ to refer to boolean expressions (conjuctions of variables).
-The purpose of putting formulae and variables together in the annotated formula is twofold:
-\begin{itemize}
-	\item the actions taken of the formula determine the constraints that will be generated, and these depend on the variables associated to said formula;
-	\item after the constraints are solved we can query the assignement of the variables and find out if the associated formula is used or not in a certain branch of a proof.
-\end{itemize}
 
 \begin{define}[Splitting a sequent]
 	Given a sequent of annotated formulae $\Delta$ we define the operation of splitting it as a function
 	$$ \text{split}(\Delta) \mapsto (\Delta^L, \Delta^R) $$
-	where, given a set $X$ of new variable names for each formula in $\Delta$
+	where, given a set $X$ of new variable names $x_i$ for each formula $\phi_i \in \Delta$
 	\begin{align*}
 		\Delta^L &= \{ \af{\phi_i}{x_i \wedge e_i} \mid i \in \{1, \dots, n\}\} \\
 		\Delta^R &= \{ \af{\phi_i}{\varNot{x_i} \wedge e_i} \mid i \in \{1, \dots, n\}\} \\
@@ -163,23 +202,29 @@ The purpose of putting formulae and variables together in the annotated formula 
 
 	It is worth noting that the variables $x_i \in X$ used for $\Delta^L$ and $\Delta^R$ must be the same, this condition is necessary for the mechanism ensuring that a formula used on the left side of a tensor proof is not used on the right side and viceversa.
 
-	With a slight abuse of notation we will write
-	$$\text{split}(\Delta)_L \; \text{and} \; \text{split}(\Delta)_R$$ 
-	respectively as the left projection and the right projection of the tuple $(\Delta_L, \Delta_R)$.
+	With a slight abuse of notation we will write $\text{split}(\Delta)_L$ and $\text{split}(\Delta)_R$ respectively as the left projection and the right projection of the pair $(\Delta_L, \Delta_R)$.
 \end{define}
+As a small example for clarity, given the sequent
+$$ \Delta = \af{a \llten b}{x_1}, \af{\llnot{c}}{x_2} $$
+this is split into
+\begin{align*}
+	\text{split}(\Delta)_L &\mapsto \af{a \llten b}{x_3 \varAnd x_1}, \af{\llnot{c}}{x_4 \varAnd x_2} \\
+	\text{split}(\Delta)_R &\mapsto \af{a \llten b}{\varNot{x_3} \varAnd x_1}, \af{\llnot{c}}{\varNot{x_4} \varAnd x_2} 
+\end{align*}
 % example of splitting and variables
 
-One simple but important detail that will be useful later when explaining the Prolog implementation is noting that the variables in common between two branches with the same root are always introduced before the two branches diverge.
-Or -- put differently -- all new variables introduced in any point of a path from the root of the proof to a leaf may appear only in the subtrees.	% sistemo
-
+% One simple but important detail that will be useful later when explaining the Prolog implementation is noting that the variables in common between two branches with the same root are always introduced before the two branches diverge.
+% Or -- put differently -- all new variables introduced in any point of a path from the root of the proof to a leaf may appear only in the subtrees.	% sistemo
 \begin{define}
 	Lastly given a formula $\phi$ we define the following predicates
 	\begin{itemize}
-		\item $\isAsy{\phi}$ and $\isNotAsy{\phi}$
-		\item $\isNegLit{\phi}$ and ...
+		\item $\isAsy{\phi}$ is a predicate that's true only when $\phi$ is an asynchronous formula, which are
+			$$ \phi ::= \phi \llpar \phi \mid \phi \llwith \phi \mid \llwn{\phi} \mid  \lltop \mid \llbot $$
+		\item $\isNegLit{\phi}$ is a predicate that's true only when $\phi$ is a negative literal, in our implementation negative literals are atoms, and positive literals are negated atoms.
 	\end{itemize}
 \end{define}
 
+We are now ready to present the full calculus.
 \begin{figure}[H]
 	\centering
 	\begin{subfigure}{\textwidth}
@@ -308,12 +353,12 @@ Or -- put differently -- all new variables introduced in any point of a path fro
 		\end{tblr}
 		\caption{Identity and decide rules}
 	\end{subfigure}
-
+	\caption{The complete focused constraint calculus}
 \end{figure}
 
-% proof of completeness
 \chapter{Implementation details}
 
-\chapter{Testing}
+
+% \chapter{Testing}
 
 \end{document}
