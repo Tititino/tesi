@@ -1,23 +1,32 @@
-\usepackage{amsfonts, amssymb, amsmath, amsthm}
-\usepackage[margin=2.5cm]{geometry}
-\usepackage[english]{babel}
-\usepackage{bussproofs}
-\usepackage{caption}
-\usepackage{subcaption}
-% \usepackage{embedall}\embedfile{\jobname.tex}
-\usepackage[bookmarks]{hyperref}
-\usepackage{graphicx}
-\usepackage{float}
-\usepackage{url}
-\usepackage{epsfig}
-\usepackage{setspace}
-% \usepackage{tesi}
-\usepackage{tabularray}
-\usepackage{todonotes}
-\usepackage{listings}
-\usepackage{xcolor}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tesi}
 
-\usepackage[utf8]{inputenc}
+\RequirePackage{amsfonts}
+\RequirePackage{amssymb}
+\RequirePackage{amsmath}
+\RequirePackage{amsthm}
+\RequirePackage[margin=2.5cm]{geometry}
+\RequirePackage[english]{babel}
+\RequirePackage{bussproofs}
+\RequirePackage{caption}
+\RequirePackage{subcaption}
+% \RequirePackage{embedall}\embedfile{\jobname.tex}
+\RequirePackage[bookmarks]{hyperref}
+\RequirePackage{graphicx}
+\RequirePackage{float}
+\RequirePackage{url}
+\RequirePackage{epsfig}
+\RequirePackage{setspace}
+\RequirePackage{tabularray}
+\RequirePackage{todonotes}
+\RequirePackage{listings}
+\RequirePackage{xcolor}
+
+\RequirePackage[utf8]{inputenc}
+
+\DeclareOption{dbg}{\overfullrule=5pt}
+\ProcessOptions\relax
+
 
 \theoremstyle{plain}
 \newtheorem{teor}{Theorem}[section]
@@ -44,7 +53,6 @@
   % tabsize=2
 }
 \lstset{style=mystyle}
-\overfullrule=10pt
 
 \newcommand{\llpar}{\:\rotatebox[origin=c]{180}{\&}\:}
 \newcommand{\llten}{\otimes}
@@ -73,3 +81,4 @@
 \newcommand{\var}[1]{x_{#1}}
 \newcommand{\varNot}[1]{\overline{#1}}
 \newcommand{\varAnd}{\wedge}
+
