@@ -63,7 +63,7 @@ We examine the efficiency of this method and we compare it to other provers for 
 Linear logic is a logic proposed by Jean-Yves Girard in his seminal paper of 1987 \cite{LinearLogic}.
 The distintive trait of this logic is that its formulae cannot be copied (called weakening) or discarded (called contraction), but instead they are consumed.
 And a certain sequent it true if and only if all its formulae get consumed exactly once.
-For this reason this logic is sometimes called a logic of resource, in the same way classical logic is a logic of truths and intuitionistic logic is a logic of proofs.
+For this reason this logic is sometimes called a logic of resources, in the same way classical logic is a logic of truths and intuitionistic logic is a logic of proofs.
 % Questo particolare utilizzo delle formule permette di avere una logica che mantiene la simmetria delle logica classica, e il costruttivismo delle logica intuizionista.
 
 In linear logic each connective of classical logic is doubled.
@@ -99,7 +99,7 @@ We have that
 		$\bot$ & $0$ & $\bot$ \\
 	\end{tblr}
 \end{center}
-It is the multiplicative side which bring the most complexity.
+It is the multiplicative side which brings the most complexity.
 The action of partitioning the context -- called splitting -- implies an exponential number of attempts to find which subset of the multiset is right for a certain branch.
 
 Linear logic defined as of right now, albeit having the added complexity of splitting, is nonetheless decidable: since formulae are finite and they cannot be copied, it is possible to explore all the possibilities.
@@ -131,7 +131,7 @@ We confront our prover with two other provers: llprover (1997, %cit
 ).
 
 Usually the splitting is handled in two ways: trying every partition possible, or using something called the method of input/output %cit
-The latter tries to do one branch of the proof of a multiplicative, and then feeds the remaining formulae in the sequent to the other branch.
+. The latter tries to do one branch of the proof of a multiplicative, and then feeds the remaining formulae in the sequent of the other branch.
 
 We now give a deeper look at the provers we confront with.
 
@@ -155,7 +155,7 @@ Before diving into the analysis of this prover, we give the definition of \texti
 \end{define}
 This measure is used in their particular way of dealing with uncontrained formulae, but is also used as a way to decide which branch to prove first for any normal operator.
 
-The program is written in OCaML and implements a pretty standard focused proof search on normalized formulae as seen in \cite{LiangMiller}.
+The program is written in OCaML and implements a standard focused proof search on normalized formulae as seen in \cite{LiangMiller}.
 In this section we will illustrate two noteworthy charateristics of its implementation:
 \begin{itemize}
 	\item Sequent splitting when encountering a tensor is done by generating all the numbers up to $2^{|\Delta|}$ -- where $\Delta$ is the sequent -- and using the bit representation of those to create the two subsets.
@@ -697,6 +697,7 @@ This tree can be used in the end to reconstruct the actual proof tree, by visiti
 A more sophisticated algorithm may even cancel out unwanted unrestricted formulae, that otherwise remain lingering in the sequent.
 
 \chapter{Testing}
+!!! VERY MUCH STILL WIP !!!
 \section{Infrastructure}
 \subsection{Reproducibility}
 The prover's tests and benchmarks are made using a jupyter notebook.
@@ -758,10 +759,11 @@ Other arbitrary fields may be present, for example we will use the following opt
 	\item[atoms] \hfill \\ the upper bound on the number of atoms.
 \end{description}
 
-\section{Benchmarking}
-\label{sec:benchmarking}
+\section{Benchmarking}\label{sec:benchmarking}
 % Finding a comprehensive test suite for linear logic, moreover one which is not made up mostly of translations of other theorems to linear logic, is not easy.
 % Most of the theorems we use for testing are llprover's %cite
+
+
 We use llprover's test suite to prove our own.
 This test suite is composed mainly of simple tautologies, so it's only purpose is to quickly determine that an iteration of the prover is free of trivial bugs.
 
@@ -772,24 +774,28 @@ Nervertheless we use test our prover using some of the tests from LLTP, like Kle
 % Out of theese our prover perfo....
 We run our provers using these two datasets, composed each of 88 cases, using a bound of 3 and a timeout of 60 seconds.
 \begin{table}
-	\begin{tblr}{colspec = { c | c | c | c | c | c } }
-		\SetCell[c=6]{c} Kleene CBN \\
+	\centering
+	\begin{tblr}{ 
+		% colspec = { c | c | c | c | c | c | c },
+		vlines = {2,3,4,5,7,8,9,10}{solid}
+		}
+		\SetCell[c=7]{c} Kleene CBN \\
+		\hline
+		prover & timeouts & failures & successes & success rate & avg. time (succ.) & avg. time (tot.) \\
 		\hline
 		\hline
-		prover & timeouts & failures & successes & success rate & average time (succ) \\
+		APLL & 0 & 16 & 72 & $\approx 0.80$ & 0.037s & 0.055s \\
+		llprover & 20 & 6 & 62 & $\approx 0.70$ & 1.709s & 3.253s \\
+		sat-ll & 4 & 18 & 66 & $\approx 0.75$ & 0.130s & 0.185s \\
 		\hline
-		APLL & ??? & ??? & ??? & ??? & ??? \\
-		llprover & ??? & ??? & ??? & ??? & ??? \\
-		sat-ll & ??? & ??? & ??? & ??? & ??? \\
+		\SetCell[c=7]{c} Kleene CBV \\
 		\hline
-		\SetCell[c=6]{c} Kleene CBV \\
+		prover & timeouts & failures & successes & success rate & avg. time (succ.) & avg. time (tot.) \\
 		\hline
 		\hline
-		prover & timeouts & failures & successes & success rate & average time (succ) \\
-		\hline
-		APLL & 0 & 17 & 71 & $\approx 0.80$ & 0.326s \\
-		llprover & 20 & 6 & 62 & $\approx 0.70$ & 2.179s \\
-		sat-ll & 5 & 15 & 68 & $\approx 0.77$ & 0.496s \\
+		APLL & 0 & 17 & 71 & $\approx 0.80$ & 0.035s & 0.326s \\
+		llprover & 20 & 6 & 62 & $\approx 0.70$ & 0.981s & 2.179s \\
+		sat-ll & 5 & 15 & 68 & $\approx 0.77$ & 0.443s & 0.496s \\
 		\hline
 	\end{tblr}
 \end{table}
@@ -800,11 +806,10 @@ And we generate some datasets of 100 formulae in mll, all, mall and finally cll.
 
 \subsection{Results}
 Using random formulae we can clearly see that our prover outperforms APLL (and llprover) with formulae rich in multiplicatives.
-As soon as exponentials come into play the differences smooth out.
+As soon as exponentials come into play the differences level out.
 
-Most of these outcomes see a persistent slght delay in the times of our prover in respect to APLL ones.
-This is to be expected since OCaML and is to be ascibed to the interpreted nature of Prolog.
-
+% Most of these outcomes see a persistent slght delay in the times of our prover in respect to APLL ones.
+% This is to be expected since OCaML and is to be ascibed to the interpreted nature of Prolog.
 Since llprover uses incremental search, its times are one of the slowest.
 
 All tests are run with a timeout of 600 seconds, and an indicative bound of 5.
@@ -832,7 +837,11 @@ The additive case is not that significant, since the only choice is the one for 
 \missingfigure{all}
 
 We can see that in the multiplicative and additive case the difference begin to level, 
+
 \begin{figure}[h!]
+	\centering
+	\includegraphics[scale=0.5]{./images/cll-500-250.pdf}
+	\caption{Full linear logic}
 \end{figure}
 Finally in classical linear logic our prover performs slightly worse than APLL.
 
