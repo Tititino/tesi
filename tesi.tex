@@ -1,104 +1,136 @@
 \documentclass[a4paper, 12pt, tesi, english]{report}
 
-\usepackage[dbg]{tesi}
+\usepackage[dbg]{sty/tesi}
 
 \begin{document}
 \tableofcontents
 
 \chapter{Intro}
-In 2001 Pym and Harland publish a paper \cite{HarlandPym} where they propose a new way to tackle 
-Given that SAT-solving has been at the center of reasearch for decades, and efficient algorithms have been developed for it, the paper proposes a new calculus for linear logic that associates to each formula a boolean variable, and enforces linearity by constraints on said variables.
+In 2001 Pym and Harland publish a paper \cite{HarlandPym} where they propose a new way to tackle the problem of splitting sequents during linear logic proof search using boolean constraints.
+The paper proposes a new calculus for linear logic that associates to each formula a boolean variable, and enforces linearity by constraints on said variables.
 This way the complexity shifts from choosing the right set of formulas to prove a certain branch, to solving for boolean assignment -- a problem for which there are much more sophisticated algorithmns.
 
 We examine the efficiency of this method and we compare it to other provers for different substets of linear logic.
 
-\section{Sequent calculus}
-We will often talk about sequents, a seuquent of the form
-$$ \Delta_1, \dots, \Delta_n \vdash \Gamma_1, \dots, \Gamma_m $$
-is another way of writing
-$$ \Delta_1 \wedge \dots \wedge \Delta_n \Rightarrow \Gamma_1 \vee \dots \vee \Gamma_m $$
-In sequent calculus we define some rules to manipulate these sequents, these rules are for example 
-$$
-\AxiomC{$\Gamma, \phi \vdash \Delta$}
-\AxiomC{$\Gamma, \psi \vdash \Delta$}
-\BinaryInfC{$\Gamma, \phi \vee \psi \vdash \Delta$}
-\DisplayProof
-$$
-means that if $\Gamma, \phi \vdash \Delta$ and $\Gamma, \psi \vdash \Delta$ hold, then $\Gamma, \phi \vee \psi \vdash \Delta$ holds.
-This for example is the classic rule for $\vee$.
-
-When trying to build a proof bottom up, we utilize these rules inversed to try to arrive at what are called axioms or leafs, rules with no premises.
-$$
-\AxiomC{}
-\UnaryInfC{$\phi \vdash \phi$}
-\DisplayProof
-$$
-
-Gentzen introduced the sequent calculus LK for classical logic, this had -- other that the usual rules -- three so called structural rules.
-These rules were used to manipulate the sequent itself, and are
-\begin{itemize}
-	\item weakening: we can always ``weaken'' the sequent by adding a proposition without changing its truth,
-		$$
-		\AxiomC{$\Gamma \vdash \Delta$}
-		\UnaryInfC{$\Gamma, \phi \vdash \Delta$}
-		\DisplayProof
-		$$
-	\item contraction: we can always ``contract'' two copies of the same proposition into one without changing the truth of the sequent,
-		$$
-		\AxiomC{$\Gamma, \phi, \phi \vdash \Delta$}
-		\UnaryInfC{$\Gamma, \phi \vdash \Delta$}
-		\DisplayProof
-		$$
-	\item exchange: we can change position of two propositions in a sequent freely without changing its truth
-		$$
-		\AxiomC{$\Gamma, \phi, \psi \vdash \Delta$}
-		\UnaryInfC{$\Gamma, \psi, \phi \vdash \Delta$}
-		\DisplayProof
-		$$
-\end{itemize}
-and their symmetric right rules.
-These structural rules will be important in the next section where we will introduce linear logic.
+% \section{Sequent calculus}
+% We will often talk about sequents, a seuquent of the form
+% $$ \Delta_1, \dots, \Delta_n \vdash \Gamma_1, \dots, \Gamma_m $$
+% is another way of writing
+% $$ \Delta_1 \wedge \dots \wedge \Delta_n \Rightarrow \Gamma_1 \vee \dots \vee \Gamma_m $$
+% In sequent calculus we define some rules to manipulate these sequents, these rules are for example 
+% $$
+% \AxiomC{$\Gamma, \phi \vdash \Delta$}
+% \AxiomC{$\Gamma, \psi \vdash \Delta$}
+% \BinaryInfC{$\Gamma, \phi \vee \psi \vdash \Delta$}
+% \DisplayProof
+% $$
+% means that if $\Gamma, \phi \vdash \Delta$ and $\Gamma, \psi \vdash \Delta$ hold, then $\Gamma, \phi \vee \psi \vdash \Delta$ holds.
+% This for example is the classic rule for $\vee$.
+% 
+% When trying to build a proof bottom up, we utilize these rules inversed to try to arrive at what are called axioms or leafs, rules with no premises.
+% $$
+% \AxiomC{}
+% \UnaryInfC{$\phi \vdash \phi$}
+% \DisplayProof
+% $$
+% 
+% Gentzen introduced the sequent calculus LK for classical logic, this had -- other that the usual rules -- three so called structural rules.
+% These rules were used to manipulate the sequent itself, and are
+% \begin{itemize}
+% 	\item weakening: we can always ``weaken'' the sequent by adding a proposition without changing its truth,
+% 		$$
+% 		\AxiomC{$\Gamma \vdash \Delta$}
+% 		\UnaryInfC{$\Gamma, \phi \vdash \Delta$}
+% 		\DisplayProof
+% 		$$
+% 	\item contraction: we can always ``contract'' two copies of the same proposition into one without changing the truth of the sequent,
+% 		$$
+% 		\AxiomC{$\Gamma, \phi, \phi \vdash \Delta$}
+% 		\UnaryInfC{$\Gamma, \phi \vdash \Delta$}
+% 		\DisplayProof
+% 		$$
+% 	\item exchange: we can change position of two propositions in a sequent freely without changing its truth
+% 		$$
+% 		\AxiomC{$\Gamma, \phi, \psi \vdash \Delta$}
+% 		\UnaryInfC{$\Gamma, \psi, \phi \vdash \Delta$}
+% 		\DisplayProof
+% 		$$
+% \end{itemize}
+% and their symmetric right rules.
+% These structural rules will be important in the next section where we will introduce linear logic.
 
 \section{Linear logic}
 Linear logic is a logic proposed by Jean-Yves Girard in his seminal paper of 1987 \cite{LinearLogic}.
-It is a substructural logic, more precisely is the logic obtained by removing the rules for weakening and contraction:
-This means that formula in a linear sequent must be used once and exactly once, since it cannot be duplicated nor discarded.
-This property is called \textit{linearity}.
+The distintive trait of this logic is that its formulae cannot be copied (called weakening) or discarded (called contraction), but instead they are consumed.
+And a certain sequent it true if and only if all its formulae get consumed exactly once.
+For this reason this logic is sometimes called a logic of resource, in the same way classical logic is a logic of truths and intuitionistic logic is a logic of proofs.
+% Questo particolare utilizzo delle formule permette di avere una logica che mantiene la simmetria delle logica classica, e il costruttivismo delle logica intuizionista.
 
-This peculiar treatment of formulae gives rise to two interpretations of the classic connectives, that would have been equivalent otherwise. 
-So in linear logic connectives and their constants are doubled, there are multiplicative and additive versions of conjuction and disjunction:
-\begin{itemize}
-	\item multiplicative connectives -- namely $\llten$ (tensor) and $\llone$ (one), and $\llpar$ (par) and $\llbot$ (bottom) -- ``split'' the context in two
-	\item additive connectives -- namely $\llwith$ (with) and $\lltop$ (top), and $\llplus$ (plus) and $\llzero$ (zero), deal with the same context
-\end{itemize}
+In linear logic each connective of classical logic is doubled.
+To better see this let's analyze classic conjuction, this can be defined as 
 
-From this property of formulae sometimes linear logic is called a logic of resources.
+$$
+\begin{array}{cc}
+\AxiomC{$\Delta \vdash \phi_2, \Gamma$}
+\AxiomC{$\Delta \vdash \phi_1, \Gamma$}
+\BinaryInfC{$\Delta \vdash \phi_1 \wedge \phi_2, \Gamma$}
+\DisplayProof
+	&
+\AxiomC{$\Delta'' \vdash \phi_2, \Gamma''$}
+\AxiomC{$\Delta' \vdash \phi_1, \Gamma'$}
+\BinaryInfC{$\Delta', \Delta'' \vdash \phi_1 \wedge \phi_2, \Gamma', \Gamma''$}
+\DisplayProof
+\end{array}
+$$
 
-Linear logic is also constructed with negation to be involutive, so there is a DeMorgan formula for each connective to push negation to the variables.
+On the other hand, these two rules are not equivalent in linear logic, since the former implies some weakening and contraction.
+This is exactly the reason why in linear logic all connectives have two versions: an additive one -- where the two branches keep the same context, and a multiplicative one -- where the context gets partioned between the two branches.
+Obviously the constants $\top$ and $\bot$ also have two versions.
+We have that
+\begin{center}
+	\begin{tblr}{ccc}
+		& Additive & Multiplicative \\
+		$\wedge$ & $\llwith$ & $\llten$ \\
+		$\vee$ & $\llplus$ & $\llpar$ \\
+		$\top$ & $\top$ & $1$ \\
+		$\bot$ & $0$ & $\bot$ \\
+	\end{tblr}
+\end{center}
+It is the multiplicative side which bring the most complexity.
+The action of partitioning the context -- called splitting -- implies an exponential number of attempts to find which subset of the multiset is right for a certain branch.
 
-Linear logic defined as of right now is decidable, since formulas cannot grow in size we can explore each possibility.
-To be as strong as classical logic, there are two so called exponentials: bang or $!\phi$ and why not or $?\phi$.
-These have the purpose of localizing the uses of weakening and contraction:
+Linear logic defined as of right now, albeit having the added complexity of splitting, is nonetheless decidable: since formulae are finite and they cannot be copied, it is possible to explore all the possibilities.
+To make linear logic as strong as classical logic two new connectives are added: $\llbang{\phi}$ and $\llwn{\phi}$ -- called respectively bang and why-not.
+% Linear logic defined as of right now is decidable, since formulas cannot grow in size we can explore each possibility.
+% To be as strong as classical logic, there are two so called exponentials: bang or $!\phi$ and why not or $?\phi$.
+% These have the purpose of localizing the uses of weakening and contraction:
+These are called exponentials and their purpose is to localize uses of contraction and weakening.
+For example, formulas marked with $!$ can be used any number of times. %, so the intuistic implication $a \rightarrow b$ is translated as $!(a \lolli b)$, and transitions in a petri net are represented by $!(resources_1 \lolli resources_2)$.
 
-For example, formulas marked with $!$ can be used any number of times, so the intuistic implication $a \rightarrow b$ is translated as $!(a \lolli b)$, and transitions in a petri net are represented by $!(resources_1 \lolli resources_2)$.
-
-Linear logic can be used to ensure that objects are used exactly once, thus allowing the system to safely deallocate an object after its use.
-The Haskell's compiler GHC has an experimental extensions to permit signatures with linear types.
+% Linear logic can be used to ensure that objects are used exactly once, thus allowing the system to safely deallocate an object after its use.
+% The Haskell's compiler GHC has an experimental extensions to permit signatures with linear types.
 
 % \subsection{Linear logic in practice}
 % utilizzi logica lineare
 %   * pi-calcolo
 %   * risorse
 %   * linear-haskell?
-A good example of linear logic may be chemical reactions % https://www.cs.cmu.edu/~crary/317-f22/lectures/20-linear.pdf
-Here we can see a reaction as an implication, if we have the reagents we can consume them to obtain the products.
+% A good example of linear logic may be chemical reactions % https://www.cs.cmu.edu/~crary/317-f22/lectures/20-linear.pdf
+% Here we can see a reaction as an implication, if we have the reagents we can consume them to obtain the products.
 
-Petri nets can be encoded in linear logic, for example, 
+% Petri nets can be encoded in linear logic, for example, 
 % https://johnwickerson.github.io/talks/linearlogic.pdf
 
 \section{State of the art}
-There are not many provers for classic linear logic.
-llprover's website has a list of related works but these links are mostly dead and the provers cited lost.
+Most forward provers for classic linear logic use some combination of focusing and normalization to structure their proofs, with the notable exception of llprover not using normalization.	% credo
+We confront our prover with two other provers: llprover (1997, %cit
+) and APLL (circa 2019, %cit
+).
+
+Usually the splitting is handled in two ways: trying every partition possible, or using something called the method of input/output %cit
+The latter tries to do one branch of the proof of a multiplicative, and then feeds the remaining formulae in the sequent to the other branch.
+
+We now give a deeper look at the provers we confront with.
 
 \subsection{APLL}
 APLL is the underlying prover of click\&collect. % cit
@@ -111,10 +143,10 @@ Before diving into the analysis of this prover, we give the definition of \texti
 	Why-not height is the maximum number of nested ``why-not''s in a formlua, or
 	$$ \text{wnh}(\phi) = 
 	\begin{cases}	
-		0 & \text{se }\phi \in \{\llbot, \lltop, \llone, \llzero\} \\
-		\max(\text{wnh}(\phi_1), \text{wnh}(\phi_2)) & \text{se } \phi \in \{ \phi_1 \llten \phi_2, \phi_1 \llpar \phi_2, \phi_1 \llplus \phi_2, \phi_1 \llwith \phi_2 \} \\
-		\text{wnh}(\phi_1) & \text{se }\phi \in \{ \llnot{\phi_1}, \llbang{\phi_1}\} \\
-		1 + \text{wnh}(\phi_1) & \text{se }\phi \in \{ \llwn{\phi_1} \} 
+		0 & \text{if }\phi \in \{\llbot, \lltop, \llone, \llzero\} \\
+		\max(\text{wnh}(\phi_1), \text{wnh}(\phi_2)) & \text{if } \phi \in \{ \phi_1 \llten \phi_2, \phi_1 \llpar \phi_2, \phi_1 \llplus \phi_2, \phi_1 \llwith \phi_2 \} \\
+		\text{wnh}(\phi_1) & \text{if }\phi \in \{ \llnot{\phi_1}, \llbang{\phi_1}\} \\
+		1 + \text{wnh}(\phi_1) & \text{if }\phi \in \{ \llwn{\phi_1} \} 
 	\end{cases}
 	$$
 \end{define}
@@ -150,8 +182,7 @@ let rec split_list_aux (acc1, acc2) l k = match l with
       (* ... *)
 		\end{lstlisting}
 
-		As we will see in ... %ref
-		this implementation choice will result in a degradation of performance on formulae with a high number of multiplicatives.
+		As we will see in \ref{sec:benchmarking} this implementation choice will result in a degradation of performance on formulae with a high number of multiplicatives.
 	\item This prover does not use a simple limit to the number of applications of the contraction rule in a branch, instead an initially empty queue of unrestricted formulae (\texttt{select\_d2}) and a counter (\texttt{max\_d2}) are kept during the search.
 		Two cases arise:
 		\begin{itemize}
@@ -180,17 +211,15 @@ if select_d2 = [] then begin
 \end{itemize}
 
 \subsection{\texttt{llprover}}
-\texttt{llprover} is a linear logic prover by Naoyuki Tamura.
-This prover has the following characteristics:
-\begin{itemize}
-	\item iterative deepening on exponential formulae
-	\item 
-\end{itemize}
-% iterative deepening, focused
-% \texttt{llprover}'s 
+\texttt{llprover} is a prover by Naoyuki Tamura.
+Where APLL had different provers for implicative and classical linear logic, this prover encodes all the rules as the same predicate \texttt{rule/6}, using the first argument as a selector for the system.
+Setting the sistem to classical linear logic, simply adds some rules to the rules for intuitionistic linear logic.
+For this reason the prover does not implement normalization.
+
+Another particular characteristic of llprover is that it uses a local bound with iterative deepening, so in the benchmarks for formulae which need a lot of contractions, it will perform slightly worse.
 
 \section{Why Prolog}
-Prolog as a language and as an environment has been historically tied to automated theorem proving for its ability to express these king of algorithmns naturally.
+Prolog as a language and as an environment has been historically tied to automated theorem proving for its ability to express these kind of algorithmns naturally.
 % In particular we chose SWI-Prolog because it offers a comprehensive and mature free Prolog environment.
 One particularly conventient characteristic of Prolog is its automatic managing of backtracking, in most other languages we would have had to use exceptions to walk down the stack, or a queue of unfinished computations, which would have made the code much less readable.
 
@@ -207,12 +236,16 @@ and to check the satisfaiability of said formulas
 X = Y, Y = 1.
 \end{lstlisting}
 
+One other characteristic of Prolog which revealed to be very handy for our prover is unification.
+Using this we didn't have to explicitly propagate the solutions of the SAT-solver, which instead were automatically propagated between branches.
+
 \chapter{The focused calculus}
 Before describing the calculus we must give some definitions
 
 % Explaination on constraints why we use them ecc ecc ecc
 
 \begin{define}[Annotated formula]
+	\label{def:annotated}
 	Given a formula $\phi$ defined as in Figure \ref{fig:ll-connectives} and a boolean expression
 	$e$ defined as in Figure \ref{fig:var-name}, an \textit{annotated formula} is simply a term 
 	$$ \text{af}(\phi, e) $$
@@ -423,7 +456,7 @@ We are now ready to present the full calculus.
 
 	\begin{subfigure}{\textwidth}
 		\centering
-		\begin{tblr}{ colspec = { cc }
+		\begin{tblr}{ colspec = { c }
 			    , rows = {abovesep=10pt, belowsep=10pt}
 			    , vborder{1-2} = { leftspace = -10pt, rightspace = -10pt } 
 			    }
@@ -432,7 +465,22 @@ We are now ready to present the full calculus.
 			\LeftLabel{$[I_1]$}
 			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta, \af{\phi}{e_2}}{\af{\llnot{\phi}}{e_1}}$}
 			\DisplayProof}
-			&
+			\\
+			{\small
+			\AxiomC{$ \sat{\used{e_1}, \notUsed{\Delta}, \Lambda}{V}$}
+			\LeftLabel{$[I_2]$}
+			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi, \phi}{\Delta}{\af{\llnot{\phi}}{e_1}}$}
+			\DisplayProof}
+		\end{tblr}
+		\caption{Identity rules}
+	\end{subfigure}
+
+	\begin{subfigure}{\textwidth}
+		\centering
+		\begin{tblr}{ colspec = { c }
+			    , rows = {abovesep=10pt, belowsep=10pt}
+			    , vborder{1-2} = { leftspace = -10pt, rightspace = -10pt } 
+			    }
 			{\small
 			\AxiomC{$\isNotNegLit{\phi}$}
 			\AxiomC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e}}$}
@@ -441,12 +489,6 @@ We are now ready to present the full calculus.
 			\DisplayProof}
 			\\
 			{\small
-			\AxiomC{$ \sat{\used{e_1}, \notUsed{\Delta}, \Lambda}{V}$}
-			\LeftLabel{$[I_2]$}
-			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi, \phi}{\Delta}{\af{\llnot{\phi}}{e_1}}$}
-			\DisplayProof}
-			&
-			{\small
 			\AxiomC{$\isNotNegLit{\phi}$}
 			\AxiomC{$\new{e}$}
 			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e}} $}
@@ -454,13 +496,11 @@ We are now ready to present the full calculus.
 			\TrinaryInfC{$\async{\constr{\Lambda}{V}}{\Psi, \phi}{\Delta}{.}$}
 			\DisplayProof}
 		\end{tblr}
-		\caption{Identity and decide rules}
+		\caption{Decide rules}
 	\end{subfigure}
 	\caption{The complete focused constraint calculus}
 	\label{fig:calculus}
 \end{figure}
-
-\section{Completeness proof}
 
 \chapter{Implementation}
 
@@ -469,75 +509,75 @@ Before beginning the proof a sequent passes through a number of transformations.
 These transformations both preprocess the sequent to a more convenient form, and also add information about the subformulae.
 
 As a first transformation the sequent gets normalized into a sequent in negated normal form (NNF).
-NNF is the form where all negations are pushed to atoms and all linear implications ($\lolli$) are expanded into pars ($\llpar$) using the following tautology
+NNF is the form where all negations are pushed down to atoms and all linear implications ($\lolli$) are expanded into pars ($\llpar$) using the following tautology
 $$ a \lolli b \Leftrightarrow \llnot{a} \llpar b $$
 Normalization is a common technique -- used in all the provers we compare with.
 The process is composed of just two steps
 \begin{enumerate}
-	\item the left sequent is negated and appended to the right sequent, implemented by the predicate \texttt{negate\_premises};
-	\item the predicate \texttt{nnf}, which encodes the DeMorgan rules, is mapped recursively over the new sequent
+	\item the left sequent is negated and appended to the right sequent, implemented by the predicate \texttt{negate\_premises/3};
+	\item the predicate \texttt{nnf/2}, which encodes the DeMorgan rules, is mapped recursively over the new sequent
 \end{enumerate}
 This is possible since classic linear logic is symmetric and negation is involutive.
 
-The purpose of this process is cutting away a great deal of possible rules applicable to the sequent sacrificing some of the structure of the sequent.
-In fact the rules we need to implement after normalization is more than halved, since we now need just the right rules, without the ones for negation and linear implication.
+The purpose of this process is to cut away a great deal of possible rules applicable to the sequent, sacrificing some of the structure of the sequent.
+In fact the number of rules we need to implement after normalization is more than halved, since we now need just the right rules, without the ones for negation and linear implication.
 
-As a second transformation to each formula we assign its why-not height, as defined in Definition \ref{def:why-not-height}.
-Why-not height is used during proof search to decide which branch to do first and which exponential to decide first, as in APLL.
-This is a technique borrowed from APLL and its obvious purpose is to try first the branches with less exponentials: in the case this -- probably -- simpler branch fails, we do not have to try the other -- probably -- harder one.
-Formulae are now attribute trees, with, at each node the why not height of the subformula.
+As a second transformation, to each formula we assign its why-not height, as defined in Definition \ref{def:why-not-height}.
+Why-not height is used during proof search to decide which branch to do first and which exponential to decide first.
+This is a technique borrowed from APLL and its obvious purpose is to try first the branches with less exponentials: in the case the first probably simpler branch fails, we do not have to try the other.
+After this transformation formulae are attribute trees, with at each node the why not height of the subformula.
 
-As a third and final transformation each formula gets annotated, this means we associate a variable to each formula in the sequent
+As a third and final transformation, each formula gets annotated.
+This means we associate a variable to each formula in the sequent as in Definition \ref{def:annotated}.
 Given a sequent $\Delta$ we obtain
 $$ \hat{\Delta} = \{ \af{\phi}{x} \mid \new{x}, \phi \in \Delta \} $$
 To be clear, a variable is only assigned to the ``top-level'' formula, and subformulae are left unchanged.
 
 In the implementation the concept of variable is split in two: the name of the variable -- represented by a Prolog atom, and the value of the variable -- represented by a Prolog variable.
-This is needed since, after checking the constraints, the sat solver unifies the variable to its value if it finds a satisfaiable solution, so we need the atom to associate the variable value to its name if the final proof.
-The process of annotation is implemented by the predicate \texttt{annotate}
+This is needed since, after checking the constraints, the SAT-solver unifies the variable to its value if it finds a satisfaiable solution, so the purpose of the atom is to associate the variable value to its name if the final proof.
+The process of annotation is implemented by the predicate \texttt{annotate/3}
 \begin{lstlisting}[language=prolog]
 %! annotate(+[Formulae], -[AFs], -[Constraints]) is det.
 annotate(Fs, Afs, Cns) :-
-    	maplist([F, af(F, X, Var), v(Var) =:= 1]>>(gensym(x, X)), Fs, Afs, Cns).
+  maplist([F, af(F, X, Var), v(Var) =:= 1]>>(gensym(x, X)), Fs, Afs, Cns).
 \end{lstlisting}
 which is a simple map over the sequent.
-The predicate returns both the annotated formulae, and the constraints on the variables of the annotated formulae: all of the variables must be set to one in a solution -- all the formulae must be used.
+The constraints returned state that each formula must have its variable to one, that is to say each formulae must be used.
+These are the constraints the proof search starts with.
 
 \section{Constraint propagation}
 Some care is to be given to explaining how the constraints propagate.
-In fact, in constrast to Figure \ref{fig:calculus} The implementation does not have explicit propagation of the solution to the constraints.
-This is because Prolog's unification implicitly propagates a solution from one branch to another, since the variables used in the constraints are the same.
+In fact, in constrast to Figure \ref{fig:calculus} the implementation does not have explicit propagation of the solution to the constraints.
+This is because Prolog's unification implicitly propagates a solution from one branch to another.
 % continuo?
 
 \section{Helper predicates}
-We define some helper predicates to work with the constraints.
-
-What we defined as $\notUsed{\Delta}$ in \ref{def:used} corresponds to the predicate \texttt{set\_to\_zero}
-\begin{lstlisting}[language=prolog]
+We now define some helper predicates to work with the constraints.
+What we defined as $\notUsed{\Delta}$ in Definition \ref{def:used} corresponds to the predicate \texttt{set\_to\_zero/2}
+\begin{lstlisting}[language=prolog, numbers=none]
 %! set_to_zero(+[AFs], -[Constr]) is det.
 set_to_zero(Fs, Cns) :-
     maplist([af(_, _, E), v(E) =:= 0]>>true, Fs, Cns).
 \end{lstlisting}
 
-The other helper predicate is the predicate to split the context when a tensor is encountered.
-This implements the split function defined in Definition \ref{def:split}
-\begin{lstlisting}[language=prolog]
+The other helper predicate implements the split function defined in Definition \ref{def:split}.
+\begin{lstlisting}[language=prolog, numbers=none]
 %! split_ctx(+[AFs], -[AFs], -[AFs], -[Cns], -[Cns]) is det.
 split_ctx(Afs, Pos, Neg, PCns, NCns) :-
-    	maplist([ af(F, Var, E)
-	        , af(F, VarPos, Y)
-		, af(F, VarNeg, Z)
-		, v(Y) =:= v(X) * v(E)
-		, v(Z) =:= (~ v(X)) * v(E)
-		]>>(
-        	gensym(x, Name),
-        	atomic_list_concat([Var, Name], '.', VarPos),
-        	atomic_list_concat([Var, Name], '.~', VarNeg)
-    	), Afs, Pos, Neg, PCns, NCns).
+  maplist([ af(F, Var, E)
+          , af(F, VarPos, Y)
+  	  , af(F, VarNeg, Z)
+  	  , v(Y) =:= v(X) * v(E)
+  	  , v(Z) =:= (~ v(X)) * v(E)
+  	  ]>>(
+  	    gensym(x, Name),
+  	    atomic_list_concat([Var, Name], '.', VarPos),
+  	    atomic_list_concat([Var, Name], '.~', VarNeg)
+  ), Afs, Pos, Neg, PCns, NCns).
 \end{lstlisting}
 It is again a map over the list of formulae, that generates the new formulae and the constraints accordingly.
 Three new Prolog variables are introduced: \texttt{X}, \texttt{Y} and \texttt{Z}.
-\texttt{X} is the new variable, the annotated formulae refere to the variable \texttt{Y} and \texttt{Z}, and constraints are added so that
+\texttt{X} is the new variable, the annotated formulae refer to the variable \texttt{Y} and \texttt{Z}, and constraints are added so that
 \begin{align*}
 	y &= x \varAnd e \\
 	y &= \varNot{x} \varAnd e \\
@@ -547,12 +587,13 @@ Compare this to the original definition of Definition \ref{def:split}, one can s
 \section{Focusing}
 When explaining the code we will use some common names for variables, these are
 \begin{itemize}
-	\item \texttt{A} is a set of unrestricted atoms
-	\item \texttt{U} is a set of unrestriched formulae
-	\item \texttt{F}, \texttt{F1}, ..., are formulae, and \texttt{Fs} and \texttt{D} is a list of them
-	\item \texttt{S} is the queue of currently usable unrestricted formulae
-	\item 
+	\item \texttt{A} is a set of unrestricted atoms;
+	\item \texttt{U} is a set of unrestriched formulae;
+	\item \texttt{F}, \texttt{F1}, ..., are formulae, and \texttt{Fs} and \texttt{D} are a lists of them;
+	\item \texttt{S} is the queue of currently usable unrestricted formulae;
+	\item \texttt{In} is a list of constraints.
 \end{itemize}
+\subsection{Asynchronous and focusing phase}
 During the asynchronous phase we have a list of formulae which are being worked on and a list of formulae which are put to the side.
 The former is \texttt{F} and the latter is \texttt{D}.
 At each step we analyze the first element of the list \texttt{F}, and we keep scomposing the memebers of the list untill we can't anymore.
@@ -573,22 +614,25 @@ The whole idea of focusing is to reduce the number of choice points by identifyi
 This is represented by the cut at line 2, once we find and asynchronous connective it gets scomposed and we do not try other rules on it if the branch fails.
 
 If a formula cannot be further be broken apart -- i.e. it is either an atom, a negated atom, or it has a toplevel synchronous connective -- then it is put to the side in \texttt{D}.
-This is implemented by the rule $R\!\Uparrow$
+This corresponds to the rule \texttt{to\_delta} which implements the rule $R\!\Uparrow$
 \begin{lstlisting}[language=prolog]
 async(A, U, D, [F|Fs], S, M, In, _) :-
-        F = af((Op-_), _, _),
-        not(is_asy(Op)), !,
-        async(A, U, [F|D], Fs, S, M, In, _).
+  F = af((Op-_), _, _),
+  not(is_asy(Op)), !,
+  async(A, U, [F|D], Fs, S, M, In, _).
 \end{lstlisting}
 This process goes on untill \texttt{Fs} has still formulae inside.
 
 When \texttt{Fs} is empty the phase switches, and the focusing process begins: we choose a formula -- called \texttt{decide} -- from either \texttt{D} or \texttt{U} and we scompose it untill either an asynchronous connective is left or a negated atom.
-This is represented by the rules $D_1$ and $D_2$.
+This is represented by the rules $D_1$ and $D_2$ that will be discussed further ahead in Section \ref{sec:decide}.
 
-This process of alternating asynchronous and synchronous phases in classic focusing goes on untill we have a positive literal (in our case a negated atom) in \texttt{Fs} and the corresponding negative literal (in our case just an atom) in either \texttt{U} or \texttt{D}.
+\subsection{Identity rules}
+This process of alternating asynchronous and synchronous phases in classic focusing goes on untill we have a only positive literal (in our case a negated atom) in \texttt{Fs} and the corresponding negative literal (in our case just an atom) in either \texttt{U} or \texttt{D}.
 When this happens the axioms -- rules $I_1$ or $I_2$ -- are applied and close the branch.
 In our case when we are focusing and we have a positive literal in \texttt{Fs}, we check if the corresponding negative literal exists in \texttt{D}.
 If this is true, then the variables of all the other formulae in \texttt{D} are set to zero using the predicate \texttt{set\_to\_zero}, and the constraints are checked.
+
+\subsection{Decide rules}\label{sec:decide}
 
 This is encoded in the clause 
 \begin{lstlisting}[language=prolog]
@@ -737,6 +781,7 @@ Nervertheless we use test our prover using some of the tests from LLTP, like Kle
 \missingfigure{performance of our prover}
 
 \section{Benchmarking}
+\label{sec:benchmarking}
 We now show how our prover compares mainly to APLL, which is the only prover we found using the backwards method with for full classical linear logic.
 The adapt the random formula generator from APLL to make it ablee to choose which connectives to use.
 And we generate some datasets of 100 formulae in mll, all, mall and finally cll.
@@ -758,7 +803,17 @@ These results show what we said before, APLL choice for splitting greatly hamper
 ...
 \begin{figure}[h!]
 	\centering
-	\includegraphics{./images/mll.pdf}
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\includegraphics[scale=0.5]{./images/mll.pdf}
+		\caption{Multiplicative case}
+	\end{subfigure}
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\includegraphics[scale=0.5]{./images/mall.pdf}
+		\caption{Multiplicative and additive case}
+	\end{subfigure}
+	\caption{Percentage of number of timeouts out of a hundred formulae}
 \end{figure}
 
 The additive case is not that significant, since the only choice is the one for plus, the formulae remain manageable and no major differences can be seen.
@@ -766,8 +821,6 @@ The additive case is not that significant, since the only choice is the one for 
 
 We can see that in the multiplicative and additive case the difference begin to level, 
 \begin{figure}[h!]
-	\centering
-	\includegraphics{./images/mall.pdf}
 \end{figure}
 Finally in classical linear logic our prover performs slightly worse than APLL.
 
