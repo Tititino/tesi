@@ -1,9 +1,10 @@
-
 LCC=pdflatex
 
-
 all:
-	$(LCC) tesi.tex
+	texliveonfly tesi.tex
 	bibtex tesi.aux
-	$(LCC) tesi.tex
-	$(LCC) tesi.tex
+	texliveonfly tesi.tex
+	texliveonfly tesi.tex
+
+draft:
+	$(LCC) -draftmode tesi.tex

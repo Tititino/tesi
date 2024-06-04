@@ -1,6 +1,6 @@
 \documentclass[a4paper, 12pt, tesi, english]{report}
 
-\usepackage[dbg]{sty/tesi}
+\usepackage[dbg]{tesi}
 
 \begin{document}
 \tableofcontents
@@ -89,7 +89,10 @@ Obviously the constants $\top$ and $\bot$ also have two versions.
 We have that
 \begin{center}
 	\begin{tblr}{ccc}
+		\hline
 		& Additive & Multiplicative \\
+		\hline
+		\hline
 		$\wedge$ & $\llwith$ & $\llten$ \\
 		$\vee$ & $\llplus$ & $\llpar$ \\
 		$\top$ & $\top$ & $1$ \\
@@ -132,7 +135,7 @@ The latter tries to do one branch of the proof of a multiplicative, and then fee
 
 We now give a deeper look at the provers we confront with.
 
-\subsection{APLL}
+\subsection{APLL}\label{sec:apll}
 APLL is the underlying prover of click\&collect. % cit
 It provides 4 different searches -- forward and backwards for classic and intuitionistic linear logic. 
 We will focus on the backwards algorithm for classic linear logic.
@@ -213,7 +216,7 @@ if select_d2 = [] then begin
 \subsection{\texttt{llprover}}
 \texttt{llprover} is a prover by Naoyuki Tamura.
 Where APLL had different provers for implicative and classical linear logic, this prover encodes all the rules as the same predicate \texttt{rule/6}, using the first argument as a selector for the system.
-Setting the sistem to classical linear logic, simply adds some rules to the rules for intuitionistic linear logic.
+Using classical logic as the system uses all the rules, included the ones for implicative linear logic.
 For this reason the prover does not implement normalization.
 
 Another particular characteristic of llprover is that it uses a local bound with iterative deepening, so in the benchmarks for formulae which need a lot of contractions, it will perform slightly worse.
@@ -551,7 +554,7 @@ In fact, in constrast to Figure \ref{fig:calculus} the implementation does not h
 This is because Prolog's unification implicitly propagates a solution from one branch to another.
 % continuo?
 
-\section{Helper predicates}
+\section{Helper predicates}\label{sec:helper}
 We now define some helper predicates to work with the constraints.
 What we defined as $\notUsed{\Delta}$ in Definition \ref{def:used} corresponds to the predicate \texttt{set\_to\_zero/2}
 \begin{lstlisting}[language=prolog, numbers=none]
@@ -564,15 +567,15 @@ The other helper predicate implements the split function defined in Definition \
 \begin{lstlisting}[language=prolog, numbers=none]
 %! split_ctx(+[AFs], -[AFs], -[AFs], -[Cns], -[Cns]) is det.
 split_ctx(Afs, Pos, Neg, PCns, NCns) :-
-  maplist([ af(F, Var, E)
+  maplist([ af(F, N, E)
           , af(F, VarPos, Y)
   	  , af(F, VarNeg, Z)
   	  , v(Y) =:= v(X) * v(E)
   	  , v(Z) =:= (~ v(X)) * v(E)
   	  ]>>(
-  	    gensym(x, Name),
-  	    atomic_list_concat([Var, Name], '.', VarPos),
-  	    atomic_list_concat([Var, Name], '.~', VarNeg)
+  	    gensym(x, V),
+  	    atomic_list_concat([N, V], '.', VarPos),
+  	    atomic_list_concat([N, V], '.~', VarNeg)
   ), Afs, Pos, Neg, PCns, NCns).
 \end{lstlisting}
 It is again a map over the list of formulae, that generates the new formulae and the constraints accordingly.
@@ -595,9 +598,9 @@ When explaining the code we will use some common names for variables, these are
 \end{itemize}
 \subsection{Asynchronous and focusing phase}
 During the asynchronous phase we have a list of formulae which are being worked on and a list of formulae which are put to the side.
-The former is \texttt{F} and the latter is \texttt{D}.
-At each step we analyze the first element of the list \texttt{F}, and we keep scomposing the memebers of the list untill we can't anymore.
-We can see this in the predicate for $\llwith$
+With the former being called \texttt{Fss} and the latter \texttt{D}.
+At each step we analyze the first element of the list \texttt{Fs}, and we keep scomposing the memebers of the list untill we can't anymore.
+This process can be seen for example in the predicate for $\llwith$
 \begin{lstlisting}[language=prolog]
 async(A, U, D, [F|Fs], S, M, In, _) :-
   F = af(((F1-H1) & (F2-H2))-_), N, E), !,
@@ -610,86 +613,78 @@ async(A, U, D, [F|Fs], S, M, In, _) :-
 \end{lstlisting}
 Here we can see both the choice being made based on the why-not height of the two subformulae, and how the with is scomposed.
 Compare this with the $\llwith$ rule in Figure \ref{fig:calculus}.
-The whole idea of focusing is to reduce the number of choice points by identifying transformations which can be applied in any order (the asynchronous rules).
-This is represented by the cut at line 2, once we find and asynchronous connective it gets scomposed and we do not try other rules on it if the branch fails.
+The cut at line 2 represents the main concept of the asynchronous phase: if an asynchronous connective is encountered the only thing we ought to do is to scompose it.
 
 If a formula cannot be further be broken apart -- i.e. it is either an atom, a negated atom, or it has a toplevel synchronous connective -- then it is put to the side in \texttt{D}.
-This corresponds to the rule \texttt{to\_delta} which implements the rule $R\!\Uparrow$
+This can be seen in the rule \texttt{to\_delta} which implements the rule $R\!\Uparrow$
 \begin{lstlisting}[language=prolog]
 async(A, U, D, [F|Fs], S, M, In, _) :-
-  F = af((Op-_), _, _),
-  not(is_asy(Op)), !,
+  F = af((F1-_), _, _),
+  not(is_asy(F1)), !,
   async(A, U, [F|D], Fs, S, M, In, _).
 \end{lstlisting}
-This process goes on untill \texttt{Fs} has still formulae inside.
+This process goes as long as \texttt{Fs} has still formulae inside.
 
 When \texttt{Fs} is empty the phase switches, and the focusing process begins: we choose a formula -- called \texttt{decide} -- from either \texttt{D} or \texttt{U} and we scompose it untill either an asynchronous connective is left or a negated atom.
 This is represented by the rules $D_1$ and $D_2$ that will be discussed further ahead in Section \ref{sec:decide}.
 
 \subsection{Identity rules}
 This process of alternating asynchronous and synchronous phases in classic focusing goes on untill we have a only positive literal (in our case a negated atom) in \texttt{Fs} and the corresponding negative literal (in our case just an atom) in either \texttt{U} or \texttt{D}.
-When this happens the axioms -- rules $I_1$ or $I_2$ -- are applied and close the branch.
+When this happens the axioms -- rules $I_1$ or $I_2$ -- are applied to close the branch.
 In our case when we are focusing and we have a positive literal in \texttt{Fs}, we check if the corresponding negative literal exists in \texttt{D}.
-If this is true, then the variables of all the other formulae in \texttt{D} are set to zero using the predicate \texttt{set\_to\_zero}, and the constraints are checked.
-
-\subsection{Decide rules}\label{sec:decide}
-
+If this is true, then the variables of all the other formulae in \texttt{D} are set to zero using the predicate \texttt{set\_to\_zero/2} defined in Section \ref{sec:helper}, and the constraints are checked.
 This is encoded in the clause 
 \begin{lstlisting}[language=prolog]
 focus(A, U, D, F, _, _, In, node(id_1, A, U, D, F, [])) :-
-	F = af(((~ T)-_), _, E1),
-    	is_term(T),
-	select(af((T-_), _, E2), D, D1),
-    	set_to_zero(D1, Dz),
-    	append([v(E1) =:= 1, v(E2) =:= 1|Dz], In, Cns),
-    	check(Cns).
+  F = af(((~ T)-_), _, E1),
+  is_term(T),
+  select(af((T-_), _, E2), D, D1),
+  set_to_zero(D1, Dz),
+  append([v(E1) =:= 1, v(E2) =:= 1|Dz], In, Cns),
+  check(Cns).
 \end{lstlisting}
 A slightly different process happens if instead a correspondence is found in \texttt{A} instead of \texttt{D}.
-\texttt{A} is a special set containing just unrestricted atoms.
-This is a slight modification to APLL approach based on the fact that once negative literals are put in a sequent they can never leave it.
-Since \texttt{U} may be sorted many times, we try to keep the number of formulae in it small.
+Here \texttt{A} is a special set containing just unrestricted atoms.
+This is a slight modification to APLL approach based on the fact that once negative literals are put in a sequent they can never leave it, and is due to the fact that since \texttt{U} may be sorted many times, we try to keep the number of formulae in it small.
 
-This ordeal of the queue of unrestricted formulae 
-
+\subsection{Decide rules}\label{sec:decide}
+For the decide rules, particularly for $D_2$, we use a slight modification to APLL algorithm defined in Section \ref{sec:apll}.
+Like APLL we keep a queue of ordered unrestricted formulae which can be refilled only a certain number of times per-branch.
+This can be seen in the definition of the rule \texttt{decide\_2}
 \begin{lstlisting}
 async(A, U, D, [], [H|T], M, In, node(decide_2, A, U, D, [], [Tree])) :-
-	\+ U = [],
-	gensym(x, X),
-	focus(A, U, D, af(H, X, E), T, M, [v(E) =:= 1|In], Tree).
-% else if it fails try with the next one
+  \+ U = [],
+  gensym(x, X),
+  focus(A, U, D, af(H, X, E), T, M, [v(E) =:= 1|In], Tree).
 async(A, U, D, [], [_|T], M, In, Tree) :-
-	\+ U = [],
-	async(A, U, D, [], T, M, In, Tree).
-% if the queue is empty the refill it, 
-% but go in a special state called early_stop
+  \+ U = [],
+  async(A, U, D, [], T, M, In, Tree).
 async(A, U, D, [], [], M, In, Tree) :-
-	\+ U = [],
-	refill(U, M, S, M1),
-	early_stop(A, U, D, S, M1, In, Tree).
-
-early_stop(_, _, _, [], _, _, _) :-
-	false.
-early_stop(A, U, D, [H|T], M, In, Tree) :-
-	gensym(x, X),
-	focus(A, U, D, af(H, X, E), T, M, [v(E) =:= 1|In], Tree).
-early_stop(A, U, D, [_|T], M, In, Tree) :-
-	early_stop(A, U, D, T, M, In, Tree).
-
-refill(U, M, S, M1) :-
-	\+ M = 0,
-	\+ U = [], 
-	sort(2, @=<, U, S), % sort on why_not_height, keep duplicates (same heights)
-	M1 is M - 1.
+  \+ U = [],
+  refill(U, M, S, M1),
+  early_stop(A, U, D, S, M1, In, Tree).
 \end{lstlisting}
+In particular, if the queue \texttt{S} is refilled, we do not directly call \texttt{async/8}, but instead call another predicate: \texttt{early\_stop/7} (line 11).
+\begin{lstlisting}[language=prolog, numbers=none]
+early_stop(_, _, _, [], _, _, _) :-
+  false.
+early_stop(A, U, D, [H|T], M, In, Tree) :-
+  gensym(x, X),
+  focus(A, U, D, af(H, X, E), T, M, [v(E) =:= 1|In], Tree).
+early_stop(A, U, D, [_|T], M, In, Tree) :-
+  early_stop(A, U, D, T, M, In, Tree).
+\end{lstlisting}
+This is due the simple fact that if the branch was not provable and we instead called directly \texttt{async/8} at line 11, we would try to refill the branch \texttt{M} times.
+What early stop does is fail if the queue has just been refilled and it turns out the branch was not provable.
 
-All the rules $D_1$, $I_1$ are put before the unrestricted counterparts, so that their are tried first.
+All the rules $D_1$, $I_1$ are put before the unrestricted counterparts, so that they are tried first.
 
 \section{Building the tree}
 In the listings above we omitted one parameter of the predicates, which purpose is to build the proof tree.
 At each call of async and focus one node of the proof tree is built.
 This contains the context of the call.
 For example in
-\begin{lstlisting}[language=prolog]
+\begin{lstlisting}[language=prolog, numbers=none]
 async(A, U, D, [F|Fs], S, M, In, node(par, A, U, D, [F|Fs], [Tree])) :- 
   F = af(((F1 / F2)-_), N, E), !,
   Fs1 = [af(F1, N, E), af(F2, N, E)|Fs],
@@ -702,16 +697,16 @@ This tree can be used in the end to reconstruct the actual proof tree, by visiti
 A more sophisticated algorithm may even cancel out unwanted unrestricted formulae, that otherwise remain lingering in the sequent.
 
 \chapter{Testing}
-\section{Reproducibility}
+\section{Infrastructure}
+\subsection{Reproducibility}
 The prover's tests and benchmarks are made using a jupyter notebook.
-To ensure reproducibility we use nix.
-Nix is a build system based on reproducile and declarative recipes, called \textit{derivations}.
-For this project infrastructure we used nix flakes, which are an experimental feature of nix that makes derivations more hermetic and pure.
+To ensure reproducibility we use Nix, which is a build system based on reproducile and declarative recipes, called \textit{derivations}.
+A docker image is also given, which in turn calls nix without the need to install it on the system.
+Furthermore for the project infrastructure we used nix flakes, which are an experimental feature of nix that makes the process more hermetic and pure.
 
-\section{Prefix format}
-Since for benchmarking we will interface with a lot of different provers, each with its own syntax for expressions, we define a common format for expressions.
-This format must have the important the important characteristics of being easy to parse and translate, and being fairly versatile.
-For this purpose we define a prefix format for linear logic formulae inspired by the format used by \cite{TarauPaiva} for implicational formulae
+\subsection{Prefix format}
+Since for benchmarking we will interface with a lot of different provers, each with its own syntax for expressions, the need for a common format which was easy to parse and translate arose.
+For this purpose we define use a prefix format for linear logic formulae inspired by the format used by \cite{TarauPaiva} for implicational formulae
 \begin{table}[H]
 	\centering
 	\begin{tblr}{ colspec = {cc} }
@@ -729,59 +724,76 @@ For this purpose we define a prefix format for linear logic formulae inspired by
 			$\llbang{\phi_A}$       & \texttt{!A} \\
 	\end{tblr}
 \end{table}
-Furthermore each character not representing an operator is considered as a variable name.
+Furthermore each single character not representing an operator is considered as a variable name.
 Longer names can be specified by enclosing them in single apices as in \texttt{'varname'}.
-We give an example using DeMorgan for the tensor:
-$$ \llnot{(a \llten b)} \lolli \llnot{a} \llpar \llnot{b} $$
-gets translated into
-$$ \text{\texttt{@\^{}ab|\^{}a\^{}b}} $$
+As an example we give the translation of DeMorgan for the tensor:
+$$ \text{trans}(\llnot{(a \llten b)} \lolli \llnot{a} \llpar \llnot{b}) = \text{\texttt{@\^{}ab|\^{}a\^{}b}} $$
 
-Since most one of the datasets we use is LLTP % cite
-, which is written in TPTP's format % cite
-, we define a parser for this using Haskell's parser generator happy. % cite
+% Since most one of the datasets we use is LLTP % cite
+% , which is written in TPTP's format % cite
+% , we define a parser for this using Haskell's parser generator happy. % cite
 
-\section{File formats}
-As a standard format to store json file we use json, for its ease of use in most modern programming languages.
-A test cases i defined as a list of
-\begin{lstlisting}
+\subsection{File formats}
+As a standard format to store the tests we use json because of its vast adoption by most programming languages.
+A test suite is defined as a list of test cases
+\begin{lstlisting}[numbers=none]
 TestCase ::= {
-		"id" = <Number>,
-		"premises" = [ <PrefixFormula> { , <PrefixFormula> } ],
-		"conclusions" = [ <PrefixFormulas> { , <PrefixFormula> } ]
-             }
+  "id": <Number>,
+  "premises": [ <PrefixFormula>+ ],
+  "conclusions": [ <PrefixFormula> ]
+}
 \end{lstlisting}
-These are
+where
 \begin{description}
-	\item[id] the sole purpose of the numeric identifier is to trace back the test case from the output;
-	\item[premises] a list of premises as prefix formulae
-	\item[conclusions] a list of conclusions as prefix formulae
+	\item[id] \hfill \\ is a number with the sole purpose of tracing back the test case from the output;
+	\item[premises] \hfill \\ is a list of premises as prefix formulae
+	\item[conclusions] \hfill \\ a list of conclusions as prefix formulae
+\end{description}
+Other arbitrary fields may be present, for example we will use the following optional fields:
+\begin{description}
+	\item[thm] \hfill \\ whether this test case is a tautology or not, may be null;
+	\item[*, &, +, ...] \hfill \\ the number of times a specific appears in the test case;
+	\item[notes] \hfill \\ human readable text about the test case, for example its infix representation;
+	\item[size] \hfill \\ an indicative number of the size of the formula;
+	\item[atoms] \hfill \\ the upper bound on the number of atoms.
 \end{description}
 
-Other fields may be present, for example we will use the following optional fields:
-\begin{description}
-	\item[thm] whether this test case is a tautology or not, may be null;
-	\item[*, ...] the number of times a specific appears in the test case;
-	\item[notes] human readable text about the test case, for example its infix representation;
-	\item[size] an indicative number of the size of the formula;
-	\item[atoms] the upper bound on the number of atoms.
-\end{description}
-
-On the other side outpust are dumped in a CSV file.
-
-\section{Testing}
-Finding a comprehensive test suite for linear logic, moreover one which is not made up mostly of translations of other theorems to linear logic, is not easy.
-Most of the theorems we use for testing are llprover's %cite
-tests, which are simple basic tautologies like the DeMorgan laws.
+\section{Benchmarking}
+\label{sec:benchmarking}
+% Finding a comprehensive test suite for linear logic, moreover one which is not made up mostly of translations of other theorems to linear logic, is not easy.
+% Most of the theorems we use for testing are llprover's %cite
+We use llprover's test suite to prove our own.
+This test suite is composed mainly of simple tautologies, so it's only purpose is to quickly determine that an iteration of the prover is free of trivial bugs.
 
 The problem with datasets with a high number of exponential formulae is the high number of timeouts and failures.
 Failures happen when the bound is too small for a formula, and all the branches are exhausted before the timeout.
 
 Nervertheless we use test our prover using some of the tests from LLTP, like Kleene's fromulae using call-by-name or call-by-value translations. % cite
 % Out of theese our prover perfo....
-\missingfigure{performance of our prover}
+We run our provers using these two datasets, composed each of 88 cases, using a bound of 3 and a timeout of 60 seconds.
+\begin{table}
+	\begin{tblr}{colspec = { c | c | c | c | c | c } }
+		\SetCell[c=6]{c} Kleene CBN \\
+		\hline
+		\hline
+		prover & timeouts & failures & successes & success rate & average time (succ) \\
+		\hline
+		APLL & ??? & ??? & ??? & ??? & ??? \\
+		llprover & ??? & ??? & ??? & ??? & ??? \\
+		sat-ll & ??? & ??? & ??? & ??? & ??? \\
+		\hline
+		\SetCell[c=6]{c} Kleene CBV \\
+		\hline
+		\hline
+		prover & timeouts & failures & successes & success rate & average time (succ) \\
+		\hline
+		APLL & 0 & 17 & 71 & $\approx 0.80$ & 0.326s \\
+		llprover & 20 & 6 & 62 & $\approx 0.70$ & 2.179s \\
+		sat-ll & 5 & 15 & 68 & $\approx 0.77$ & 0.496s \\
+		\hline
+	\end{tblr}
+\end{table}
 
-\section{Benchmarking}
-\label{sec:benchmarking}
 We now show how our prover compares mainly to APLL, which is the only prover we found using the backwards method with for full classical linear logic.
 The adapt the random formula generator from APLL to make it ablee to choose which connectives to use.
 And we generate some datasets of 100 formulae in mll, all, mall and finally cll.
@@ -824,8 +836,8 @@ We can see that in the multiplicative and additive case the difference begin to 
 \end{figure}
 Finally in classical linear logic our prover performs slightly worse than APLL.
 
-\chapter{Conclusions}
-We showed that -- given appropriate modifications -- Harland\&Pym's method is competitive to other provers, and in some cases (see multiplicatives) may be even faster.
+% \chapter{Conclusions}
+% We showed that -- given appropriate modifications -- Harland\&Pym's method is competitive to other provers, and in some cases (see multiplicatives) may be even faster.
 
 \bibliographystyle{plain}
 \bibliography{refs}
