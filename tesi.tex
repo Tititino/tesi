@@ -2,7 +2,13 @@
 
 \usepackage[dbg]{tesi}
 
+\title{Titolo}
+
 \begin{document}
+\maketitle
+
+\newpage
+
 \tableofcontents
 
 \chapter{Intro}
@@ -164,7 +170,8 @@ In this section we will illustrate two noteworthy charateristics of its implemen
 let rec split_list_aux (acc1, acc2) l k = match l with
   | [] -> acc1, acc2
   | hd :: tl -> 
-      if k mod 2 = 0 then split_list_aux (acc1, hd :: acc2) tl (k / 2)
+      if k mod 2 = 0 
+      then split_list_aux (acc1, hd :: acc2) tl (k / 2)
       else split_list_aux (hd :: acc1, acc2) tl (k / 2)
 		\end{lstlisting}
 		where the argument \texttt{k} is the number that determines the decomposition of the sequent.
@@ -542,7 +549,10 @@ The process of annotation is implemented by the predicate \texttt{annotate/3}
 \begin{lstlisting}[language=prolog]
 %! annotate(+[Formulae], -[AFs], -[Constraints]) is det.
 annotate(Fs, Afs, Cns) :-
-  maplist([F, af(F, X, Var), v(Var) =:= 1]>>(gensym(x, X)), Fs, Afs, Cns).
+  maplist([ F
+          , af(F, X, Var)
+	  , v(Var) =:= 1
+	  ]>>(gensym(x, X)), Fs, Afs, Cns).
 \end{lstlisting}
 which is a simple map over the sequent.
 The constraints returned state that each formula must have its variable to one, that is to say each formulae must be used.
@@ -652,27 +662,27 @@ For the decide rules, particularly for $D_2$, we use a slight modification to AP
 Like APLL we keep a queue of ordered unrestricted formulae which can be refilled only a certain number of times per-branch.
 This can be seen in the definition of the rule \texttt{decide\_2}
 \begin{lstlisting}
-async(A, U, D, [], [H|T], M, In, node(decide_2, A, U, D, [], [Tree])) :-
+async(A, U, D, [], [H|T], M, In, _) :-
   \+ U = [],
   gensym(x, X),
-  focus(A, U, D, af(H, X, E), T, M, [v(E) =:= 1|In], Tree).
-async(A, U, D, [], [_|T], M, In, Tree) :-
+  focus(A, U, D, af(H, X, E), T, M, [v(E) =:= 1|In], _).
+async(A, U, D, [], [_|T], M, In, _) :-
   \+ U = [],
-  async(A, U, D, [], T, M, In, Tree).
-async(A, U, D, [], [], M, In, Tree) :-
+  async(A, U, D, [], T, M, In, _).
+async(A, U, D, [], [], M, In, _) :-
   \+ U = [],
   refill(U, M, S, M1),
-  early_stop(A, U, D, S, M1, In, Tree).
+  early_stop(A, U, D, S, M1, In, _).
 \end{lstlisting}
 In particular, if the queue \texttt{S} is refilled, we do not directly call \texttt{async/8}, but instead call another predicate: \texttt{early\_stop/7} (line 11).
 \begin{lstlisting}[language=prolog, numbers=none]
 early_stop(_, _, _, [], _, _, _) :-
   false.
-early_stop(A, U, D, [H|T], M, In, Tree) :-
+early_stop(A, U, D, [H|T], M, In, _) :-
   gensym(x, X),
-  focus(A, U, D, af(H, X, E), T, M, [v(E) =:= 1|In], Tree).
-early_stop(A, U, D, [_|T], M, In, Tree) :-
-  early_stop(A, U, D, T, M, In, Tree).
+  focus(A, U, D, af(H, X, E), T, M, [v(E) =:= 1|In], _).
+early_stop(A, U, D, [_|T], M, In, _) :-
+  early_stop(A, U, D, T, M, In, _).
 \end{lstlisting}
 This is due the simple fact that if the branch was not provable and we instead called directly \texttt{async/8} at line 11, we would try to refill the branch \texttt{M} times.
 What early stop does is fail if the queue has just been refilled and it turns out the branch was not provable.
@@ -734,7 +744,7 @@ $$ \text{trans}(\llnot{(a \llten b)} \lolli \llnot{a} \llpar \llnot{b}) = \text{
 % , which is written in TPTP's format % cite
 % , we define a parser for this using Haskell's parser generator happy. % cite
 
-\subsection{File formats}
+\subsection{File formats}\label{sec:file_format}
 As a standard format to store the tests we use json because of its vast adoption by most programming languages.
 A test suite is defined as a list of test cases
 \begin{lstlisting}[numbers=none]
@@ -753,97 +763,118 @@ where
 Other arbitrary fields may be present, for example we will use the following optional fields:
 \begin{description}
 	\item[thm] \hfill \\ whether this test case is a tautology or not, may be null;
-	\item[*, &, +, ...] \hfill \\ the number of times a specific appears in the test case;
+	\item[*, \&, +, ...] \hfill \\ the number of times a specific appears in the test case;
 	\item[notes] \hfill \\ human readable text about the test case, for example its infix representation;
 	\item[size] \hfill \\ an indicative number of the size of the formula;
 	\item[atoms] \hfill \\ the upper bound on the number of atoms.
 \end{description}
 
+\subsection{Formula generation}\label{sec:formula_generator}
+One of the sources of formulae we'll use in Section \ref{sec:benchmarking} is APLL's random formula generator.
+The version we'll use is a slight modification of it where:
+\begin{itemize}
+	\item the output is in the json format described in Section \ref{sec:file_format}
+	\item one can choose to generate normalized formulae or not;
+	\item one can choose which connectives appear in the generated formula.
+\end{itemize}
+A noteworthy detail is how the parameters \texttt{size} and \texttt{atoms} mentioned in Section \ref{sec:file_format} are defined, since these are directly related to how the formulae are generated:
+\begin{itemize}
+	\item when one specifies a number of atoms \texttt{atoms}, the generator initializes an array containing \texttt{atoms} atoms, their negations, and the constants $\bot, \top, \dots$.
+		During the generation of the formula this array is randomly accessed, extracting a random element when needed.
+		This means that \texttt{atoms} represents an upper bound to the number of different atoms that may appear in the formula, not their exact number.
+	\item when a formula is generated at each step, based on a threshold, it is chosen whether to generate a unary or binary connective:
+		\begin{itemize}
+			\item if a unary connective is chosen, the process continues with a size of $\text{\texttt{size}} - 1$;
+			\item if a binary connective is chosen, the program chooses a random value between 0 and \texttt{size}, and it generates the two branches of the formula, with size respectively $k$ and $\text{\texttt{size}} - k$.
+		\end{itemize}
+\end{itemize}
+
 \section{Benchmarking}\label{sec:benchmarking}
 % Finding a comprehensive test suite for linear logic, moreover one which is not made up mostly of translations of other theorems to linear logic, is not easy.
 % Most of the theorems we use for testing are llprover's %cite
+We'll mainly use three sources for formulae:
+\begin{itemize}
+	\item llprover's tests
+	\item LLTP, especially the translations of Kleene's intuistic formulae 
+	\item randomly generated formulae made by the genrator described in \ref{sec:formula_generator}
+\end{itemize}
+llprovers tests are composed mainly by simple linear logic tautologies, e.g. the DeMorgan rules, for this reason these tests are used more as a simple and fast suite to catch the most obvious bugs between iterations of the prover.
 
-
-We use llprover's test suite to prove our own.
-This test suite is composed mainly of simple tautologies, so it's only purpose is to quickly determine that an iteration of the prover is free of trivial bugs.
-
-The problem with datasets with a high number of exponential formulae is the high number of timeouts and failures.
-Failures happen when the bound is too small for a formula, and all the branches are exhausted before the timeout.
-
-Nervertheless we use test our prover using some of the tests from LLTP, like Kleene's fromulae using call-by-name or call-by-value translations. % cite
-% Out of theese our prover perfo....
-We run our provers using these two datasets, composed each of 88 cases, using a bound of 3 and a timeout of 60 seconds.
-\begin{table}
+We now show the results of running the provers on two datasets: KLE-cbn and KLE-cbv, respectively the call-by-name and call-by-value translations of Kleene's theorems.
+These translations introduce a high number of exponentials, and this causes, other than timeouts because of the added complexity, some failures.
+These failures are not due to bugs, but instead happen because the prover has reached its bound for that formula.
+The benchmarks are done using a timeout of \qty{60}{\second} and a bound of 3.
+\begin{table}[H]
 	\centering
 	\begin{tblr}{ 
-		% colspec = { c | c | c | c | c | c | c },
-		vlines = {2,3,4,5,7,8,9,10}{solid}
+		colspec = { l c c c c c c },
+		vlines = {2,3,4,5,7,8,9,10}{solid},
+		cells = { preto = {\small} },
+		% cells{2,7} = { preto = {\small}, cmd = {\textbf} }
 		}
 		\SetCell[c=7]{c} Kleene CBN \\
 		\hline
 		prover & timeouts & failures & successes & success rate & avg. time (succ.) & avg. time (tot.) \\
 		\hline
 		\hline
-		APLL & 0 & 16 & 72 & $\approx 0.80$ & 0.037s & 0.055s \\
-		llprover & 20 & 6 & 62 & $\approx 0.70$ & 1.709s & 3.253s \\
-		sat-ll & 4 & 18 & 66 & $\approx 0.75$ & 0.130s & 0.185s \\
+		APLL & 0 & 16 & 72 & $\approx 0.80$ & \qty{0.037}{\second} & \qty{0.055}{\second} \\
+		llprover & 20 & 6 & 62 & $\approx 0.70$ & \qty{1.709}{\second} & \qty{3.253}{\second} \\
+		sat-ll & 4 & 18 & 66 & $\approx 0.75$ & \qty{0.130}{\second} & \qty{0.185}{\second} \\
 		\hline
 		\SetCell[c=7]{c} Kleene CBV \\
 		\hline
 		prover & timeouts & failures & successes & success rate & avg. time (succ.) & avg. time (tot.) \\
 		\hline
 		\hline
-		APLL & 0 & 17 & 71 & $\approx 0.80$ & 0.035s & 0.326s \\
-		llprover & 20 & 6 & 62 & $\approx 0.70$ & 0.981s & 2.179s \\
-		sat-ll & 5 & 15 & 68 & $\approx 0.77$ & 0.443s & 0.496s \\
+		APLL & 0 & 17 & 71 & $\approx 0.80$ & \qty{0.035}{\second} & \qty{0.326}{\second} \\
+		llprover & 20 & 6 & 62 & $\approx 0.70$ & \qty{0.981}{\second} & \qty{2.179}{\second} \\
+		sat-ll & 5 & 15 & 68 & $\approx 0.77$ & \qty{0.443}{\second} & \qty{0.496}{\second} \\
 		\hline
 	\end{tblr}
 \end{table}
 
-We now show how our prover compares mainly to APLL, which is the only prover we found using the backwards method with for full classical linear logic.
-The adapt the random formula generator from APLL to make it ablee to choose which connectives to use.
-And we generate some datasets of 100 formulae in mll, all, mall and finally cll.
-
-\subsection{Results}
+There are mainly two downsides with using random formulae:
+\begin{itemize}
+	\item most cases do not hold any structure, 
+	\item ??? % non ricordo più cosa volessi scrivere
+\end{itemize}
 Using random formulae we can clearly see that our prover outperforms APLL (and llprover) with formulae rich in multiplicatives.
-As soon as exponentials come into play the differences level out.
-
-% Most of these outcomes see a persistent slght delay in the times of our prover in respect to APLL ones.
-% This is to be expected since OCaML and is to be ascibed to the interpreted nature of Prolog.
-Since llprover uses incremental search, its times are one of the slowest.
-
-All tests are run with a timeout of 600 seconds, and an indicative bound of 5.
-Each prover treats the bound differently so sometimes a provers prematurely fail because of a small bound. 
-
-We run the tests on a dataset of 100 random normalized multiplicative formulae.
-These results show what we said before, APLL choice for splitting greatly hampers it's ability with formulae rich in multiplicatives, to the point that APLL consistently exhausted its time on almont a fourth of the formulae tried.
-...
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\begin{subfigure}{0.49\textwidth}
 		\centering
 		\includegraphics[scale=0.5]{./images/mll.pdf}
 		\caption{Multiplicative case}
+		\label{fig:mll_bars}
 	\end{subfigure}
 	\begin{subfigure}{0.49\textwidth}
 		\centering
 		\includegraphics[scale=0.5]{./images/mall.pdf}
 		\caption{Multiplicative and additive case}
+		\label{fig:mall_bars}
 	\end{subfigure}
 	\caption{Percentage of number of timeouts out of a hundred formulae}
 \end{figure}
+We can see that in the multiplicative and additive case the difference begin to level.
+The additive case is not that significant as the formulae remain manageable and no major differences can be seen.
 
-The additive case is not that significant, since the only choice is the one for plus, the formulae remain manageable and no major differences can be seen.
-\missingfigure{all}
-
-We can see that in the multiplicative and additive case the difference begin to level, 
-
+As soon as exponentials come into play the differences level out.
 \begin{figure}[h!]
 	\centering
 	\includegraphics[scale=0.5]{./images/cll-500-250.pdf}
 	\caption{Full linear logic}
+	\label{fig:cll_bars}
 \end{figure}
-Finally in classical linear logic our prover performs slightly worse than APLL.
+In full linear logic our prover performs slightly worse than APLL.
+
+All these test were done generating suits of 100 tests.
+Figure \ref{fig:mll_bars}'s tests were normalized formulae of size 100, and atoms 50, with just the connectives $\llten$ and $\llpar$.
+Figure \ref{fig:mall_bars}'s tests were normalized formulae formulae of size 500, and atoms 250, with the connectives $\llten, \llpar, \llwith$ and $\llplus$.
+Finally \ref{fig:cll_bars}'s tests were normalized formulae of size 500, and atoms 250, with all the connectives.
+
+When looking at the results of full linear logic, it is important to note that unlike the tests with multiplicatives and additives, some of the results may be early failures because of the bound.
+Since llprover uses incremental search, its times are often of the slowest.
+On the other hand our prover is consistently slightly slower that APLL, this difference is negligible and due to the fact that APLL is compiled, whereas our prover is interpreted.
 
 % \chapter{Conclusions}
 % We showed that -- given appropriate modifications -- Harland\&Pym's method is competitive to other provers, and in some cases (see multiplicatives) may be even faster.
