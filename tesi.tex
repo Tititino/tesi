@@ -655,10 +655,10 @@ focus(A, U, D, F, _, _, In, node(id_1, A, U, D, F, [])) :-
 \end{lstlisting}
 A slightly different process happens if instead a correspondence is found in \texttt{A} instead of \texttt{D}.
 Here \texttt{A} is a special set containing just unrestricted atoms.
-This is a slight modification to APLL approach based on the fact that once negative literals are put in a sequent they can never leave it, and is due to the fact that since \texttt{U} may be sorted many times, we try to keep the number of formulae in it small.
+This is a small modification to APLL's approach based on the fact that once negative literals are put in a sequent they can never leave it, and is due to the fact that since \texttt{U} may be sorted many times, we try to keep the number of formulae in it small.
 
 \subsection{Decide rules}\label{sec:decide}
-For the decide rules, particularly for $D_2$, we use a slight modification to APLL algorithm defined in Section \ref{sec:apll}.
+For the decide rules, particularly for $D_2$, we use a modified version of APLL's algorithm defined in Section \ref{sec:apll}.
 Like APLL we keep a queue of ordered unrestricted formulae which can be refilled only a certain number of times per-branch.
 This can be seen in the definition of the rule \texttt{decide\_2}
 \begin{lstlisting}
@@ -685,9 +685,9 @@ early_stop(A, U, D, [_|T], M, In, _) :-
   early_stop(A, U, D, T, M, In, _).
 \end{lstlisting}
 This is due the simple fact that if the branch was not provable and we instead called directly \texttt{async/8} at line 11, we would try to refill the branch \texttt{M} times.
-What early stop does is fail if the queue has just been refilled and it turns out the branch was not provable.
+What \texttt{early\_stop/7} does is fail if the queue has just been refilled and it turns out the branch was not provable.
 
-All the rules $D_1$, $I_1$ are put before the unrestricted counterparts, so that they are tried first.
+All the rules $D_1$, $I_1$ are defined before the unrestricted counterparts, so that they are tried first.
 
 \section{Building the tree}
 In the listings above we omitted one parameter of the predicates, which purpose is to build the proof tree.
@@ -703,21 +703,21 @@ async(A, U, D, [F|Fs], S, M, In, node(par, A, U, D, [F|Fs], [Tree])) :-
 we can see clearly the structure of the node: a label, the context and an -- optionally empty -- list of subtrees.
 A leaf is just a node with an empty list of subtrees.
 
-This tree can be used in the end to reconstruct the actual proof tree, by visiting it and -- for each formula -- querying whether its variable is set of one, and cancelling it otherwise.
+This tree can be used in the end to reconstruct the actual proof tree, by visiting it and -- for each formula -- querying whether its variable is set to one, and deleting it otherwise.
 A more sophisticated algorithm may even cancel out unwanted unrestricted formulae, that otherwise remain lingering in the sequent.
 
 \chapter{Testing}
 !!! VERY MUCH STILL WIP !!!
 \section{Infrastructure}
 \subsection{Reproducibility}
-The prover's tests and benchmarks are made using a jupyter notebook.
-To ensure reproducibility we use Nix, which is a build system based on reproducile and declarative recipes, called \textit{derivations}.
+The prover's tests and benchmarks are organized in a jupyter notebook.
+To ensure reproducibility we use Nix which is a build system based on declarative recipes, called \textit{derivations}.
 A docker image is also given, which in turn calls nix without the need to install it on the system.
-Furthermore for the project infrastructure we used nix flakes, which are an experimental feature of nix that makes the process more hermetic and pure.
+% Furthermore for the project infrastructure we used nix flakes, which are an experimental feature of nix that makes the process more hermetic and pure.
 
 \subsection{Prefix format}
 Since for benchmarking we will interface with a lot of different provers, each with its own syntax for expressions, the need for a common format which was easy to parse and translate arose.
-For this purpose we define use a prefix format for linear logic formulae inspired by the format used by \cite{TarauPaiva} for implicational formulae
+For this purpose we define a prefix format for linear logic formulae inspired by the format used by \cite{TarauPaiva} for implicational formulae
 \begin{table}[H]
 	\centering
 	\begin{tblr}{ colspec = {cc} }
@@ -745,25 +745,25 @@ $$ \text{trans}(\llnot{(a \llten b)} \lolli \llnot{a} \llpar \llnot{b}) = \text{
 % , we define a parser for this using Haskell's parser generator happy. % cite
 
 \subsection{File formats}\label{sec:file_format}
-As a standard format to store the tests we use json because of its vast adoption by most programming languages.
-A test suite is defined as a list of test cases
+We use json as a standard format to store the tests because of its vast adoption by most programming languages.
+A test suite is thus defined as a list of test cases
 \begin{lstlisting}[numbers=none]
 TestCase ::= {
   "id": <Number>,
-  "premises": [ <PrefixFormula>+ ],
-  "conclusions": [ <PrefixFormula> ]
+  "premises": [ <PrefixFormula>* ],
+  "conclusions": [ <PrefixFormula>* ]
 }
 \end{lstlisting}
 where
 \begin{description}
 	\item[id] \hfill \\ is a number with the sole purpose of tracing back the test case from the output;
-	\item[premises] \hfill \\ is a list of premises as prefix formulae
-	\item[conclusions] \hfill \\ a list of conclusions as prefix formulae
+	\item[premises] \hfill \\ is a list of premises as prefix formulae;
+	\item[conclusions] \hfill \\ a list of conclusions as prefix formulae.
 \end{description}
 Other arbitrary fields may be present, for example we will use the following optional fields:
 \begin{description}
 	\item[thm] \hfill \\ whether this test case is a tautology or not, may be null;
-	\item[*, \&, +, ...] \hfill \\ the number of times a specific appears in the test case;
+	\item[*, \&, +, ...] \hfill \\ the number of times a specific connective appears in the test case;
 	\item[notes] \hfill \\ human readable text about the test case, for example its infix representation;
 	\item[size] \hfill \\ an indicative number of the size of the formula;
 	\item[atoms] \hfill \\ the upper bound on the number of atoms.
@@ -780,9 +780,9 @@ The version we'll use is a slight modification of it where:
 A noteworthy detail is how the parameters \texttt{size} and \texttt{atoms} mentioned in Section \ref{sec:file_format} are defined, since these are directly related to how the formulae are generated:
 \begin{itemize}
 	\item when one specifies a number of atoms \texttt{atoms}, the generator initializes an array containing \texttt{atoms} atoms, their negations, and the constants $\bot, \top, \dots$.
-		During the generation of the formula this array is randomly accessed, extracting a random element when needed.
+		During the generation of the formula this array is randomly accessed, choosing an element when needed.
 		This means that \texttt{atoms} represents an upper bound to the number of different atoms that may appear in the formula, not their exact number.
-	\item when a formula is generated at each step, based on a threshold, it is chosen whether to generate a unary or binary connective:
+	\item when a formula is generated, at each step it is chosen whether to generate a unary or binary connective based on a threshold:
 		\begin{itemize}
 			\item if a unary connective is chosen, the process continues with a size of $\text{\texttt{size}} - 1$;
 			\item if a binary connective is chosen, the program chooses a random value between 0 and \texttt{size}, and it generates the two branches of the formula, with size respectively $k$ and $\text{\texttt{size}} - k$.
@@ -795,13 +795,13 @@ A noteworthy detail is how the parameters \texttt{size} and \texttt{atoms} menti
 We'll mainly use three sources for formulae:
 \begin{itemize}
 	\item llprover's tests
-	\item LLTP, especially the translations of Kleene's intuistic formulae 
+	\item LLTP, especially the translations of Kleene's intuitionistic formulae 
 	\item randomly generated formulae made by the genrator described in \ref{sec:formula_generator}
 \end{itemize}
 llprovers tests are composed mainly by simple linear logic tautologies, e.g. the DeMorgan rules, for this reason these tests are used more as a simple and fast suite to catch the most obvious bugs between iterations of the prover.
 
 We now show the results of running the provers on two datasets: KLE-cbn and KLE-cbv, respectively the call-by-name and call-by-value translations of Kleene's theorems.
-These translations introduce a high number of exponentials, and this causes, other than timeouts because of the added complexity, some failures.
+These translations introduce a high number of exponentials, and this causes -- other than timeouts because of the added complexity -- some failures.
 These failures are not due to bugs, but instead happen because the prover has reached its bound for that formula.
 The benchmarks are done using a timeout of \qty{60}{\second} and a bound of 3.
 \begin{table}[H]
@@ -838,7 +838,7 @@ There are mainly two downsides with using random formulae:
 	\item most cases do not hold any structure, 
 	\item ??? % non ricordo più cosa volessi scrivere
 \end{itemize}
-Using random formulae we can clearly see that our prover outperforms APLL (and llprover) with formulae rich in multiplicatives.
+Using random formulae we can clearly see that our prover outperforms APLL (and llprover) when dealing with formulae rich in multiplicatives.
 \begin{figure}[H]
 	\centering
 	\begin{subfigure}{0.49\textwidth}
@@ -865,16 +865,16 @@ As soon as exponentials come into play the differences level out.
 	\caption{Full linear logic}
 	\label{fig:cll_bars}
 \end{figure}
-In full linear logic our prover performs slightly worse than APLL.
+It can be seen in \ref{fig:cll_bars} that in full linear logic our prover performs slightly worse than APLL.
 
 All these test were done generating suits of 100 tests.
-Figure \ref{fig:mll_bars}'s tests were normalized formulae of size 100, and atoms 50, with just the connectives $\llten$ and $\llpar$.
-Figure \ref{fig:mall_bars}'s tests were normalized formulae formulae of size 500, and atoms 250, with the connectives $\llten, \llpar, \llwith$ and $\llplus$.
-Finally \ref{fig:cll_bars}'s tests were normalized formulae of size 500, and atoms 250, with all the connectives.
+Figure \ref{fig:mll_bars}'s tests were composed of normalized formulae of \texttt{size} 100, and \texttt{atoms} 50, with just the connectives $\llten$ and $\llpar$.
+Figure \ref{fig:mall_bars}'s tests were composed of normalized formulae formulae of \texttt{size} 500, and \texttt{atoms} 250, with the connectives $\llten, \llpar, \llwith$ and $\llplus$.
+Finally \ref{fig:cll_bars}'s tests were composed of normalized formulae of \texttt{size} 500, and \texttt{atoms} 250, with all the connectives.
 
 When looking at the results of full linear logic, it is important to note that unlike the tests with multiplicatives and additives, some of the results may be early failures because of the bound.
-Since llprover uses incremental search, its times are often of the slowest.
-On the other hand our prover is consistently slightly slower that APLL, this difference is negligible and due to the fact that APLL is compiled, whereas our prover is interpreted.
+Since llprover uses incremental search, its times are often the slowest.
+Similarly our prover is consistently slightly slower that APLL, this difference is negligible and due to the fact that APLL is compiled, whereas our prover is interpreted.
 
 % \chapter{Conclusions}
 % We showed that -- given appropriate modifications -- Harland\&Pym's method is competitive to other provers, and in some cases (see multiplicatives) may be even faster.
