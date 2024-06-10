@@ -96,7 +96,7 @@ We have that
 \begin{center}
 	\begin{tblr}{ccc}
 		\hline
-		& Additive & Multiplicative \\
+		& Add. & Mult. \\
 		\hline
 		\hline
 		$\wedge$ & $\llwith$ & $\llten$ \\
@@ -250,27 +250,24 @@ One other characteristic of Prolog which revealed to be very handy for our prove
 Using this we didn't have to explicitly propagate the solutions of the SAT-solver, which instead were automatically propagated between branches.
 
 \chapter{The focused calculus}
-Before describing the calculus we must give some definitions
+Before describing the calculus we must give some preliminary definitions
 
 % Explaination on constraints why we use them ecc ecc ecc
 
-\begin{define}[Annotated formula]
-	\label{def:annotated}
-	Given a formula $\phi$ defined as in Figure \ref{fig:ll-connectives} and a boolean expression
-	$e$ defined as in Figure \ref{fig:var-name}, an \textit{annotated formula} is simply a term 
-	$$ \text{af}(\phi, e) $$
-	that associates the formula to the expression.
-	We denote 
-	$$ \text{exp}(\af{\phi}{e}) = e $$
-	and then extend this notation to sequents, such that $ \text{exp}(\Delta) $ is the set of all boolean expressions of $\Delta$.
+\section{Normalization}
+Since in linear logic negation is symmetric and involutive, it is usual to work only with formulae in negated normal form.
+\begin{define}[Negated Normal Form -- NNF]
+	A farmula is in NNF if all its linear implications ($\lolli$) are expanded to pars ($\llpar$) and negation is found only at atoms.
+	By extension, a sequent is in NNF if all its formulae are in NNF.
 \end{define}
-As seen in Figure \ref{fig:ll-connectives} and \ref{fig:var-name} we will usually use $\phi$ to refer to formulas, $x$ to refer to boolean variables, and $e$ to refer to boolean expressions (conjuctions of variables).
+A generic formula is then normalized applying recursively the DeMorgan rules for linear logic, untill NNF is reached.
+The process of normalization takes a two-sided judgement, of the form
+$$ \Delta \vdash \Gamma $$
+and transforms it into a one-sided judgement
+$$ \vdash \Delta' $$
+where the right side is composed of the normalization of $\Gamma$ and $\llnot{\Delta}$.
 
-The purpose of putting formulae and expressions together in the annotated formula is twofold:
-\begin{itemize}
-	\item the actions taken on the formula determine the constraints that will be generated, and these depend on the variables associated to said formula;
-	\item after the constraints are solved we can query the assignement of the variables and find out if the associated formula is used or not in a certain branch of a proof.
-\end{itemize}
+This choice has some implementation-wise advantages, but for now we will only care about the fact that it shrinks the size of the complete calulus by roughly half since we only have to deal with the right rules of the connectives.
 \begin{figure}[H]
 	\centering
 	\begin{tblr}{ colspec = {cccccccccr}
@@ -280,12 +277,54 @@ The purpose of putting formulae and expressions together in the annotated formul
 		\phi & ::=  & 1              &\mid& \phi \llten \phi  &\mid& \bot &\mid& \phi \llpar \phi  & \text{(Multiplicatives and their constants)} \\
 		     & \mid & 0              &\mid& \phi \llplus \phi &\mid& \top &\mid& \phi \llwith \phi & \text{(Additives and their constants)} \\
 		     & \mid & \llbang{\phi}  &\mid& \llwn{\phi}       &    &      &    &                   & \text{(Exponentials)} \\
-		     & \mid & \llnot{\alpha} &\mid& \alpha	      &    &      &    &                   & \text{($\alpha$ a term)}
+		     & \mid & \llnot{\alpha} &\mid& \alpha	      &    &      &    &                   & \text{(Where $\alpha$ is a term)}
 	\end{tblr}
 	\caption{Normalized linear logic formulae}
 	\label{fig:ll-connectives}
 \end{figure}
-\begin{figure}[H]
+As seen in Figure \ref{fig:ll-connectives} we will use $\phi$ for formulae and $\alpha$ for terms.
+
+\section{Focusing}
+Focusing is a technique described by Andreoli in his seminal paper \cite{Focusing}.
+There he recognizes two alternating phases in a proof: a deterministic phase, where the order of rule application to the sequent does not matter; and a non deterministic phase, where several choices may be tried.
+These two phases are respectively called asynchronous and synchronous phase.
+\begin{define}
+	Given a formula $\phi$ we define the following predicates
+	``$\isAsy{\phi}$'' indicates that the rule for the toplevel connective of the formula $\phi$ is asynchronous on the right, these connectives are 
+	$$ \llpar\!, \llwith\!, \llwn{}, \lltop, \llbot $$
+	conversely we define ``$\isSync{\phi}$'' to indicate that the rule for the toplevel connective of $\phi$ is synchronous on the right, these are
+	$$ \llten, \llplus, \llbang{}, \llone $$
+\end{define}
+Furthermore in focusing to everything is assigned a polarity of positive or negative.
+Connectives are negative if are asynchronous on the right, or positive if are asynchronous on the left.
+Terms also have a polarity, which may be assigned with some complex mechanisms.
+We will follow \cite{LiangMiller} and simply assing atoms with a negative polarity and negated atoms with a positive one.
+\begin{define}
+	``$\isNegLit{\alpha}$'' is a predicate that is true only when $\alpha$ is a negative literal (i.e. an atom).
+	Conversely ``$\isPosLit{\alpha}$'' is a predicate that is only when $\alpha$ is a positive literal (i.e. a negated atom).
+\end{define}
+
+\section{Constraints}
+Our calculus uses constraints to manage the resources.
+\begin{define}[Variables, expressions]
+	\label{def:bool-expr}
+	A boolean variable is simply a symbol to which one can associate a value of true or false.
+	A boolean expression, in our case, is just a conjunction of possibly negated boolean variables.
+\end{define}
+\begin{define}[New]
+	\label{def:new}
+	Sometimes we will write 
+	$$ \new{x}, \new{X} $$
+	these mean respectively that:
+	\begin{itemize}
+		\item the variable name $x$ has not yet occurred in any expression in the proof;
+		\item each variable name $x_i \in X$ has not yet occurred in the proof and 
+			$$ \forall i, j \mid i \neq j \Rightarrow x_i \neq x_j $$
+			each variable in $X$ is distinct.
+	\end{itemize}
+\end{define}
+As seen in Figure \ref{fig:var-name} we will call $e$ such a conjuction and $x$ the single boolean variables.
+\begin{figure}[h!]
 	\centering
 	\begin{tblr}{ colspec = {cccccr}, cells = { mode = math } }
 		x & ::=  & x_i &\mid& \overline{x_i} & \text{(Variable)}\\
@@ -295,14 +334,25 @@ The purpose of putting formulae and expressions together in the annotated formul
 	\label{fig:var-name}
 \end{figure}
 
-\begin{define}[Consuming formulae]
-	\label{def:used}
-	Given a boolean expression $e$ as in Figure \ref{fig:var-name}, we use the following notation
+\begin{define}[Annotated formula]
+	\label{def:annotated}
+	Given a formula $\phi$ defined as in Figure \ref{fig:ll-connectives} and a boolean expression $e$ defined as in Definition \ref{def:bool-expr}, an \textit{annotated formula} is simply a term 
+	$$ \text{af}(\phi, e) $$
+	that associates the formula to the expression.
+	We denote 
+	$$ \text{exp}(\af{\phi}{e}) = e $$
+	the operation of extracting the boolean expression associated to a given formula, and then extend this notation to sequents such that $ \text{exp}(\Delta) $ is the set of all boolean expressions of $\Delta$.
+\end{define}
+
+We now define the constraints on these expressions:
+\begin{define}[Constraints]
+	\label{def:constraints}
+	Given an annotated formula $\af{\phi}{e}$ as in Definition \ref{def:anootated}, a constraint may be of two kinds
 	\begin{itemize}
-		\item ``$\used{e}$'' to state that the formula associated to the boolean expression $e$ gets consumed in this branch of the proof,
-			this corresponds to saying the constraint $e$ is true;
-		\item ``$\avail{e}$'' to state that the formula associated to the boolean variable $e$ does not get consumed in this branch of the proof,
-			this corresponds to saying the constraint $e$ is not true.
+		\item ``$\used{e}$'' states that the formula $\phi$ gets consumed in this branch of the proof, this corresponds to saying the constraint $e$ is true or
+			$$ x_i \wedge \dots \wedge x_j = \top $$
+		\item ``$\avail{e}$'' states that the formula $\phi$ does not get consumed in this branch of the proof, this corresponds to saying the constraint $e$ is not true or
+			$$ x_i \wedge \dots \wedge x_j = \bot $$
 	\end{itemize}
 	We then extends these predicates to sequents
 	\begin{align*}
@@ -310,205 +360,220 @@ The purpose of putting formulae and expressions together in the annotated formul
 		\avail{\Delta} &= \{ \avail{e_2} \mid e_2 \in \text{exp}(\Delta) \}
 	\end{align*}
 \end{define}
+The purpose of putting formulae and expressions together in the annotated formula is twofold:
+\begin{itemize}
+	\item the actions taken on the formula determine the constraints that will be generated, and these depend on the variables associated to said formula;
+	\item after the constraints are solved we can query the assignement of the variables and find out if the associated formula is used or not in a certain branch of a proof.
+\end{itemize}
 
+\begin{define}[Satisfaiability of constraints]
+	\label{def:sat}
+	Given a set of constraints $\Lambda$ and a function V
+	$$ \text{V} : \{ x_1, x_2, \dots, x_n \} \rightarrow \{ \top, \bot \} $$
+	mapping variables to their value, such that
+	\begin{align*}
+		\Lambda &= \{ \dots, \used{e_i}, \avail{e_j}, \dots \} \\
+		\text{V}&= \{ \dots, (x_i, \top), (x_j, \bot), \dots \}
+	\end{align*}
+	we write $\sat{\Lambda}{\text{V}}$ if 
+	$$ \bigwedge_{e \in \Lambda} e[x_1 / \text{V}(x_1), x_2 / \text{V}(x_2), \dots] = \top $$
+	Here we are using the translation given in Definition \ref{def:constraints} such that
+	\begin{align*}
+		\used{e} &\Leftrightarrow e = \top \\
+		\avail{e} &\Leftrightarrow e = \bot
+	\end{align*}
+	It is worth noting that simply by rewriting the function V to
+	$$ \text{V} = \{ \dots, x_i = \top, x_j = \bot, \dots \} $$
+	we get back a set of constraints.
+\end{define}
+
+We now expand the definition of triadic sequent of \cite{Focusing}, by adding constraints
 \begin{define}[Members of the sequent]
 	Given any sequent this can be in either two forms:
 	\begin{itemize}
 		\item focused or in the synchronous phase, written:
-			$$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\phi}$$
+			$$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\phi}$$
 		\item in the asynchronous phase, written:
-			$$\async{\constr{\Lambda}{V}}{\Psi}{\Delta}{\Phi}$$
+			$$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\Phi}$$
 	\end{itemize}
 	These two have more or less the same members, which are
 	\begin{itemize}
 		\item the set $\Psi$ of unrestricted formulae, or all formulae that can be freely discarded or duplicated;
 		\item the multisets $\Delta$ and $\Phi$ of linear (annotated) formulae, these are respectively the formulas ``put to the side'' and the formulae which are being ``worked on'' during a certain moment of the asynchronous phase;
-		\item the set $\Lambda$ of constraints, which is to be interpreted as the conjunction of its members, and the set $V$ which represents a propagated solution.
-			Furthermore if $\Lambda$ is satisfiable we write $\sat{\Lambda}{V}$, so:
-				$$ \sat{\Lambda}{V} \;\Longleftrightarrow\; \bigwedge_{e \in \Lambda} e \text{ is \textit{sat} by } V $$
-			$V$ is in and of itself a boolean expression as in Figure \ref{fig:var-name}, in fact it can be seen as the conjunction of the variables assigned to true and the negation of the variables assigned to false.
-			As such it can be used as a constraint, stating that a certain solution must be respected in a new one.
-			
+		\item the sets $\Lambda$ and V as defined in Definition \ref{def:sat}.
 			This approach to constraints helps to make the flow of the variables and solutions through the proof tree more explicit and clear and leaves no ambiguity to where the constraints should be checked.
-
-			The choice of letters is mainly a mnemonic or visual one, constraints $\Lambda$ ``go-up'' the proof tree and solutions $V$ ``come down'' from the leaves.
+			The choice of letters is mainly a mnemonic or visual one, constraints $\Lambda$ ``go-up'' the proof tree and solutions V ``come down'' from the leaves.
 	\end{itemize}
 \end{define}
+As explained in Definition \ref{def:sat}, V may be used as a set of constraint itself; this states that a certain solution must be respected in a new one.
 
-\begin{define}[Splitting a sequent]
+\begin{define}[Splitting]
 	\label{def:split}
-	Given a sequent of annotated formulae $\Delta$ we define the operation of splitting it as a function
-	$$ \text{split}(\Delta) \mapsto (\Delta^L, \Delta^R) $$
-	where, given a set $X$ of new variable names $x_i$ for each formula $\phi_i \in \Delta$
+	Given a sequent of annotated formulae $\Delta$ and a set of variables $X$ such that $|\Delta| = |X|$ we define the operation of splitting it as a function
+	$$ \text{split}(\Delta, X) \mapsto (\Delta^L, \Delta^R) $$
+	where
 	\begin{align*}
 		\Delta^L &= \{ \af{\phi_i}{x_i \wedge e_i} \mid i \in \{1, \dots, n\}\} \\
-		\Delta^R &= \{ \af{\phi_i}{\varNot{x_i} \wedge e_i} \mid i \in \{1, \dots, n\}\} \\
+		\Delta^R &= \{ \af{\phi_i}{\varNot{x_i} \wedge e_i} \mid i \in \{1, \dots, n\}\}
 	\end{align*}
-	with $n$ the cardinality of $\Delta$, and $\phi_i$ and $e_i$ respectively the formula and the variable of the $i$-eth annotated formula in $\Delta$ using an arbitrary order.
+	with $n$ the cardinality of $\Delta$, and $\phi_i$ (resp. $e_i$) the formula (resp. the expression) of the $i$-eth annotated formula in $\Delta$ using an arbitrary order.
+	The same holds for $x_i$ and $X$.
 
-	It is worth noting that the variables $x_i \in X$ used for $\Delta^L$ and $\Delta^R$ must be the same, this condition is necessary for the mechanism ensuring that a formula used on the left side of a tensor proof is not used on the right side and viceversa.
-
-	With a slight abuse of notation we will write $\text{split}(\Delta)_L$ and $\text{split}(\Delta)_R$ respectively as the left projection and the right projection of the pair $(\Delta_L, \Delta_R)$.
+	With a slight abuse of notation we will write $\text{split}(\Delta, X)_L$ and $\text{split}(\Delta, X)_R$ respectively as the left projection and the right projection of the pair $(\Delta_L, \Delta_R)$.
 \end{define}
 As a small example for clarity, given the sequent
-$$ \Delta = \af{a \llten b}{x_1}, \af{\llnot{c}}{x_2} $$
+\begin{align*}
+	\Delta &= \af{a \llten b}{x_1}, \af{\llnot{c}}{x_2} \\
+	X      &= \{ x_3, x_4 \} 
+\end{align*}
 this is split into
 \begin{align*}
-	\text{split}(\Delta)_L &\mapsto \af{a \llten b}{x_3 \varAnd x_1}, \af{\llnot{c}}{x_4 \varAnd x_2} \\
-	\text{split}(\Delta)_R &\mapsto \af{a \llten b}{\varNot{x_3} \varAnd x_1}, \af{\llnot{c}}{\varNot{x_4} \varAnd x_2} 
+	\text{split}(\Delta, X)^L &\mapsto \af{a \llten b}{x_3 \varAnd x_1}, \af{\llnot{c}}{x_4 \varAnd x_2} \\
+	\text{split}(\Delta, X)^R &\mapsto \af{a \llten b}{\varNot{x_3} \varAnd x_1}, \af{\llnot{c}}{\varNot{x_4} \varAnd x_2} 
 \end{align*}
 % example of splitting and variables
 
 % One simple but important detail that will be useful later when explaining the Prolog implementation is noting that the variables in common between two branches with the same root are always introduced before the two branches diverge.
 % Or -- put differently -- all new variables introduced in any point of a path from the root of the proof to a leaf may appear only in the subtrees.	% sistemo
-\begin{define}
-	Lastly given a formula $\phi$ we define the following predicates
-	\begin{itemize}
-		\item $\isAsy{\phi}$ is a predicate that's true only when $\phi$ is an asynchronous formula, which are
-			$$ \phi ::= \phi \llpar \phi \mid \phi \llwith \phi \mid \llwn{\phi} \mid  \lltop \mid \llbot $$
-		\item $\isNegLit{\phi}$ is a predicate that's true only when $\phi$ is a negative literal, in our implementation negative literals are atoms, and positive literals are negated atoms.
-	\end{itemize}
-\end{define}
 
 We are now ready to present the full calculus.
 \begin{figure}[H]
-	\centering
 	\begin{subfigure}{\textwidth}
 		\centering
-		\begin{tblr}{ colspec = { cc }, rows = {abovesep=10pt, belowsep=10pt}}
-			\SetCell[c=2]{c} {\small
-			\AxiomC{$\async{\constr{\used{e}, \Lambda}{V}}{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi}$}
+			\begin{tblr}{ colspec = { cc }
+				    , rows = {abovesep=5pt, belowsep=5pt}
+				    }
+			\SetCell[c=2]{c} {\scriptsize
+			\AxiomC{$\async{\constr{\used{e}, \Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi}$}
 			\LeftLabel{$[\llpar]$}
-			\UnaryInfC{$\async{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi}$}
+			\UnaryInfC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi}$}
 			\DisplayProof} \\
-			{\small
-			\AxiomC{$\async{\constr{\used{e}, \Lambda}{V}}{\Psi}{\Delta}{\Phi}$}
+			{\scriptsize
+			\AxiomC{$\async{\constr{\used{e}, \Lambda}{\text{V}}}{\Psi}{\Delta}{\Phi}$}
 			\LeftLabel{$[\llbot]$}
-			\UnaryInfC{$\async{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\llbot}{e}, \Phi}$}
+			\UnaryInfC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\llbot}{e}, \Phi}$}
 			\DisplayProof}
 			&
-			{\small
+			{\scriptsize
 			\AxiomC{}
 			\LeftLabel{$[\lltop]$}
-			\UnaryInfC{$\async{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\lltop}{-}, \Phi}$}
+			\UnaryInfC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\lltop}{-}, \Phi}$}
 			\DisplayProof
 			}
 			\\
-			\SetCell[c=2]{c} {\small
-			\AxiomC{$\async{\constr{\used{e}, \Lambda}{V'}}{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi}$}
-			\AxiomC{$\async{\constr{\used{e}, \Lambda}{V''}}{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi}$}
+			\SetCell[c=2]{c} {\scriptsize
+			\AxiomC{$\async{\constr{\used{e}, \Lambda}{\text{V}'}}{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi}$}
+			\AxiomC{$\async{\constr{\used{e}, \Lambda}{\text{V}''}}{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi}$}
 			\LeftLabel{$[\llwith]$}
-			\BinaryInfC{$\async{\constr{\Lambda}{V', V''}}{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi}$}	% capisco cosa fanno qui i constraint
+			\BinaryInfC{$\async{\constr{\Lambda}{\text{V}', \text{V}''}}{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi}$}	% capisco cosa fanno qui i constraint
 			\DisplayProof}
 			\\
-			\SetCell[c=2]{c} {\small
-			\AxiomC{$\async{\constr{\Lambda}{V}}{\Psi, \phi}{\Delta}{\Phi}$}
+			\SetCell[c=2]{c} {\scriptsize
+			\AxiomC{$\async{\constr{\Lambda}{\text{V}}}{\Psi, \phi}{\Delta}{\Phi}$}
 			\LeftLabel{$[\,?\,]$}
-			\UnaryInfC{$\async{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi}$}
+			\UnaryInfC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi}$}
 			\DisplayProof} 
 			\\
-			\SetCell[c=2]{c} {\small
+			\SetCell[c=2]{c} {\scriptsize
 			\AxiomC{$\neg\isAsy{\phi}$}
-			\AxiomC{$\async{\constr{\Lambda}{V}}{\Psi}{\Delta, \af{\phi}{e}}{\Phi}$}
+			\AxiomC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta, \af{\phi}{e}}{\Phi}$}
 			\LeftLabel{$[R\!\Uparrow]$}
-			\BinaryInfC{$\async{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e}, \Phi}$}
+			\BinaryInfC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi}{e}, \Phi}$}
 			\DisplayProof
 			}
 		\end{tblr}
 		\caption{Asynchronous rules}
 	\end{subfigure}
-
+\end{figure}
+\begin{figure}[H]
+	\ContinuedFloat
 	\begin{subfigure}{\textwidth}
 		\centering
-		\begin{tblr}{colspec = { cc }, rows = {abovesep=10pt, belowsep=10pt}}
-			\SetCell[c=2]{c} {\small
-			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{V'}}{\Psi}{\text{split}(\Delta)_L}{\text{af}(\phi_1, e)}$}
-			\AxiomC{$\focus{\constr{V'}{V''}}{\Psi}{\text{split}(\Delta)_R}{\text{af}(\phi_2, e)}$}
+		\begin{tblr}{ colspec = { cc } 
+			    , rows = {abovesep=5pt, belowsep=5pt}
+			    }
+			\SetCell[c=2]{c} {\scriptsize
+			\AxiomC{$\new{X}$}
+			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{\text{V}'}}{\Psi}{\text{split}(\Delta, X)^L}{\text{af}(\phi_1, e)}$}
+			\AxiomC{$\focus{\constr{\text{V}'}{\text{V}''}}{\Psi}{\text{split}(\Delta, X)^R}{\text{af}(\phi_2, e)}$}
 			\LeftLabel{$[\llten]$}
-			\BinaryInfC{$\focus{\constr{\Lambda}{V''}}{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)}$}	% capisco il movimento dei constraint
+			\TrinaryInfC{$\focus{\constr{\Lambda}{\text{V}''}}{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)}$}	% capisco il movimento dei constraint
 			\DisplayProof}
 			\\ 
-			{\small
-			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{V}}{\Psi}{\Delta}{\af{\phi_1}{e}} $}
+			{\scriptsize
+			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi_1}{e}} $}
 			\LeftLabel{$[\llplus_L]$}
-			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}}$}
+			\UnaryInfC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}}$}
 			\DisplayProof}
 			&
-			{\small
-			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{V}}{\Psi}{\Delta}{\af{\phi_2}{e}}$}
+			{\scriptsize
+			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi_2}{e}}$}
 			\LeftLabel{$[\llplus_R]$}
-			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}}$}
+			\UnaryInfC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}}$}
 			\DisplayProof}
 			\\
-			{\small
-			\AxiomC{$\sat{ \used{e_1}, \avail{\Delta}, \Lambda}{V}$}
+			{\scriptsize
+			\AxiomC{$\sat{ \used{e_1}, \avail{\Delta}, \Lambda}{\text{V}}$}
 			\LeftLabel{$[1]$}
-			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\llone}{e_1}}$}
+			\UnaryInfC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\llone}{e_1}}$}
 			\DisplayProof} 
 			&
-			{\small
-			\AxiomC{$\focus{\constr{\used{e_1}, \avail{\Delta}, \Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e_1}}$}
+			{\scriptsize
+			\AxiomC{$\focus{\constr{\used{e_1}, \avail{\Delta}, \Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi}{e_1}}$}
 			\LeftLabel{$[\,!\,]$}
-			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}}$}
+			\UnaryInfC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}}$}
 			\DisplayProof
 			}
 			\\
-			\SetCell[c=2]{c} {\small
+			\SetCell[c=2]{c} {\scriptsize
 			\AxiomC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
-			\AxiomC{$\async{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e}}$}
+			\AxiomC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi}{e}}$}
 			\LeftLabel{$[R\!\Downarrow]$}
-			\BinaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e}}$}
+			\BinaryInfC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi}{e}}$}
 			\DisplayProof
 			}
 		\end{tblr}
 		\caption{Synchronous rules}
 	\end{subfigure}
-
+\end{figure}
+\begin{figure}[H]
+	\ContinuedFloat
 	\begin{subfigure}{\textwidth}
 		\centering
-		\begin{tblr}{ colspec = { c }
-			    , rows = {abovesep=10pt, belowsep=10pt}
-			    , vborder{1-2} = { leftspace = -10pt, rightspace = -10pt } 
+		\begin{tblr}{ colspec = { cc }
+			    , rows = {abovesep=5pt, belowsep=5pt}
+			    , vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
 			    }
-			{\small
-			\AxiomC{$ \sat{\used{e_1}, \used{e_2}, \avail{\Delta}, \Lambda}{V}$}
+			{\scriptsize
+			\AxiomC{$ \sat{\used{e_1}, \used{e_2}, \avail{\Delta}, \Lambda}{\text{V}}$}
 			\LeftLabel{$[I_1]$}
-			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta, \af{\phi}{e_2}}{\af{\llnot{\phi}}{e_1}}$}
+			\UnaryInfC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta, \af{\phi}{e_2}}{\af{\llnot{\phi}}{e_1}}$}
 			\DisplayProof}
-			\\
-			{\small
-			\AxiomC{$ \sat{\used{e_1}, \avail{\Delta}, \Lambda}{V}$}
-			\LeftLabel{$[I_2]$}
-			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi, \phi}{\Delta}{\af{\llnot{\phi}}{e_1}}$}
-			\DisplayProof}
-		\end{tblr}
-		\caption{Identity rules}
-	\end{subfigure}
-
-	\begin{subfigure}{\textwidth}
-		\centering
-		\begin{tblr}{ colspec = { c }
-			    , rows = {abovesep=10pt, belowsep=10pt}
-			    , vborder{1-2} = { leftspace = -10pt, rightspace = -10pt } 
-			    }
-			{\small
+			&
+			{\scriptsize
 			\AxiomC{$\isPosLit{\phi}$}
-			\AxiomC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e}}$}
+			\AxiomC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi}{e}}$}
 			\LeftLabel{$[D_1]$}
-			\BinaryInfC{$\async{\constr{\Lambda}{V}}{\Psi}{\Delta, \af{\phi}{e}}{.}$}
+			\BinaryInfC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta, \af{\phi}{e}}{.}$}
 			\DisplayProof}
 			\\
-			{\small
+			{\scriptsize
+			\AxiomC{$ \sat{\used{e_1}, \avail{\Delta}, \Lambda}{\text{V}}$}
+			\LeftLabel{$[I_2]$}
+			\UnaryInfC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi, \phi}{\Delta}{\af{\llnot{\phi}}{e_1}}$}
+			\DisplayProof}
+			&
+			{\scriptsize
 			\AxiomC{$\isPosLit{\phi}$}
 			\AxiomC{$\new{e}$}
-			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e}} $}
+			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi}{e}} $}
 			\LeftLabel{$[D_2]$}
-			\TrinaryInfC{$\async{\constr{\Lambda}{V}}{\Psi, \phi}{\Delta}{.}$}
+			\TrinaryInfC{$\async{\constr{\Lambda}{\text{V}}}{\Psi, \phi}{\Delta}{.}$}
 			\DisplayProof}
 		\end{tblr}
-		\caption{Decide rules}
+		\caption{Identity and decide rules}
 	\end{subfigure}
-	\caption{The complete focused constraint calculus}
+	\caption{Focused constraint calculus for Linear Logic}
 	\label{fig:calculus}
 \end{figure}
 
@@ -566,7 +631,7 @@ This is because Prolog's unification implicitly propagates a solution from one b
 
 \section{Helper predicates}\label{sec:helper}
 We now define some helper predicates to work with the constraints.
-What we defined as $\avail{\Delta}$ in Definition \ref{def:used} corresponds to the predicate \texttt{set\_to\_zero/2}
+What we defined as $\avail{\Delta}$ in Definition \ref{def:constraints} corresponds to the predicate \texttt{set\_to\_zero/2}
 \begin{lstlisting}[language=prolog, numbers=none]
 %! set_to_zero(+[AFs], -[Constr]) is det.
 set_to_zero(Fs, Cns) :-
