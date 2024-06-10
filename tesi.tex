@@ -266,7 +266,7 @@ Before describing the calculus we must give some definitions
 \end{define}
 As seen in Figure \ref{fig:ll-connectives} and \ref{fig:var-name} we will usually use $\phi$ to refer to formulas, $x$ to refer to boolean variables, and $e$ to refer to boolean expressions (conjuctions of variables).
 
-The purpose of putting formulae and variables together in the annotated formula is twofold:
+The purpose of putting formulae and expressions together in the annotated formula is twofold:
 \begin{itemize}
 	\item the actions taken on the formula determine the constraints that will be generated, and these depend on the variables associated to said formula;
 	\item after the constraints are solved we can query the assignement of the variables and find out if the associated formula is used or not in a certain branch of a proof.
@@ -277,12 +277,12 @@ The purpose of putting formulae and variables together in the annotated formula 
 		    , cells = { mode = math } 
 		    % , vborder{1-4} = { leftspace = 0pt, rightspace = 0pt } 
 		    }
-		\phi & ::=  & 1             &\mid& \phi \llten \phi  &\mid& \bot &\mid& \phi \llpar \phi  & \text{(Multiplicatives and their constants)} \\
-		     & \mid & 0             &\mid& \phi \llplus \phi &\mid& \top &\mid& \phi \llwith \phi & \text{(Additives and their constants)} \\
-		     & \mid & \llbang{\phi} &\mid& \llwn{\phi}       &    &      &    &                   & \text{(Exponentials)} \\
-		     & \mid & \llnot{\phi}  &\mid& \text{name} 
+		\phi & ::=  & 1              &\mid& \phi \llten \phi  &\mid& \bot &\mid& \phi \llpar \phi  & \text{(Multiplicatives and their constants)} \\
+		     & \mid & 0              &\mid& \phi \llplus \phi &\mid& \top &\mid& \phi \llwith \phi & \text{(Additives and their constants)} \\
+		     & \mid & \llbang{\phi}  &\mid& \llwn{\phi}       &    &      &    &                   & \text{(Exponentials)} \\
+		     & \mid & \llnot{\alpha} &\mid& \alpha	      &    &      &    &                   & \text{($\alpha$ a term)}
 	\end{tblr}
-	\caption{Linear logic connectives}
+	\caption{Normalized linear logic formulae}
 	\label{fig:ll-connectives}
 \end{figure}
 \begin{figure}[H]
@@ -301,13 +301,13 @@ The purpose of putting formulae and variables together in the annotated formula 
 	\begin{itemize}
 		\item ``$\used{e}$'' to state that the formula associated to the boolean expression $e$ gets consumed in this branch of the proof,
 			this corresponds to saying the constraint $e$ is true;
-		\item ``$\notUsed{e}$'' to state that the formula associated to the boolean variable $e$ does not get consumed in this branch of the proof,
+		\item ``$\avail{e}$'' to state that the formula associated to the boolean variable $e$ does not get consumed in this branch of the proof,
 			this corresponds to saying the constraint $e$ is not true.
 	\end{itemize}
 	We then extends these predicates to sequents
 	\begin{align*}
 		\used{\Delta} &= \{ \used{e_2} \mid e_2 \in \text{exp}(\Delta) \} \\
-		\notUsed{\Delta} &= \{ \notUsed{e_2} \mid e_2 \in \text{exp}(\Delta) \}
+		\avail{\Delta} &= \{ \avail{e_2} \mid e_2 \in \text{exp}(\Delta) \}
 	\end{align*}
 \end{define}
 
@@ -408,7 +408,7 @@ We are now ready to present the full calculus.
 			\DisplayProof} 
 			\\
 			\SetCell[c=2]{c} {\small
-			\AxiomC{$\isNotAsy{\phi}$}
+			\AxiomC{$\neg\isAsy{\phi}$}
 			\AxiomC{$\async{\constr{\Lambda}{V}}{\Psi}{\Delta, \af{\phi}{e}}{\Phi}$}
 			\LeftLabel{$[R\!\Uparrow]$}
 			\BinaryInfC{$\async{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e}, \Phi}$}
@@ -422,8 +422,8 @@ We are now ready to present the full calculus.
 		\centering
 		\begin{tblr}{colspec = { cc }, rows = {abovesep=10pt, belowsep=10pt}}
 			\SetCell[c=2]{c} {\small
-			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{V'}}{\Psi}{\text{split}(\Delta)^L}{\text{af}(\phi_1, e)}$}
-			\AxiomC{$\focus{\constr{V'}{V''}}{\Psi}{\text{split}(\Delta)^R}{\text{af}(\phi_2, e)}$}
+			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{V'}}{\Psi}{\text{split}(\Delta)_L}{\text{af}(\phi_1, e)}$}
+			\AxiomC{$\focus{\constr{V'}{V''}}{\Psi}{\text{split}(\Delta)_R}{\text{af}(\phi_2, e)}$}
 			\LeftLabel{$[\llten]$}
 			\BinaryInfC{$\focus{\constr{\Lambda}{V''}}{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)}$}	% capisco il movimento dei constraint
 			\DisplayProof}
@@ -441,13 +441,13 @@ We are now ready to present the full calculus.
 			\DisplayProof}
 			\\
 			{\small
-			\AxiomC{$\sat{ \used{e_1}, \notUsed{\Delta}, \Lambda}{V}$}
+			\AxiomC{$\sat{ \used{e_1}, \avail{\Delta}, \Lambda}{V}$}
 			\LeftLabel{$[1]$}
 			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\llone}{e_1}}$}
 			\DisplayProof} 
 			&
 			{\small
-			\AxiomC{$\focus{\constr{\used{e_1}, \notUsed{\Delta}, \Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e_1}}$}
+			\AxiomC{$\focus{\constr{\used{e_1}, \avail{\Delta}, \Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e_1}}$}
 			\LeftLabel{$[\,!\,]$}
 			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}}$}
 			\DisplayProof
@@ -471,13 +471,13 @@ We are now ready to present the full calculus.
 			    , vborder{1-2} = { leftspace = -10pt, rightspace = -10pt } 
 			    }
 			{\small
-			\AxiomC{$ \sat{\used{e_1}, \used{e_2}, \notUsed{\Delta}, \Lambda}{V}$}
+			\AxiomC{$ \sat{\used{e_1}, \used{e_2}, \avail{\Delta}, \Lambda}{V}$}
 			\LeftLabel{$[I_1]$}
 			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta, \af{\phi}{e_2}}{\af{\llnot{\phi}}{e_1}}$}
 			\DisplayProof}
 			\\
 			{\small
-			\AxiomC{$ \sat{\used{e_1}, \notUsed{\Delta}, \Lambda}{V}$}
+			\AxiomC{$ \sat{\used{e_1}, \avail{\Delta}, \Lambda}{V}$}
 			\LeftLabel{$[I_2]$}
 			\UnaryInfC{$\focus{\constr{\Lambda}{V}}{\Psi, \phi}{\Delta}{\af{\llnot{\phi}}{e_1}}$}
 			\DisplayProof}
@@ -492,14 +492,14 @@ We are now ready to present the full calculus.
 			    , vborder{1-2} = { leftspace = -10pt, rightspace = -10pt } 
 			    }
 			{\small
-			\AxiomC{$\isNotNegLit{\phi}$}
+			\AxiomC{$\isPosLit{\phi}$}
 			\AxiomC{$\focus{\constr{\Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e}}$}
 			\LeftLabel{$[D_1]$}
 			\BinaryInfC{$\async{\constr{\Lambda}{V}}{\Psi}{\Delta, \af{\phi}{e}}{.}$}
 			\DisplayProof}
 			\\
 			{\small
-			\AxiomC{$\isNotNegLit{\phi}$}
+			\AxiomC{$\isPosLit{\phi}$}
 			\AxiomC{$\new{e}$}
 			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{V}}{\Psi}{\Delta}{\af{\phi}{e}} $}
 			\LeftLabel{$[D_2]$}
@@ -566,7 +566,7 @@ This is because Prolog's unification implicitly propagates a solution from one b
 
 \section{Helper predicates}\label{sec:helper}
 We now define some helper predicates to work with the constraints.
-What we defined as $\notUsed{\Delta}$ in Definition \ref{def:used} corresponds to the predicate \texttt{set\_to\_zero/2}
+What we defined as $\avail{\Delta}$ in Definition \ref{def:used} corresponds to the predicate \texttt{set\_to\_zero/2}
 \begin{lstlisting}[language=prolog, numbers=none]
 %! set_to_zero(+[AFs], -[Constr]) is det.
 set_to_zero(Fs, Cns) :-
