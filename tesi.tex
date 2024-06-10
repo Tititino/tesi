@@ -609,7 +609,7 @@ When explaining the code we will use some common names for variables, these are
 \subsection{Asynchronous and focusing phase}
 During the asynchronous phase we have a list of formulae which are being worked on and a list of formulae which are put to the side.
 With the former being called \texttt{Fss} and the latter \texttt{D}.
-At each step we analyze the first element of the list \texttt{Fs}, and we keep scomposing the memebers of the list untill we can't anymore.
+At each step we analyze the first element of the list \texttt{Fs}, and we keep scomposing the memebers of the list untill we cannot anymore.
 This process can be seen for example in the predicate for $\llwith$
 \begin{lstlisting}[language=prolog]
 async(A, U, D, [F|Fs], S, M, In, _) :-
