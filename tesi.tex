@@ -6,9 +6,7 @@
 
 \begin{document}
 \maketitle
-
 \newpage
-
 \tableofcontents
 
 \chapter{Intro}
@@ -130,103 +128,6 @@ For example, formulas marked with $!$ can be used any number of times. %, so the
 % Petri nets can be encoded in linear logic, for example, 
 % https://johnwickerson.github.io/talks/linearlogic.pdf
 
-\section{State of the art}
-Most forward provers for classic linear logic use some combination of focusing and normalization to structure their proofs, with the notable exception of llprover not using normalization.	% credo
-We confront our prover with two other provers: llprover (1997, %cit
-) and APLL (circa 2019, %cit
-).
-
-Usually the splitting is handled in two ways: trying every partition possible, or using something called the method of input/output %cit
-. The latter tries to do one branch of the proof of a multiplicative, and then feeds the remaining formulae in the sequent of the other branch.
-
-We now give a deeper look at the provers we confront with.
-
-\subsection{APLL}\label{sec:apll}
-APLL is the underlying prover of click\&collect. % cit
-It provides 4 different searches -- forward and backwards for classic and intuitionistic linear logic. 
-We will focus on the backwards algorithm for classic linear logic.
-
-Before diving into the analysis of this prover, we give the definition of \textit{why-not height}
-\begin{define}[Why-not height]
-	\label{def:why-not-height}
-	Why-not height is the maximum number of nested ``why-not''s in a formlua, or
-	$$ \text{wnh}(\phi) = 
-	\begin{cases}	
-		0 & \text{if }\phi \in \{\llbot, \lltop, \llone, \llzero\} \\
-		\max(\text{wnh}(\phi_1), \text{wnh}(\phi_2)) & \text{if } \phi \in \{ \phi_1 \llten \phi_2, \phi_1 \llpar \phi_2, \phi_1 \llplus \phi_2, \phi_1 \llwith \phi_2 \} \\
-		\text{wnh}(\phi_1) & \text{if }\phi \in \{ \llnot{\phi_1}, \llbang{\phi_1}\} \\
-		1 + \text{wnh}(\phi_1) & \text{if }\phi \in \{ \llwn{\phi_1} \} 
-	\end{cases}
-	$$
-\end{define}
-This measure is used in their particular way of dealing with uncontrained formulae, but is also used as a way to decide which branch to prove first for any normal operator.
-
-The program is written in OCaML and implements a standard focused proof search on normalized formulae as seen in \cite{LiangMiller}.
-In this section we will illustrate two noteworthy charateristics of its implementation:
-\begin{itemize}
-	\item Sequent splitting when encountering a tensor is done by generating all the numbers up to $2^{|\Delta|}$ -- where $\Delta$ is the sequent -- and using the bit representation of those to create the two subsets.
-		This can be seen in the function \texttt{split\_list}, which in turn calls \texttt{split\_list\_aux}
-		\begin{lstlisting}[language=caml]
-let rec split_list_aux (acc1, acc2) l k = match l with
-  | [] -> acc1, acc2
-  | hd :: tl -> 
-      if k mod 2 = 0 
-      then split_list_aux (acc1, hd :: acc2) tl (k / 2)
-      else split_list_aux (hd :: acc1, acc2) tl (k / 2)
-		\end{lstlisting}
-		where the argument \texttt{k} is the number that determines the decomposition of the sequent.
-		This function is called recursively when a tensor is encountered during proof search, starting at $ k = 2^{|\Delta|}$ and decreasing by one at each iteration
-		\begin{lstlisting}[language=caml]
-(* ... *)
-| Tensor (g, h) ->
-  let rec split_gamma k = 
-    if k = -1 then None
-    else
-      let gamma1, gamma2 = split_list gamma k in
-        try
-	  (* ... *)
-        with NoValue ->
-          split_gamma (k - 1) 
-  in
-    let k = fast_exp_2 (List.length gamma) - 1 in
-      (* ... *)
-		\end{lstlisting}
-
-		As we will see in \ref{sec:benchmarking} this implementation choice will result in a degradation of performance on formulae with a high number of multiplicatives.
-	\item This prover does not use a simple limit to the number of applications of the contraction rule in a branch, instead an initially empty queue of unrestricted formulae (\texttt{select\_d2}) and a counter (\texttt{max\_d2}) are kept during the search.
-		Two cases arise:
-		\begin{itemize}
-			\item if \texttt{select\_d2 = []} and \texttt{max\_d2 > 0} then the sequent of unrestricted formulae is taken, negative terms are filtered out and it is sorted based on why-not height.	% cambio persona
-				\begin{lstlisting}[language=caml]
-(* ... *)
-if select_d2 = [] then begin
-  (if max_d2 = 0 then (bl := true; raise NoValue));                    
-  let select_d2' = 
-    sort_whynot (List.filter (fun x -> not (is_neg x)) 
-    (Set_formula.elements theta)) in
-  if select_d2' = [] then None
-  else
-    apply_d2 select_d2' (max_d2 - 1) end
-    (* ... *)
-				\end{lstlisting}
-				This new list of unrestricted formule becomes the new \texttt{select\_d2}.
-				Otherwise if \texttt{select\_d2} is still empty after being refilled (line 7) or if \texttt{max\_d2} is 0 (line 3) the branch fails.
-			\item if \texttt{select\_d2} is not empty, then the first formula in the queue is extracted and added to the working set.	% sistemo
-				If the branch fails the formula gets discarded and the next one in the queue is tried.	% sistemo
-		\end{itemize}
-		The main purpose of this whole process is to avoid infinite loops that always contract on the same formula.
-		Instead all the formulae are tried one by one, starting from the simplest (lower why-not height).
-
-		The counter \texttt{max\_d2} is a local bound, since decreasing it in a branch does not affect other branches.
-\end{itemize}
-
-\subsection{\texttt{llprover}}
-\texttt{llprover} is a prover by Naoyuki Tamura.
-Where APLL had different provers for implicative and classical linear logic, this prover encodes all the rules as the same predicate \texttt{rule/6}, using the first argument as a selector for the system.
-Using classical logic as the system uses all the rules, included the ones for implicative linear logic.
-For this reason the prover does not implement normalization.
-
-Another particular characteristic of llprover is that it uses a local bound with iterative deepening, so in the benchmarks for formulae which need a lot of contractions, it will perform slightly worse.
 
 \section{Why Prolog}
 Prolog as a language and as an environment has been historically tied to automated theorem proving for its ability to express these kind of algorithmns naturally.
@@ -236,15 +137,15 @@ One particularly conventient characteristic of Prolog is its automatic managing 
 Most Prolog implementations also support CLP or constraint logic programming.
 This allows to have constraints referencing some attributes of variables in the body of clauses, in our case we use CLP($\mathcal{B}$) for boolean constraints and an handy interface to a sat-solver.
 The library exposes operators to compose boolean formulas made of prolog variables
-\begin{lstlisting}[language=prolog, numbers=none]
+\begin{minted}{prolog}
 X = (X =:= 1),
 Y = (X * X)
-\end{lstlisting}
+\end{minted}
 and to check the satisfaiability of said formulas
-\begin{lstlisting}[language=prolog, numbers=none]
+\begin{minted}{prolog}
 ?- sat(X * Y).
 X = Y, Y = 1.
-\end{lstlisting}
+\end{minted}
 
 One other characteristic of Prolog which revealed to be very handy for our prover is unification.
 Using this we didn't have to explicitly propagate the solutions of the SAT-solver, which instead were automatically propagated between branches.
@@ -311,11 +212,11 @@ Our calculus uses constraints to manage the resources.
 	A boolean variable is simply a symbol to which one can associate a value of true or false.
 	A boolean expression, in our case, is just a conjunction of possibly negated boolean variables.
 \end{define}
-\begin{define}[New]
+\begin{define}[New variables]
 	\label{def:new}
 	Sometimes we will write 
 	$$ \new{x}, \new{X} $$
-	these mean respectively that:
+	to mean respectively:
 	\begin{itemize}
 		\item the variable name $x$ has not yet occurred in any expression in the proof;
 		\item each variable name $x_i \in X$ has not yet occurred in the proof and 
@@ -347,7 +248,7 @@ As seen in Figure \ref{fig:var-name} we will call $e$ such a conjuction and $x$ 
 We now define the constraints on these expressions:
 \begin{define}[Constraints]
 	\label{def:constraints}
-	Given an annotated formula $\af{\phi}{e}$ as in Definition \ref{def:anootated}, a constraint may be of two kinds
+	Given an annotated formula $\af{\phi}{e}$ as in Definition \ref{def:annotated}, a constraint may be of two kinds
 	\begin{itemize}
 		\item ``$\used{e}$'' states that the formula $\phi$ gets consumed in this branch of the proof, this corresponds to saying the constraint $e$ is true or
 			$$ x_i \wedge \dots \wedge x_j = \top $$
@@ -578,6 +479,22 @@ We are now ready to present the full calculus.
 \end{figure}
 
 \chapter{Implementation}
+We now describe the main implementation details of the prover.
+Our mechanism to deal with exponentials borrows a great deal from APLL's one, which we will talk about briefly in \ref{sec:apll}.
+APLL uses the measure of why-not height throught all its implementation.
+\begin{define}[Why-not height]
+	\label{def:why-not-height}
+	Why-not height is the maximum number of nested ``why-not''s in a formula, or
+	$$ \text{wnh}(\phi) = 
+	\begin{cases}	
+		0 & \text{if }\phi \in \{\llbot, \lltop, \llone, \llzero\} \\
+		\max(\text{wnh}(\phi_1), \text{wnh}(\phi_2)) & \text{if } \phi \in \{ \phi_1 \llten \phi_2, \phi_1 \llpar \phi_2, \phi_1 \llplus \phi_2, \phi_1 \llwith \phi_2 \} \\
+		\text{wnh}(\phi_1) & \text{if }\phi \in \{ \llnot{\phi_1}, \llbang{\phi_1}\} \\
+		1 + \text{wnh}(\phi_1) & \text{if }\phi \in \{ \llwn{\phi_1} \} 
+	\end{cases}
+	$$
+\end{define}
+This attribute is used both to deal with unconstrained formulae, and to decide which branch to prove first for any normal operator.
 
 \section{Formula transformations}
 Before beginning the proof a sequent passes through a number of transformations.
@@ -611,14 +528,14 @@ To be clear, a variable is only assigned to the ``top-level'' formula, and subfo
 In the implementation the concept of variable is split in two: the name of the variable -- represented by a Prolog atom, and the value of the variable -- represented by a Prolog variable.
 This is needed since, after checking the constraints, the SAT-solver unifies the variable to its value if it finds a satisfaiable solution, so the purpose of the atom is to associate the variable value to its name if the final proof.
 The process of annotation is implemented by the predicate \texttt{annotate/3}
-\begin{lstlisting}[language=prolog]
+\begin{minted}{prolog}
 %! annotate(+[Formulae], -[AFs], -[Constraints]) is det.
 annotate(Fs, Afs, Cns) :-
   maplist([ F
           , af(F, X, Var)
 	  , v(Var) =:= 1
 	  ]>>(gensym(x, X)), Fs, Afs, Cns).
-\end{lstlisting}
+\end{minted}
 which is a simple map over the sequent.
 The constraints returned state that each formula must have its variable to one, that is to say each formulae must be used.
 These are the constraints the proof search starts with.
@@ -631,15 +548,10 @@ This is because Prolog's unification implicitly propagates a solution from one b
 
 \section{Helper predicates}\label{sec:helper}
 We now define some helper predicates to work with the constraints.
-What we defined as $\avail{\Delta}$ in Definition \ref{def:constraints} corresponds to the predicate \texttt{set\_to\_zero/2}
-\begin{lstlisting}[language=prolog, numbers=none]
-%! set_to_zero(+[AFs], -[Constr]) is det.
-set_to_zero(Fs, Cns) :-
-    maplist([af(_, _, E), v(E) =:= 0]>>true, Fs, Cns).
-\end{lstlisting}
+What we defined as $\avail{\Delta}$ in Definition \ref{def:constraints} corresponds to the predicate \texttt{set\_to\_zero/2}.
 
 The other helper predicate implements the split function defined in Definition \ref{def:split}.
-\begin{lstlisting}[language=prolog, numbers=none]
+\begin{minted}{prolog}
 %! split_ctx(+[AFs], -[AFs], -[AFs], -[Cns], -[Cns]) is det.
 split_ctx(Afs, Pos, Neg, PCns, NCns) :-
   maplist([ af(F, N, E)
@@ -652,7 +564,7 @@ split_ctx(Afs, Pos, Neg, PCns, NCns) :-
   	    atomic_list_concat([N, V], '.', VarPos),
   	    atomic_list_concat([N, V], '.~', VarNeg)
   ), Afs, Pos, Neg, PCns, NCns).
-\end{lstlisting}
+\end{minted}
 It is again a map over the list of formulae, that generates the new formulae and the constraints accordingly.
 Three new Prolog variables are introduced: \texttt{X}, \texttt{Y} and \texttt{Z}.
 \texttt{X} is the new variable, the annotated formulae refer to the variable \texttt{Y} and \texttt{Z}, and constraints are added so that
@@ -676,7 +588,7 @@ During the asynchronous phase we have a list of formulae which are being worked 
 With the former being called \texttt{Fss} and the latter \texttt{D}.
 At each step we analyze the first element of the list \texttt{Fs}, and we keep scomposing the memebers of the list untill we cannot anymore.
 This process can be seen for example in the predicate for $\llwith$
-\begin{lstlisting}[language=prolog]
+\begin{minted}{prolog}
 async(A, U, D, [F|Fs], S, M, In, _) :-
   F = af(((F1-H1) & (F2-H2))-_), N, E), !,
   ( H2 > H1	
@@ -685,19 +597,19 @@ async(A, U, D, [F|Fs], S, M, In, _) :-
   ;  async(A, U, D, [af((F2-H2), N, E)|Fs], S, M, [v(E) =:= 1|In], _),
      async(A, U, D, [af((F1-H1), N, E)|Fs], S, M, [v(E) =:= 1|In], _)
   ).
-\end{lstlisting}
+\end{minted}
 Here we can see both the choice being made based on the why-not height of the two subformulae, and how the with is scomposed.
 Compare this with the $\llwith$ rule in Figure \ref{fig:calculus}.
 The cut at line 2 represents the main concept of the asynchronous phase: if an asynchronous connective is encountered the only thing we ought to do is to scompose it.
 
 If a formula cannot be further be broken apart -- i.e. it is either an atom, a negated atom, or it has a toplevel synchronous connective -- then it is put to the side in \texttt{D}.
 This can be seen in the rule \texttt{to\_delta} which implements the rule $R\!\Uparrow$
-\begin{lstlisting}[language=prolog]
+\begin{minted}{prolog}
 async(A, U, D, [F|Fs], S, M, In, _) :-
   F = af((F1-_), _, _),
   not(is_asy(F1)), !,
   async(A, U, [F|D], Fs, S, M, In, _).
-\end{lstlisting}
+\end{minted}
 This process goes as long as \texttt{Fs} has still formulae inside.
 
 When \texttt{Fs} is empty the phase switches, and the focusing process begins: we choose a formula -- called \texttt{decide} -- from either \texttt{D} or \texttt{U} and we scompose it untill either an asynchronous connective is left or a negated atom.
@@ -709,7 +621,7 @@ When this happens the axioms -- rules $I_1$ or $I_2$ -- are applied to close the
 In our case when we are focusing and we have a positive literal in \texttt{Fs}, we check if the corresponding negative literal exists in \texttt{D}.
 If this is true, then the variables of all the other formulae in \texttt{D} are set to zero using the predicate \texttt{set\_to\_zero/2} defined in Section \ref{sec:helper}, and the constraints are checked.
 This is encoded in the clause 
-\begin{lstlisting}[language=prolog]
+\begin{minted}{prolog}
 focus(A, U, D, F, _, _, In, node(id_1, A, U, D, F, [])) :-
   F = af(((~ T)-_), _, E1),
   is_term(T),
@@ -717,63 +629,182 @@ focus(A, U, D, F, _, _, In, node(id_1, A, U, D, F, [])) :-
   set_to_zero(D1, Dz),
   append([v(E1) =:= 1, v(E2) =:= 1|Dz], In, Cns),
   check(Cns).
-\end{lstlisting}
+\end{minted}
 A slightly different process happens if instead a correspondence is found in \texttt{A} instead of \texttt{D}.
 Here \texttt{A} is a special set containing just unrestricted atoms.
 This is a small modification to APLL's approach based on the fact that once negative literals are put in a sequent they can never leave it, and is due to the fact that since \texttt{U} may be sorted many times, we try to keep the number of formulae in it small.
 
 \subsection{Decide rules}\label{sec:decide}
 For the decide rules, particularly for $D_2$, we use a modified version of APLL's algorithm defined in Section \ref{sec:apll}.
-Like APLL we keep a queue of ordered unrestricted formulae which can be refilled only a certain number of times per-branch.
+The method consists of not using directly the set $\Psi$ in the $D_2$ rule, but instead we keep a queue of ordered unrestricted formulae which can be refilled only a certain number of times per-branch.
 This can be seen in the definition of the rule \texttt{decide\_2}
-\begin{lstlisting}
-async(A, U, D, [], [H|T], M, In, _) :-
+\begin{minted}{prolog}
+async(A, U, D, [], [H|T], M, In) :-
   \+ U = [],
   gensym(x, X),
-  focus(A, U, D, af(H, X, E), T, M, [v(E) =:= 1|In], _).
-async(A, U, D, [], [_|T], M, In, _) :-
+  focus(A, U, D, af(H, X, E), T, M, [v(E) =:= 1|In]).
+async(A, U, D, [], [_|T], M, In) :-
   \+ U = [],
-  async(A, U, D, [], T, M, In, _).
-async(A, U, D, [], [], M, In, _) :-
+  async(A, U, D, [], T, M, In).
+async(A, U, D, [], [], M, In) :-
   \+ U = [],
   refill(U, M, S, M1),
-  early_stop(A, U, D, S, M1, In, _).
-\end{lstlisting}
+  early_stop(A, U, D, S, M1, In).
+\end{minted}
+Here the fifth argument is the queue and the sixth is the bound.
+Two cases arise:
+\begin{itemize}
+	\item if \texttt{S = []} and \texttt{M > 0} then the sequent of unrestricted formulae is taken and it is sorted based on why-not height.	% cambio persona
+		This can be seen in the predicate \texttt{refill/4}
+		\begin{minted}{prolog}
+refill(U, M, S, M1) :-
+	\+ M = 0,
+	\+ U = [], 
+	sort(2, @=<, U, S), 
+	M1 is M - 1.
+		\end{minted}
+		Here line 4 is to be interpreted as a sort in increasing order on the second attribute (the why-not height) keeping duplicates.
+		This new list of unrestricted formule becomes the new \texttt{S} and \texttt{M} is decreased.
+		Otherwise if if \texttt{M} is 0 (line 2) the branch fails.
+	\item if \texttt{S} is not empty, then the first formula in the queue is extracted and added to the working set.	% sistemo
+		If the branch fails the formula gets discarded and the next one in the queue is tried.	% sistemo
+\end{itemize}
 In particular, if the queue \texttt{S} is refilled, we do not directly call \texttt{async/8}, but instead call another predicate: \texttt{early\_stop/7} (line 11).
-\begin{lstlisting}[language=prolog, numbers=none]
-early_stop(_, _, _, [], _, _, _) :-
+\begin{minted}{prolog}
+early_stop(_, _, _, [], _, _) :-
   false.
-early_stop(A, U, D, [H|T], M, In, _) :-
+early_stop(A, U, D, [H|T], M, In) :-
   gensym(x, X),
-  focus(A, U, D, af(H, X, E), T, M, [v(E) =:= 1|In], _).
-early_stop(A, U, D, [_|T], M, In, _) :-
-  early_stop(A, U, D, T, M, In, _).
-\end{lstlisting}
+  focus(A, U, D, af(H, X, E), T, M, [v(E) =:= 1|In]).
+early_stop(A, U, D, [_|T], M, In) :-
+  early_stop(A, U, D, T, M, In).
+\end{minted}
 This is due the simple fact that if the branch was not provable and we instead called directly \texttt{async/8} at line 11, we would try to refill the branch \texttt{M} times.
 What \texttt{early\_stop/7} does is fail if the queue has just been refilled and it turns out the branch was not provable.
 
 All the rules $D_1$, $I_1$ are defined before the unrestricted counterparts, so that they are tried first.
+
 
 \section{Building the tree}
 In the listings above we omitted one parameter of the predicates, which purpose is to build the proof tree.
 At each call of async and focus one node of the proof tree is built.
 This contains the context of the call.
 For example in
-\begin{lstlisting}[language=prolog, numbers=none]
+\begin{minted}{prolog}
 async(A, U, D, [F|Fs], S, M, In, node(par, A, U, D, [F|Fs], [Tree])) :- 
   F = af(((F1 / F2)-_), N, E), !,
   Fs1 = [af(F1, N, E), af(F2, N, E)|Fs],
   async(A, U, D, Fs1, S, M, [v(E) =:= 1|In], Tree).
-\end{lstlisting}
+\end{minted}
 we can see clearly the structure of the node: a label, the context and an -- optionally empty -- list of subtrees.
 A leaf is just a node with an empty list of subtrees.
 
 This tree can be used in the end to reconstruct the actual proof tree, by visiting it and -- for each formula -- querying whether its variable is set to one, and deleting it otherwise.
 A more sophisticated algorithm may even cancel out unwanted unrestricted formulae, that otherwise remain lingering in the sequent.
 
+\chapter{State of the art}
+Most forward provers for classic linear logic use some combination of focusing and normalization to structure their proofs, with the notable exception of llprover not using normalization.	% credo
+We confront our prover with two other provers: llprover (1997, %cit
+) and APLL (circa 2019, %cit
+).
+
+Usually the splitting is handled in two ways: trying every partition possible, or using something called the method of input/output %cit
+. The latter tries to do one branch of the proof of a multiplicative, and then feeds the remaining formulae in the sequent of the other branch.
+
+We now give a deeper look at the provers we confront with.
+
+\section{APLL}\label{sec:apll}
+APLL is the underlying prover of click\&collect. % cit
+It provides 4 different searches -- forward and backwards for classic and intuitionistic linear logic. 
+We will focus on the backwards algorithm for classic linear logic.
+
+
+The program is written in OCaML and implements a standard focused proof search on normalized formulae as seen in \cite{LiangMiller}.
+In this section we will illustrate two noteworthy charateristics of its implementation:
+\begin{itemize}
+	\item Sequent splitting when encountering a tensor is done by generating all the numbers up to $2^{|\Delta|}$ -- where $\Delta$ is the sequent -- and using the bit representation of those to create the two subsets.
+		This can be seen in the function \texttt{split\_list}, which in turn calls \texttt{split\_list\_aux}
+		\begin{minted}{ocaml}
+let rec split_list_aux (acc1, acc2) l k = match l with
+  | [] -> acc1, acc2
+  | hd :: tl -> 
+      if k mod 2 = 0 
+      then split_list_aux (acc1, hd :: acc2) tl (k / 2)
+      else split_list_aux (hd :: acc1, acc2) tl (k / 2)
+		\end{minted}
+		where the argument \texttt{k} is the number that determines the decomposition of the sequent.
+		This function is called recursively when a tensor is encountered during proof search, starting at $ k = 2^{|\Delta|}$ and decreasing by one at each iteration
+		\begin{minted}{ocaml}
+(* ... *)
+| Tensor (g, h) ->
+  let rec split_gamma k = 
+    if k = -1 then None
+    else
+      let gamma1, gamma2 = split_list gamma k in
+        try
+	  (* ... *)
+        with NoValue ->
+          split_gamma (k - 1) 
+  in
+    let k = fast_exp_2 (List.length gamma) - 1 in
+      (* ... *)
+		\end{minted}
+
+		As we will see in \ref{sec:benchmarking} this implementation choice will result in a degradation of performance on formulae with a high number of multiplicatives.
+\end{itemize}
+
+\section{\texttt{llprover}}
+\texttt{llprover} is a prover by Naoyuki Tamura.
+Where APLL had different provers for implicative and classical linear logic, this prover encodes all the rules as the same predicate \texttt{rule/6}, using the first argument as a selector for the system.
+Using classical logic as the system uses all the rules, included the ones for implicative linear logic.
+For this reason the prover does not implement normalization.
+
+Another particular characteristic of llprover is that it uses a local bound with iterative deepening, so in the benchmarks for formulae which need a lot of contractions, it will perform slightly worse.
+
 \chapter{Testing}
 !!! VERY MUCH STILL WIP !!!
 \section{Infrastructure}
+The infrastructure for the project is divided in two parts:
+\begin{itemize}
+	\item the nix ``glue''
+	\item python utilities to call and confront provers
+\end{itemize}
+In nix everything must be packaged as a derivation, so derivations are written for all the programs we interact with:
+\begin{itemize}
+	\item the provers, such as APLL or llprover
+	\item the formula generator adapted from APLL described in Section \ref{sec:formula_generator}
+	\item the TPTP parser
+\end{itemize}
+All these derivations, together with a derivation for the python environment, are then used to define a single development environment to run the jupyter notebook with all necessary dependencies.
+Furthermore having used ``flakes'' all dependencies are locked to a certain commit, thus ensuring better reproducibility.
+
+The python module \texttt{testprover} on the other hand defines some helper utilities run.
+Here for simplicity, and to avoid parsing of standard output, we assume that a prover returns a code of 0 if it found a solution to a sequent, or any other number otherwise.
+
+Defining the call to our prover using this library is as simple as writing
+\begin{minted}{python}
+pc = Registered()
+
+@pc.register('sat-ll')
+@call_prover(PrefixTree.SAT_LL_DICT)
+def call_sat_prover(premises, conclusions):
+        return [ 'sat-ll'
+               , '-b', '3'
+               , f'{premises} |- {conclusions}'
+               ]
+\end{minted}
+The innermost decorator (line 3) accepts a dictionary, and is needed to auomatically call the prover with a test entry (as in Section \ref{sec:file_format}), time it and eventually terminate the process it if the prover timeouts.
+The outermost decorator (line 4) instead simply add an entry \texttt{sat-ll} associated to the prover call in the register \texttt{pc}.
+This register is then passed to other functions, which will automatically call all the provers in it.
+Since often the prover take a considerable amount of time to finish, calls are usually done using futures.
+
+The library then provides two functions
+\begin{itemize}
+	\item the function \texttt{testall} accepts a single prover and a test suite and checks if the output of the prover corresponds to the expected value for the test;
+	\item the function \texttt{benchmark} accepts a register and a test suite and returns the times and outcomes of each prover.
+\end{itemize}
+All the outputs of the functions above pandas are \texttt{DataFrame}s, which means that they can be easily queried, dumped to csv, aggregated, or visualized using most plotting libraries.
+
 \subsection{Reproducibility}
 The prover's tests and benchmarks are organized in a jupyter notebook.
 To ensure reproducibility we use Nix which is a build system based on declarative recipes, called \textit{derivations}.
@@ -812,13 +843,13 @@ $$ \text{trans}(\llnot{(a \llten b)} \lolli \llnot{a} \llpar \llnot{b}) = \text{
 \subsection{File formats}\label{sec:file_format}
 We use json as a standard format to store the tests because of its vast adoption by most programming languages.
 A test suite is thus defined as a list of test cases
-\begin{lstlisting}[numbers=none]
+\begin{verbatim}
 TestCase ::= {
   "id": <Number>,
   "premises": [ <PrefixFormula>* ],
   "conclusions": [ <PrefixFormula>* ]
 }
-\end{lstlisting}
+\end{verbatim}
 where
 \begin{description}
 	\item[id] \hfill \\ is a number with the sole purpose of tracing back the test case from the output;
@@ -833,6 +864,16 @@ Other arbitrary fields may be present, for example we will use the following opt
 	\item[size] \hfill \\ an indicative number of the size of the formula;
 	\item[atoms] \hfill \\ the upper bound on the number of atoms.
 \end{description}
+% As an example the test case for the DeMorgan rule of $\llten$
+% \begin{minted}{json}
+% {
+% 	"id": 1,
+% 	"thm": true,
+% 	"premises": [ "^*ab" ],
+% 	"conclusions": [ "|^a^b" ],
+% 	"notes": "tensor DeMorgan"
+% }
+% \end{minted}
 
 \subsection{Formula generation}\label{sec:formula_generator}
 One of the sources of formulae we'll use in Section \ref{sec:benchmarking} is APLL's random formula generator.

@@ -20,7 +20,8 @@
 \RequirePackage{siunitx}
 \RequirePackage{tabularray}
 \RequirePackage{todonotes}
-\RequirePackage{listings}
+% \RequirePackage{listings}
+\RequirePackage{minted}
 \RequirePackage{xcolor}
 
 \RequirePackage[utf8]{inputenc}
@@ -39,22 +40,22 @@
 % \renewcommand{\baselinestretch}{1.5}
 
 \definecolor{codegray}{gray}{0.95}
-\lstdefinestyle{mystyle}{
-  % frame=lines,
-  numberstyle=\tiny\color{black},
-  basicstyle=\footnotesize,
-  % breakatwhitespace=false,
-  % breaklines=true,
-  % captionpos=b, keepspaces=true,
-  numbers=left,
-  numbersep=5pt,
-  % showspaces=false,
-  % showstringspaces=false,
-  % showtabs=false,
-  % tabsize=2
-  % sensitive=true
-}
-\lstset{style=mystyle}
+% \lstdefinestyle{mystyle}{
+%   % frame=lines,
+%   numberstyle=\tiny\color{black},
+%   basicstyle=\footnotesize,
+%   % breakatwhitespace=false,
+%   % breaklines=true,
+%   % captionpos=b, keepspaces=true,
+%   numbers=left,
+%   numbersep=5pt,
+%   % showspaces=false,
+%   % showstringspaces=false,
+%   % showtabs=false,
+%   % tabsize=2
+%   % sensitive=true
+% }
+% \lstset{style=mystyle}
 
 \newcommand{\llpar}{\:\rotatebox[origin=c]{180}{\&}\:}
 \newcommand{\llten}{\otimes}
@@ -84,3 +85,18 @@
 \newcommand{\varNot}[1]{\overline{#1}}
 \newcommand{\varAnd}{\wedge}
 
+% \newenvironment{ocaml}[1][none]
+% 	{\begin{lstlisting}[language=caml]
+% 	}
+% 	{
+% 	\\
+% 	\end{lstlisting}
+% 	}
+% \newenvironment{prolog}[1][none]
+% 	{\begin{lstlisting}[language=prolog]
+% 	}
+% 	{
+% 	\\
+% 	\end{lstlisting}
+% 	}
+\usemintedstyle{trac}

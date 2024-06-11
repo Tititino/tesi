@@ -1,10 +1,10 @@
 LCC=pdflatex
 
 all:
-	texliveonfly tesi.tex
+	$(LCC) -shell-escape tesi.tex
 	bibtex tesi.aux
-	texliveonfly tesi.tex
-	texliveonfly tesi.tex
+	$(LCC) -shell-escape tesi.tex
+	$(LCC) -shell-escape tesi.tex
 
 draft:
 	$(LCC) -draftmode tesi.tex
