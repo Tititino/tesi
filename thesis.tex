@@ -1,6 +1,6 @@
 \documentclass[a4paper, 12pt, tesi, english]{report}
 
-\usepackage[dbg]{tesi}
+\usepackage[dbg]{thesis}
 
 \title{Titolo}
 
@@ -136,10 +136,12 @@ One particularly conventient characteristic of Prolog is its automatic managing 
 
 Most Prolog implementations also support CLP or constraint logic programming.
 This allows to have constraints referencing some attributes of variables in the body of clauses, in our case we use CLP($\mathcal{B}$) for boolean constraints and an handy interface to a sat-solver.
-The library exposes operators to compose boolean formulas made of prolog variables
+The library exposes operators to compose boolean formulas made of prolog variables.
+We will exclusively use conjunction, negation and equality, respectively 
 \begin{minted}{prolog}
-X = (X =:= 1),
-Y = (X * X)
+X * Y.
+~ X.
+X =:= Y.
 \end{minted}
 and to check the satisfaiability of said formulas
 \begin{minted}{prolog}
