@@ -8,14 +8,15 @@
 \maketitle
 \newpage
 \tableofcontents
+\newpage
 
 \chapter{Intro}
-In 2001 Pym and Harland publish a paper \cite{HarlandPym} where they propose a new way to tackle the problem of splitting sequents during linear logic proof search using boolean constraints.
-The paper proposes a new calculus for linear logic that associates to each formula a boolean variable, and enforces linearity by constraints on said variables.
-This way the complexity shifts from choosing the right set of formulas to prove a certain branch, to solving for boolean assignment -- a problem for which there are much more sophisticated algorithmns.
-
-We examine the efficiency of this method and we compare it to other provers for different substets of linear logic.
-
+% In 2001 Pym and Harland publish a paper \cite{HarlandPym} where they propose a new way to tackle the problem of splitting sequents during linear logic proof search using boolean constraints.
+% The paper proposes a new calculus for linear logic that associates to each formula a boolean variable, and enforces linearity by constraints on said variables.
+% This way the complexity shifts from choosing the right set of formulas to prove a certain branch, to solving for boolean assignment -- a problem for which there are much more sophisticated algorithmns.
+% 
+% We examine the efficiency of this method and we compare it to other provers for different substets of linear logic.
+% 
 % \section{Sequent calculus}
 % We will often talk about sequents, a seuquent of the form
 % $$ \Delta_1, \dots, \Delta_n \vdash \Gamma_1, \dots, \Gamma_m $$
@@ -63,56 +64,56 @@ We examine the efficiency of this method and we compare it to other provers for 
 % and their symmetric right rules.
 % These structural rules will be important in the next section where we will introduce linear logic.
 
-\section{Linear logic}
-Linear logic is a logic proposed by Jean-Yves Girard in his seminal paper of 1987 \cite{LinearLogic}.
-The distintive trait of this logic is that its formulae cannot be copied (called weakening) or discarded (called contraction), but instead they are consumed.
-And a certain sequent it true if and only if all its formulae get consumed exactly once.
-For this reason this logic is sometimes called a logic of resources, in the same way classical logic is a logic of truths and intuitionistic logic is a logic of proofs.
-% Questo particolare utilizzo delle formule permette di avere una logica che mantiene la simmetria delle logica classica, e il costruttivismo delle logica intuizionista.
-
-In linear logic each connective of classical logic is doubled.
-To better see this let's analyze classic conjuction, this can be defined as 
-
-$$
-\begin{array}{cc}
-\AxiomC{$\Delta \vdash \phi_2, \Gamma$}
-\AxiomC{$\Delta \vdash \phi_1, \Gamma$}
-\BinaryInfC{$\Delta \vdash \phi_1 \wedge \phi_2, \Gamma$}
-\DisplayProof
-	&
-\AxiomC{$\Delta'' \vdash \phi_2, \Gamma''$}
-\AxiomC{$\Delta' \vdash \phi_1, \Gamma'$}
-\BinaryInfC{$\Delta', \Delta'' \vdash \phi_1 \wedge \phi_2, \Gamma', \Gamma''$}
-\DisplayProof
-\end{array}
-$$
-
-On the other hand, these two rules are not equivalent in linear logic, since the former implies some weakening and contraction.
-This is exactly the reason why in linear logic all connectives have two versions: an additive one -- where the two branches keep the same context, and a multiplicative one -- where the context gets partioned between the two branches.
-Obviously the constants $\top$ and $\bot$ also have two versions.
-We have that
-\begin{center}
-	\begin{tblr}{ccc}
-		\hline
-		& Add. & Mult. \\
-		\hline
-		\hline
-		$\wedge$ & $\llwith$ & $\llten$ \\
-		$\vee$ & $\llplus$ & $\llpar$ \\
-		$\top$ & $\top$ & $1$ \\
-		$\bot$ & $0$ & $\bot$ \\
-	\end{tblr}
-\end{center}
-It is the multiplicative side which brings the most complexity.
-The action of partitioning the context -- called splitting -- implies an exponential number of attempts to find which subset of the multiset is right for a certain branch.
-
-Linear logic defined as of right now, albeit having the added complexity of splitting, is nonetheless decidable: since formulae are finite and they cannot be copied, it is possible to explore all the possibilities.
-To make linear logic as strong as classical logic two new connectives are added: $\llbang{\phi}$ and $\llwn{\phi}$ -- called respectively bang and why-not.
-% Linear logic defined as of right now is decidable, since formulas cannot grow in size we can explore each possibility.
-% To be as strong as classical logic, there are two so called exponentials: bang or $!\phi$ and why not or $?\phi$.
-% These have the purpose of localizing the uses of weakening and contraction:
-These are called exponentials and their purpose is to localize uses of contraction and weakening.
-For example, formulas marked with $!$ can be used any number of times. %, so the intuistic implication $a \rightarrow b$ is translated as $!(a \lolli b)$, and transitions in a petri net are represented by $!(resources_1 \lolli resources_2)$.
+% \section{Linear logic}
+% Linear logic is a logic proposed by Jean-Yves Girard in his seminal paper of 1987 \cite{LinearLogic}.
+% The distintive trait of this logic is that its formulae cannot be copied (called weakening) or discarded (called contraction), but instead they are consumed.
+% And a certain sequent it true if and only if all its formulae get consumed exactly once.
+% For this reason this logic is sometimes called a logic of resources, in the same way classical logic is a logic of truths and intuitionistic logic is a logic of proofs.
+% % Questo particolare utilizzo delle formule permette di avere una logica che mantiene la simmetria delle logica classica, e il costruttivismo delle logica intuizionista.
+% 
+% In linear logic each connective of classical logic is doubled.
+% To better see this let's analyze classic conjuction, this can be defined as 
+% 
+% $$
+% \begin{array}{cc}
+% \AxiomC{$\Delta \vdash \phi_2, \Gamma$}
+% \AxiomC{$\Delta \vdash \phi_1, \Gamma$}
+% \BinaryInfC{$\Delta \vdash \phi_1 \wedge \phi_2, \Gamma$}
+% \DisplayProof
+% 	&
+% \AxiomC{$\Delta'' \vdash \phi_2, \Gamma''$}
+% \AxiomC{$\Delta' \vdash \phi_1, \Gamma'$}
+% \BinaryInfC{$\Delta', \Delta'' \vdash \phi_1 \wedge \phi_2, \Gamma', \Gamma''$}
+% \DisplayProof
+% \end{array}
+% $$
+% 
+% On the other hand, these two rules are not equivalent in linear logic, since the former implies some weakening and contraction.
+% This is exactly the reason why in linear logic all connectives have two versions: an additive one -- where the two branches keep the same context, and a multiplicative one -- where the context gets partioned between the two branches.
+% Obviously the constants $\top$ and $\bot$ also have two versions.
+% We have that
+% \begin{center}
+% 	\begin{tblr}{ccc}
+% 		\hline
+% 		& Add. & Mult. \\
+% 		\hline
+% 		\hline
+% 		$\wedge$ & $\llwith$ & $\llten$ \\
+% 		$\vee$ & $\llplus$ & $\llpar$ \\
+% 		$\top$ & $\top$ & $1$ \\
+% 		$\bot$ & $0$ & $\bot$ \\
+% 	\end{tblr}
+% \end{center}
+% It is the multiplicative side which brings the most complexity.
+% The action of partitioning the context -- called splitting -- implies an exponential number of attempts to find which subset of the multiset is right for a certain branch.
+% 
+% Linear logic defined as of right now, albeit having the added complexity of splitting, is nonetheless decidable: since formulae are finite and they cannot be copied, it is possible to explore all the possibilities.
+% To make linear logic as strong as classical logic two new connectives are added: $\llbang{\phi}$ and $\llwn{\phi}$ -- called respectively bang and why-not.
+% % Linear logic defined as of right now is decidable, since formulas cannot grow in size we can explore each possibility.
+% % To be as strong as classical logic, there are two so called exponentials: bang or $!\phi$ and why not or $?\phi$.
+% % These have the purpose of localizing the uses of weakening and contraction:
+% These are called exponentials and their purpose is to localize uses of contraction and weakening.
+% For example, formulas marked with $!$ can be used any number of times. %, so the intuistic implication $a \rightarrow b$ is translated as $!(a \lolli b)$, and transitions in a petri net are represented by $!(resources_1 \lolli resources_2)$.
 
 % Linear logic can be used to ensure that objects are used exactly once, thus allowing the system to safely deallocate an object after its use.
 % The Haskell's compiler GHC has an experimental extensions to permit signatures with linear types.
@@ -135,7 +136,7 @@ Prolog as a language and as an environment has been historically tied to automat
 One particularly conventient characteristic of Prolog is its automatic managing of backtracking, in most other languages we would have had to use exceptions to walk down the stack, or a queue of unfinished computations, which would have made the code much less readable.
 
 Most Prolog implementations also support CLP or constraint logic programming.
-This allows to have constraints referencing some attributes of variables in the body of clauses, in our case we use CLP($\mathcal{B}$) for boolean constraints and an handy interface to a sat-solver.
+This allows to have constraints referencing some attributes of variables in the body of clauses, in our case we use CLP($\mathcal{B}$) \cite{clpb} for boolean constraints and an handy interface to a sat-solver.
 The library exposes operators to compose boolean formulas made of prolog variables.
 We will exclusively use conjunction, negation and equality, respectively 
 \begin{minted}{prolog}
@@ -143,17 +144,40 @@ X * Y.
 ~ X.
 X =:= Y.
 \end{minted}
-and to check the satisfaiability of said formulas
+True is represented by 1 and false by 0.
+
+Usually constraints will be accumualted in a list, for this reason CLP($\mathcal{B}$) provides the functor \texttt{*(L)} to express the conjunction of its members.
+A constraint may be checked using the predicate \texttt{sat/1}, which succeds iff the constraint is satisfiable.
+Since we only deal with conjunctions we define the helper predicate \texttt{check/1}
 \begin{minted}{prolog}
-?- sat(X * Y).
-X = Y, Y = 1.
+check(L) :-
+	sat(*(L)).
 \end{minted}
+The predicate \texttt{sat/1} may work a bit unexpectedly, to clarify its possibile outcomes we give a little example:
+\begin{minted}{prolog}
+?- L = [X * Y =:= 1, X =:= 0], sat(*(L)).
+false.
+?- L = [X * Y =:= 0], sat(*(L)).
+sat(1#X*Y).
+?- L = [X * Y =:= 0, X =:= 1], sat(*(L)).
+X = 1,
+Y = 0.
+\end{minted}
+Here we can see three different cases:
+\begin{itemize}
+	\item the first case is unsatisfiable, so the predicate fails;
+	\item the second case is not instantiated enough and so the constraint just gets rewritten;
+	\item the third case shows how one constraint (\texttt{X =:= 1}) can force a variable to be unified to a value.
+\end{itemize}
+We use the library with the flag \texttt{clpb\_monotonic} set to \texttt{true}.
+This make the algorithm many order of magnitude faster but mandates that all variables be wrapped by the functor \texttt{v/1}.
+This small explanation sums up the extent of the library we use in our prover.
 
 One other characteristic of Prolog which revealed to be very handy for our prover is unification.
 Using this we didn't have to explicitly propagate the solutions of the SAT-solver, which instead were automatically propagated between branches.
 
 \chapter{The focused calculus}
-Before describing the calculus we must give some preliminary definitions
+% Before describing the calculus we must give some preliminary definitions
 
 % Explaination on constraints why we use them ecc ecc ecc
 
