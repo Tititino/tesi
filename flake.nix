@@ -10,66 +10,74 @@
     flake-utils.lib.eachDefaultSystem (system: 
       with import nixpkgs { system = system; };
       let pygmentize = python312Packages.pygments;
-	  texliveEnv = 
-	    texliveSmall.withPackages (p: with p; [
-	      amsfonts
-	      # amssymb
-	      amsmath
-	      amstex
-	      # amsthm
-	      babel
-	      bibtex
-	      bussproofs
-	      caption
-	      # subcaption
-	      embedall
-	      float
-	      geometry
-	      hyperref
-	      # graphicx
-	      listings
-	      minted
-	      ninecolors
-	      # epsfig
-	      setspace
-	      siunitx
-	      tabularray
-	      todonotes
-	      url
-	      xcolor
-	    ]);
+	  tex = texliveFull;
+	  # (texlive.combine {
+	  #  inherit (texlive) 
+	  #    scheme-small
+	  #    amsfonts
+	  #    amsmath
+	  #    amstex
+	  #    # amsthm
+	  #    babel
+	  #    bibtex
+	  #    bussproofs
+	  #    caption
+	  #    # subcaption
+	  #    embedall
+	  #    float
+	  #    geometry
+	  #    hyperref
+	  #    # graphicx
+	  #    latexmk
+	  #    latex-bin
+	  #    listings
+	  #    minted
+	  #    ninecolors
+	  #    # epsfig
+	  #    setspace
+	  #    siunitx
+	  #    tabularray
+	  #    todonotes
+	  #    url
+	  #    xcolor;
+	  #});
     in rec {
-        # packages = rec {
-	#   thesis = 
-	#     stdenv.mkDerivation rec {
-        #       name = "thesis";
+        packages = rec {
+	  thesis = 
+	    stdenvNoCC.mkDerivation rec {
+              name = "thesis";
 
-        #       system = system;
+              system = system;
 
-        #       nativeBuildInputs = [
-	#         pygmentize
-	# 	texliveEnv
-	# 	which
-        #       ];
+              buildInputs = [
+	        coreutils
+	        pygmentize
+		tex
+              ];
 
-        #       src = self;
+              src = self;
 
-	#       buildPhase = ''
-	#         export PATH=${which}/bin/which:${pygmentize}/bin/pygmentize:$PATH
-	#         make LCC=${texliveEnv}/bin/lualatex BTX=${texliveEnv}/bin/bibtex all
-	#       '';
+              phases = ["unpackPhase" "buildPhase" "installPhase"];
 
-        #       installPhase = ''
-	# 	  mkdir -p $out
-	# 	  cp thesis.pdf $out/thesis.pdf
-	#       '';
+	      buildPhase = ''
+                export PATH="${pkgs.lib.makeBinPath buildInputs}";
+                mkdir -p .cache/texmf-var
+                env TEXMFHOME=.cache TEXMFVAR=.cache/texmf-var \
+                  SOURCE_DATE_EPOCH=${toString self.lastModified} \
+                  latexmk -f -interaction=nonstopmode -pdf -lualatex -latexoption="-shell-escape" \
+		  -pretex="\pdfvariable suppressoptionalinfo 512\relax" \
+		  -usepretex thesis.tex
+	      '';
 
-        #       out = [ "out" ];
-        #     };
+              installPhase = ''
+		  mkdir -p $out
+		  cp thesis.pdf $out/thesis.pdf
+	      '';
+            };
 
-	#     default = thesis;
+	    default = thesis;
 
-        # };
+        };
 
         devShells = rec {
           default =  
@@ -78,7 +86,7 @@
 
               packages = [
 	        pygmentize
-		texliveEnv
+		tex
 		gnumake
               ];
             };
