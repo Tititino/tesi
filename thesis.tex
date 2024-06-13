@@ -187,7 +187,7 @@ Using this we didn't have to explicitly propagate the solutions of the SAT-solve
 Since in linear logic negation is symmetric and involutive, it is usual to work only with formulae in negated normal form.
 \begin{define}[Negated Normal Form -- NNF]
 	A farmula is in NNF if all its linear implications ($\lolli$) are expanded to pars ($\llpar$) and negation is found only at atoms.
-	By extension, a sequent is in NNF if all its formulae are in NNF.
+	Intuitively, a sequent is in NNF if all its formulae are in NNF.
 \end{define}
 A generic formula is then normalized applying recursively the DeMorgan rules for linear logic, untill NNF is reached.
 The process of normalization takes a two-sided judgement, of the form
@@ -218,15 +218,15 @@ Focusing is a technique described by Andreoli in his seminal paper \cite{Focusin
 There he recognizes two alternating phases in a proof: a deterministic phase, where the order of rule application to the sequent does not matter; and a non deterministic phase, where several choices may be tried.
 These two phases are respectively called asynchronous and synchronous phase.
 \begin{define}
-	Given a formula $\phi$ we define the following predicates
+	Given a formula $\phi$ we define the following predicates:
 	``$\isAsy{\phi}$'' indicates that the rule for the toplevel connective of the formula $\phi$ is asynchronous on the right, these connectives are 
 	$$ \llpar\!, \llwith\!, \llwn{}, \lltop, \llbot $$
 	conversely we define ``$\isSync{\phi}$'' to indicate that the rule for the toplevel connective of $\phi$ is synchronous on the right, these are
 	$$ \llten, \llplus, \llbang{}, \llone $$
 \end{define}
-Furthermore in focusing to everything is assigned a polarity of positive or negative.
-Connectives are negative if are asynchronous on the right, or positive if are asynchronous on the left.
-Terms also have a polarity, which may be assigned with some complex mechanisms.
+Furthermore in focusing everything is assigned a polarity of positive or negative.
+Synchronous connectives are defined to have a positive polarity, whereas asynchronous connectives are define to have a negative polarity.
+Terms also have a polarity, which may be assigned with some arbitrarly complex mechanisms.
 We will follow \cite{LiangMiller} and simply assing atoms with a negative polarity and negated atoms with a positive one.
 \begin{define}
 	``$\isNegLit{\alpha}$'' is a predicate that is true only when $\alpha$ is a negative literal (i.e. an atom).
@@ -246,10 +246,9 @@ Our calculus uses constraints to manage the resources.
 	$$ \new{x}, \new{X} $$
 	These mean respectively that:
 	\begin{itemize}
-		\item the variable name $x$ has not yet occurred in any expression in the proof tree, i.e. does not appear in any constraint of the father, of its (the father) siblings and their subtrees.
-		\item each variable name $x_i, x_j \in X$ has not yet occurred in the proof and 
+		\item the variable name $x$ has not yet occurred in any expression in the proof tree, i.e. does not appear in any constraint of the father, or of its (the father) siblings and their subtrees.
+		\item each variable name $x_i, x_j \in X$ has not yet occurred in the proof and each variable in $X$ is distinct.
 			$$ \forall i, j \mid i \neq j \Rightarrow x_i \neq x_j $$
-			each variable in $X$ is distinct.
 	\end{itemize}
 \end{define}
 As seen in Figure \ref{fig:var-name} we will call $e$ such a conjuction and $x$ the single boolean variables.
@@ -273,7 +272,8 @@ As seen in Figure \ref{fig:var-name} we will call $e$ such a conjuction and $x$ 
 	as the operation of extracting the boolean expression associated to a given formula, and then extend this notation to sequents such that $ \text{exp}(\Delta) $ is the set of all boolean expressions of $\Delta$.
 \end{define}
 It is important to note that only the topmost connective gets annotated, and not the subformulae.
-The purpose of putting formulae and expressions together in the annotated formula is twofold:
+
+\noindent The purpose of putting formulae and expressions together in the annotated formula is twofold:
 \begin{itemize}
 	\item the actions taken on the formula determine the constraints that will be generated, and these depend on the variables associated to said formula;
 	\item after the constraints are solved we can query the assignement of the variables and find out if the associated formula is used or not in a certain branch of a proof.
@@ -284,10 +284,10 @@ These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
 	Given an annotated formula $\af{\phi}{e}$ as in Definition \ref{def:annotated}, a constraint may be of two kinds
 	\begin{itemize}
 		\item ``$\used{e}$'' states that the formula $\phi$ gets consumed in this branch of the proof.
-			This corresponds to saying the constraint $e$ is true or
+			This corresponds to saying the expression $e$ is true or
 			$$ x_i \wedge \dots \wedge x_j = \top $$
 		\item ``$\avail{e}$'' states that the formula $\phi$ does not get consumed in this branch of the proof, and thus is available to be used in another branch.
-			This corresponds to saying the constraint $e$ is not true or
+			This corresponds to saying the expression $e$ is not true or
 			$$ x_i \wedge \dots \wedge x_j = \bot $$
 	\end{itemize}
 	We then extend these predicates to sequents
@@ -308,7 +308,7 @@ Otherwise the branch of the proof fails.
 		\text{V}&= \{ \dots, (x_i, \top), (x_j, \bot), \dots \}
 	\end{align*}
 	we write $\sat{\Lambda}{\text{V}}$ if 
-	$$ \bigwedge_{e \in \Lambda} e[x_1 / \text{V}(x_1), x_2 / \text{V}(x_2), \dots] = \top $$
+	$$ \bigwedge_{e \in \Lambda} e[x_1 / \text{V}(x_1), x_2 / \text{V}(x_2), \dots, x_n / \text{V}(x_n)] = \top $$
 	Here we are using the translation given in Definition \ref{def:constraints} such that
 	\begin{align*}
 		\used{e} &\Leftrightarrow e = \top \\
@@ -324,15 +324,15 @@ We now expand the concept of triadic sequent of \cite{Focusing} by adding constr
 	Given any sequent this can be in either two forms:
 	\begin{itemize}
 		\item focused or in the synchronous phase, written:
-			$$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\phi}$$
+			$$\focus{\Psi}{\Delta}{\phi} \separator \constr{\Lambda}{\text{V}}$$
 		\item in the asynchronous phase, written:
-			$$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\Phi}$$
+			$$\async{\Psi}{\Delta}{\Phi} \separator \constr{\Lambda}{\text{V}}$$
 	\end{itemize}
 	Where 
 	\begin{itemize}
 		\item $\Psi$ is a set of unrestricted formulae, or all formulae that can be freely discarded or duplicated;
 		\item $\Delta$ and $\Phi$ are multisets of linear (annotated) formulae, these are respectively the formulas ``put to the side'' and the formulae which are being ``worked on'' during a certain moment of the asynchronous phase;
-		\item $\Lambda$ and V are the constraints are solutions as defined in Definition \ref{def:sat}.
+		\item $\Lambda$ and V are the constraints and the solution as defined in Definition \ref{def:sat}.
 			By adding these members we make the flow of constraints through the proof tree explicit, leaving no ambiguity to where the constraints should be checked.
 			This approach to constraints differs from the one in \cite{HarlandPym}, which, on the other hand, preferred to keep generality.
 			The choice of letters is mainly a mnemonic or visual one, constraints $\Lambda$ ``go-up'' the proof tree and solutions V ``come down'' from the leaves.
@@ -352,7 +352,7 @@ As explained in Definition \ref{def:sat}, V may be used as a set of constraint i
 	with $n$ the cardinality of $\Delta$, and $\phi_i$ (resp. $e_i$) the formula (resp. the expression) of the $i$-eth annotated formula in $\Delta$ using an arbitrary order.
 	The same holds for $x_i$ and $X$.
 
-	\noindent With a slight abuse of notation we will write $\text{split}(\Delta, X)_L$ and $\text{split}(\Delta, X)_R$ respectively as the left projection and the right projection of the pair $(\Delta_L, \Delta_R)$.
+	\noindent With a slight abuse of notation we will write $\Delta_L^X$ and $\Delta_R^X$ respectively as the left projection and the right projection of the pair $(\Delta_L, \Delta_R)$.
 \end{define}
 As a small example for clarity, given the sequent
 \begin{align*}
@@ -361,8 +361,8 @@ As a small example for clarity, given the sequent
 \end{align*}
 this is split into
 \begin{align*}
-	\text{split}(\Delta, X)_L &\mapsto \af{a \llten b}{x_3 \varAnd x_1}, \af{\llnot{c}}{x_4 \varAnd x_2} \\
-	\text{split}(\Delta, X)_R &\mapsto \af{a \llten b}{\varNot{x_3} \varAnd x_1}, \af{\llnot{c}}{\varNot{x_4} \varAnd x_2} 
+	\Delta_L^X &\mapsto \af{a \llten b}{x_3 \varAnd x_1}, \af{\llnot{c}}{x_4 \varAnd x_2} \\
+	\Delta_R^X &\mapsto \af{a \llten b}{\varNot{x_3} \varAnd x_1}, \af{\llnot{c}}{\varNot{x_4} \varAnd x_2} 
 \end{align*}
 % example of splitting and variables
 
@@ -376,38 +376,38 @@ We are now ready to present the full calculus.
 			\begin{tblr}{ colspec = { cc }
 				    , rows = {abovesep=5pt, belowsep=5pt}
 				    }
-			\SetCell[c=2]{c} {\scriptsize
+			\SetCell[c=2]{c} {\footnotesize
 			\Axiom$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
 			\LeftLabel{$[\llpar]$}
 			\UnaryInf$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
 			\DisplayProof} \\
-			{\scriptsize
+			{\footnotesize
 			\Axiom$\async{\Psi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
 			\LeftLabel{$[\llbot]$}
 			\UnaryInf$\async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
 			\DisplayProof}
 			&
-			{\scriptsize
+			{\footnotesize
 			\AxiomC{}
 			\LeftLabel{$[\lltop]$}
 			\UnaryInfC{$\async{\Psi}{\Delta}{\af{\lltop}{-}, \Phi} \separator \constr{\Lambda}{\text{V}}$}
 			\DisplayProof
 			}
 			\\
-			\SetCell[c=2]{c} {\scriptsize
+			\SetCell[c=2]{c} {\footnotesize
 			\AxiomC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}'}$}
 			\AxiomC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}''}$}
 			\LeftLabel{$[\llwith]$}
 			\BinaryInfC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\text{V}', \text{V}''}$}	% capisco cosa fanno qui i constraint
 			\DisplayProof}
 			\\
-			\SetCell[c=2]{c} {\scriptsize
+			\SetCell[c=2]{c} {\footnotesize
 			\Axiom$\async{\Psi, \phi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
 			\LeftLabel{$[\,?\,]$}
 			\UnaryInf$\async{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
 			\DisplayProof} 
 			\\
-			\SetCell[c=2]{c} {\scriptsize
+			\SetCell[c=2]{c} {\footnotesize
 			\AxiomC{$\neg\isAsy{\phi}$}
 			\AxiomC{$\async{\Psi}{\Delta, \af{\phi}{e}}{\Phi} \separator \constr{\Lambda}{\text{V}}$}
 			\LeftLabel{$[R\!\Uparrow]$}
@@ -425,40 +425,40 @@ We are now ready to present the full calculus.
 		\begin{tblr}{ colspec = { cc } 
 			    , rows = {abovesep=5pt, belowsep=5pt}
 			    }
-			\SetCell[c=2]{c} {\scriptsize
+			\SetCell[c=2]{c} {\footnotesize
 			\AxiomC{$ \new{X} \hspace{.3cm} 
-				\focus{\Psi}{\text{split}(\Delta, X)_L}{\text{af}(\phi_1, e)} \separator \constr{\Lambda, \used{e}}{\text{V}'} \hspace{.3cm} 
-				\focus{\Psi}{\text{split}(\Delta, X)_R}{\text{af}(\phi_2, e)} \separator \constr{\text{V}'}{\text{V}''}$}
+				\focus{\Psi}{\Delta_L^X}{\text{af}(\phi_1, e)} \separator \constr{\Lambda, \used{e}}{\text{V}'} \hspace{.3cm} 
+				\focus{\Psi}{\Delta_R^X}{\text{af}(\phi_2, e)} \separator \constr{\text{V}'}{\text{V}''}$}
 			\LeftLabel{$[\llten]$}
 			\UnaryInfC{$\focus{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)} \separator \constr{\Lambda}{\text{V}''}$}	% capisco il movimento dei constraint
 			\DisplayProof}
 			\\ 
-			{\scriptsize
+			{\footnotesize
 			\Axiom$\focus{\Psi}{\Delta}{\af{\phi_1}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
 			\LeftLabel{$[\llplus_L]$}
 			\UnaryInf$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
 			\DisplayProof}
 			&
-			{\scriptsize
+			{\footnotesize
 			\Axiom$\focus{\Psi}{\Delta}{\af{\phi_2}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
 			\LeftLabel{$[\llplus_R]$}
 			\UnaryInf$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
 			\DisplayProof}
 			\\
-			{\scriptsize
+			{\footnotesize
 			\AxiomC{$\sat{ \Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$}
 			\LeftLabel{$[1]$}
 			\UnaryInfC{$\focus{\Psi}{\Delta}{\af{\llone}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
 			\DisplayProof} 
 			&
-			{\scriptsize
+			{\footnotesize
 			\Axiom$\focus{\Psi}{\Delta}{\af{\phi}{e_1}} \fCenter \separator \constr{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$
 			\LeftLabel{$[\,!\,]$}
 			\UnaryInf$\focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}} \fCenter \separator \constr{\Lambda}{\text{V}}$
 			\DisplayProof
 			}
 			\\
-			\SetCell[c=2]{c} {\scriptsize
+			\SetCell[c=2]{c} {\footnotesize
 			\AxiomC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
 			\AxiomC{$\async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
 			\LeftLabel{$[R\!\Downarrow]$}
@@ -477,26 +477,26 @@ We are now ready to present the full calculus.
 			    , rows = {abovesep=5pt, belowsep=5pt}
 			    , vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
 			    }
-			{\scriptsize
+			{\footnotesize
 			\AxiomC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\text{V}}$}
 			\LeftLabel{$[I_1]$}
 			\UnaryInfC{$\focus{\Psi}{\Delta, \af{\phi}{e_2}}{\af{\llnot{\phi}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
 			\DisplayProof}
 			&
-			{\scriptsize
+			{\footnotesize
 			\AxiomC{$\isPosLit{\phi}$}
 			\AxiomC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
 			\LeftLabel{$[D_1]$}
 			\BinaryInfC{$\async{\Psi}{\Delta, \af{\phi}{e}}{.} \separator \constr{\Lambda}{\text{V}}$}
 			\DisplayProof}
 			\\
-			{\scriptsize
+			{\footnotesize
 			\AxiomC{$ \sat{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$}
 			\LeftLabel{$[I_2]$}
 			\UnaryInfC{$\focus{\Psi, \phi}{\Delta}{\af{\llnot{\phi}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
 			\DisplayProof}
 			&
-			{\scriptsize
+			{\footnotesize
 			\AxiomC{$\isPosLit{\phi}$}
 			\AxiomC{$\new{x}$}
 			\AxiomC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\Lambda, \used{e}}{\text{V}}$}
@@ -509,10 +509,174 @@ We are now ready to present the full calculus.
 	\caption{Focused constraint calculus for Linear Logic}
 	\label{fig:calculus}
 \end{figure}
+What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy described by \cite{HarlandPym}.
+
+\begin{define}
+Given an assignment V, we define
+	$$ e[\text{V}] = e[x_i / V(x_i), \dots, x_j / V(x_j)] $$
+as the value of the $e$ using assignment V.
+We then extend this notation to sequents, such that
+	$$ \Delta[\text{V}] = \{ \phi \in \Delta \mid e[\text{V}] = \top \} $$
+\end{define}
+
+We show now a translation from our focused method to the one of \cite{HarlandPym}:
 \begin{teor}
-	The calculus of Figure \ref{fig:calculus} is sound % ...
+	Let $\vdash \Psi$ The calculus of Figure \ref{fig:calculus} is sound % ...
 \end{teor}
 \begin{proof}
+	Let $<$ be weakening and $>$ contraction.
+	We proceed with the base cases
+	\begin{itemize}
+		\item[$I_1$:] Given a judgment
+			$$
+			\AxiomC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\text{V}}$}
+			\LeftLabel{$[I_1]$}
+			\UnaryInfC{$\focus{\Psi}{\Delta, \af{\phi}{e_2}}{\af{\llnot{\phi}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
+			\DisplayProof
+			$$
+			We get that 
+			$$ (\Delta, \af{\phi}{e_2}, \af{\llnot{\phi}}{e_1})[V] \mapsto \phi, \llnot{\phi}$$
+			$$
+			\AxiomC{}
+			\LeftLabel{$[I]$}
+			\UnaryInfC{$\vdash \phi, \llnot{\phi}$}
+			\LeftLabel{$[<\!*]$}
+			\UnaryInfC{$\vdash \llwn{\Psi}, \phi, \llnot{\phi}$}
+			\DisplayProof
+			$$
+		\item[$I_2$:]
+			$$
+			\AxiomC{$ \sat{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$}
+			\LeftLabel{$[I_2]$}
+			\UnaryInfC{$\focus{\Psi, \phi}{\Delta}{\af{\llnot{\phi}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
+			\DisplayProof
+			$$
+			Again by substituting the variables we get that
+			$$
+			\AxiomC{}
+			\LeftLabel{$[I]$}
+			\UnaryInfC{$\vdash \phi, \llnot{\phi}$}
+			\LeftLabel{$[<\!*]$}
+			\UnaryInfC{$\vdash \llwn{\Psi}, \phi, \llnot{\phi}$}
+			\LeftLabel{$[?]$}
+			\UnaryInfC{$\vdash \llwn{\Psi}, \llwn{\phi}, \llnot{\phi}$}
+			\DisplayProof
+			$$
+		\item[$\llone$:]
+			$$
+			\AxiomC{$\sat{ \Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$}
+			\LeftLabel{$[1]$}
+			\UnaryInfC{$\focus{\Psi}{\Delta}{\af{\llone}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
+			\DisplayProof
+			$$
+			This uses the same reasoning as above:
+			$$
+			\AxiomC{}
+			\LeftLabel{$[\llone]$}
+			\UnaryInfC{$\vdash \llone$}
+			\LeftLabel{$[<\!*]$}
+			\UnaryInfC{$\vdash \llwn{\Psi}, \llone$}
+			\DisplayProof
+			$$
+	\end{itemize}
+	Assuming the premises hold we now proceed with the induction sted:
+	\begin{itemize}
+		\item[$\llten$:] 
+			$$
+			\AxiomC{$ \new{X} \hspace{.3cm} 
+				\focus{\Psi}{\Delta_L^X}{\text{af}(\phi_1, e)} \separator \constr{\Lambda, \used{e}}{\text{V}'} \hspace{.3cm} 
+				\focus{\Psi}{\Delta_R^X}{\text{af}(\phi_2, e)} \separator \constr{\text{V}'}{\text{V}''}$}
+			\LeftLabel{$[\llten]$}
+			\UnaryInfC{$\focus{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)} \separator \constr{\Lambda}{\text{V}''}$}	% capisco il movimento dei constraint
+			\DisplayProof
+			$$
+			By inductive hypothesis both
+			\begin{align*}
+				\focus{\Psi}{\Delta_L^X}{\text{af}(\phi_1, e)} & \separator \constr{\Lambda, \used{e}}{\text{V}'} \\
+				\focus{\Psi}{\Delta_R^X}{\text{af}(\phi_2, e)}  & \separator \constr{\text{V}'}{\text{V}''}
+			\end{align*}
+			hold.
+			Now the set of all the variables referenced in the conclusion must be a subset of the sets of the variables of the branches, since a branch can only add new variables.
+			Furthermore, given how the variables are defined, $\Delta_L^X[\text{V}']$ and $\Delta_R^X[\text{V}'']$ must be disjoint.
+			Given this we get that this equals to 
+			$$
+			\AxiomC{$\vdash \llwn{\Psi}, \Delta', \phi_1$}
+			\AxiomC{$\vdash \llwn{\Psi}, \Delta'', \phi_2$}
+			\LeftLabel{$[\llten]$}
+			\BinaryInfC{$\vdash \llwn{\Psi}, \llwn{\Psi}, \Delta', \Delta'', \phi_1 \llten \phi_2$}
+			\LeftLabel{$[>\!*]$}
+			\UnaryInfC{$\vdash \llwn{\Psi}, \Delta', \Delta'', \phi_1 \llten \phi_2$}
+			\DisplayProof
+			$$
+		\item[$\llbot$:] 
+		\item[$\lltop$:]
+		\item[$\llpar$:]
+			$$
+			\Axiom$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\LeftLabel{$[\llpar]$}
+			\UnaryInf$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\DisplayProof
+			$$
+			Assuming the hypotesis holds
+			$$ \async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}}$$
+			We trivially can % recuperare
+			$$
+			\AxiomC{$\vdash \llwn{\Psi}, \Delta, \phi_1, \phi_2$}
+			\LeftLabel{$[\llpar]$}
+			\UnaryInfC{$\vdash \llwn{\Psi}, \Delta, \phi_1 \llpar \phi_2$}
+			\DisplayProof
+			$$
+		\item[$\llplus_L$:]
+			$$
+			\Axiom$\focus{\Psi}{\Delta}{\af{\phi_1}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\LeftLabel{$[\llplus_L]$}
+			\UnaryInf$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\DisplayProof
+			$$
+
+			$$
+			\AxiomC{$\vdash \llwn{\Psi}, \Delta, \phi_1$}
+			\LeftLabel{$[\llplus_L]$}
+			\UnaryInfC{$\vdash \llwn{\Psi}, \Delta, \phi_1 \llplus \phi_2$}
+			\DisplayProof
+			$$
+		\item[$\llplus_R$:]
+			$$
+			\Axiom$\focus{\Psi}{\Delta}{\af{\phi_2}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\LeftLabel{$[\llplus_R]$}
+			\UnaryInf$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\DisplayProof
+			$$
+
+			$$
+			\AxiomC{$\vdash \llwn{\Psi}, \Delta, \phi_2$}
+			\LeftLabel{$[\llplus_R]$}
+			\UnaryInfC{$\vdash \llwn{\Psi}, \Delta, \phi_1 \llplus \phi_2$}
+			\DisplayProof
+			$$
+		\item[$\llwith$:]
+			$$
+			\AxiomC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}'}$}
+			\AxiomC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}''}$}
+			\LeftLabel{$[\llwith]$}
+			\BinaryInfC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\text{V}', \text{V}''}$}	% capisco cosa fanno qui i constraint
+			\DisplayProof
+			$$
+
+			$$
+			\AxiomC{$\vdash \llwn{\Psi}, \Delta, \phi_1$}
+			\AxiomC{$\vdash \llwn{\Psi}, \Delta, \phi_2$}
+			\LeftLabel{$[\llwith]$}
+			\BinaryInfC{$\vdash \llwn{\Psi}, \Delta, \phi_1 \llwith \phi_2$}
+			\DisplayProof
+			$$
+		\item[$\llbang$:]
+		\item[$\llwn$:]
+		\item[$R\!\Downarrow$:]
+		\item[$R\!\Uparrow$:]
+		\item[$D_1$:]
+		\item[$D_2$:]
+	\end{itemize}
 \end{proof}
 
 \chapter{Implementation}

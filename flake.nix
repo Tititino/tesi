@@ -10,37 +10,41 @@
     flake-utils.lib.eachDefaultSystem (system: 
       with import nixpkgs { system = system; };
       let pygmentize = python312Packages.pygments;
-	  tex = texliveFull;
-	  # (texlive.combine {
-	  #  inherit (texlive) 
-	  #    scheme-small
-	  #    amsfonts
-	  #    amsmath
-	  #    amstex
-	  #    # amsthm
-	  #    babel
-	  #    bibtex
-	  #    bussproofs
-	  #    caption
-	  #    # subcaption
-	  #    embedall
-	  #    float
-	  #    geometry
-	  #    hyperref
-	  #    # graphicx
-	  #    latexmk
-	  #    latex-bin
-	  #    listings
-	  #    minted
-	  #    ninecolors
-	  #    # epsfig
-	  #    setspace
-	  #    siunitx
-	  #    tabularray
-	  #    todonotes
-	  #    url
-	  #    xcolor;
-	  #});
+	  tex = (texlive.combine {
+	    inherit (texlive) 
+	      scheme-minimal
+	      amsfonts
+	      amsmath
+	      amscls
+	      amstex
+	      # amsthm
+	      babel
+	      bibtex
+	      bussproofs
+	      caption
+	      # subcaption
+	      embedall
+	      epstopdf
+	      epstopdf-pkg
+	      float
+	      geometry
+	      grfext
+	      hyperref
+	      infwarerr
+	      # graphicx
+	      latexmk
+	      latex-bin
+	      listings
+	      minted
+	      ninecolors
+	      # epsfig
+	      setspace
+	      siunitx
+	      tabularray
+	      todonotes
+	      url
+	      xcolor;
+	  });
     in rec {
         packages = rec {
 	  thesis = 
@@ -64,7 +68,7 @@
                 mkdir -p .cache/texmf-var
                 env TEXMFHOME=.cache TEXMFVAR=.cache/texmf-var \
                   SOURCE_DATE_EPOCH=${toString self.lastModified} \
-                  latexmk -f -interaction=nonstopmode -pdf -lualatex -latexoption="-shell-escape" \
+                  latexmk -interaction=nonstopmode -pdf -lualatex -latexoption="-shell-escape" \
 		  -pretex="\pdfvariable suppressoptionalinfo 512\relax" \
 		  -usepretex thesis.tex
 	      '';
