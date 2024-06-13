@@ -1,10 +1,11 @@
 LCC=pdflatex
+BTX=bibtex
 
 all:
-	$(LCC) -shell-escape tesi.tex
-	bibtex tesi.aux
-	$(LCC) -shell-escape tesi.tex
-	$(LCC) -shell-escape tesi.tex
+	$(LCC) -shell-escape thesis.tex
+	$(BTX) thesis.aux
+	$(LCC) -shell-escape thesis.tex
+	$(LCC) -shell-escape thesis.tex
 
 draft:
-	$(LCC) -draftmode tesi.tex
+	$(LCC) -shell-escape thesis.tex

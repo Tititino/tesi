@@ -1,8 +1,10 @@
-\documentclass[a4paper, 12pt, tesi, english]{report}
+\documentclass[a4paper, 12pt, english]{report}
 
 \usepackage[dbg]{thesis}
 
-\title{Titolo}
+\title{Proof Search in Propositional Linear Logic via Boolean Constraints Satisfaction
+% \includegraphics{./images/tesiSCIENZE_TECNOLOGIE.jpg}
+}
 
 \begin{document}
 \maketitle
@@ -131,9 +133,11 @@
 
 
 \section{Why Prolog}
+Prolog come linguaggio e come ambiente è sempre stato legato all'albito dell'automated theorem proving per la sua abilità di esprimere di gestire in modo naturale il backtracking; a differenza della maggior parte degli altri linguaggi
+
 Prolog as a language and as an environment has been historically tied to automated theorem proving for its ability to express these kind of algorithmns naturally.
 % In particular we chose SWI-Prolog because it offers a comprehensive and mature free Prolog environment.
-One particularly conventient characteristic of Prolog is its automatic managing of backtracking, in most other languages we would have had to use exceptions to walk down the stack, or a queue of unfinished computations, which would have made the code much less readable.
+One particularly conventient characteristic of Prolog is its automatic management of backtracking, in most other languages we would have had to use exceptions to walk down the stack, or a queue of unfinished computations, which would have made the code much less readable.
 
 Most Prolog implementations also support CLP or constraint logic programming.
 This allows to have constraints referencing some attributes of variables in the body of clauses, in our case we use CLP($\mathcal{B}$) \cite{clpb} for boolean constraints and an handy interface to a sat-solver.
@@ -242,10 +246,10 @@ Our calculus uses constraints to manage the resources.
 	\label{def:new}
 	Sometimes we will write 
 	$$ \new{x}, \new{X} $$
-	to mean respectively:
+	These mean respectively that:
 	\begin{itemize}
-		\item the variable name $x$ has not yet occurred in any expression in the proof;
-		\item each variable name $x_i \in X$ has not yet occurred in the proof and 
+		\item the variable name $x$ has not yet occurred in any expression in the proof tree, i.e. does not appear in any constraint of the father, of its (the father) siblings and their subtrees.
+		\item each variable name $x_i, x_j \in X$ has not yet occurred in the proof and 
 			$$ \forall i, j \mid i \neq j \Rightarrow x_i \neq x_j $$
 			each variable in $X$ is distinct.
 	\end{itemize}
@@ -268,31 +272,34 @@ As seen in Figure \ref{fig:var-name} we will call $e$ such a conjuction and $x$ 
 	that associates the formula to the expression.
 	We denote 
 	$$ \text{exp}(\af{\phi}{e}) = e $$
-	the operation of extracting the boolean expression associated to a given formula, and then extend this notation to sequents such that $ \text{exp}(\Delta) $ is the set of all boolean expressions of $\Delta$.
+	as the operation of extracting the boolean expression associated to a given formula, and then extend this notation to sequents such that $ \text{exp}(\Delta) $ is the set of all boolean expressions of $\Delta$.
 \end{define}
-
-We now define the constraints on these expressions:
-\begin{define}[Constraints]
-	\label{def:constraints}
-	Given an annotated formula $\af{\phi}{e}$ as in Definition \ref{def:annotated}, a constraint may be of two kinds
-	\begin{itemize}
-		\item ``$\used{e}$'' states that the formula $\phi$ gets consumed in this branch of the proof, this corresponds to saying the constraint $e$ is true or
-			$$ x_i \wedge \dots \wedge x_j = \top $$
-		\item ``$\avail{e}$'' states that the formula $\phi$ does not get consumed in this branch of the proof, this corresponds to saying the constraint $e$ is not true or
-			$$ x_i \wedge \dots \wedge x_j = \bot $$
-	\end{itemize}
-	We then extends these predicates to sequents
-	\begin{align*}
-		\used{\Delta} &= \{ \used{e_2} \mid e_2 \in \text{exp}(\Delta) \} \\
-		\avail{\Delta} &= \{ \avail{e_2} \mid e_2 \in \text{exp}(\Delta) \}
-	\end{align*}
-\end{define}
+It is important to note that only the topmost connective gets annotated, and not the subformulae.
 The purpose of putting formulae and expressions together in the annotated formula is twofold:
 \begin{itemize}
 	\item the actions taken on the formula determine the constraints that will be generated, and these depend on the variables associated to said formula;
 	\item after the constraints are solved we can query the assignement of the variables and find out if the associated formula is used or not in a certain branch of a proof.
 \end{itemize}
-
+These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
+\begin{define}[Constraints]
+	\label{def:constraints}
+	Given an annotated formula $\af{\phi}{e}$ as in Definition \ref{def:annotated}, a constraint may be of two kinds
+	\begin{itemize}
+		\item ``$\used{e}$'' states that the formula $\phi$ gets consumed in this branch of the proof.
+			This corresponds to saying the constraint $e$ is true or
+			$$ x_i \wedge \dots \wedge x_j = \top $$
+		\item ``$\avail{e}$'' states that the formula $\phi$ does not get consumed in this branch of the proof, and thus is available to be used in another branch.
+			This corresponds to saying the constraint $e$ is not true or
+			$$ x_i \wedge \dots \wedge x_j = \bot $$
+	\end{itemize}
+	We then extend these predicates to sequents
+	\begin{align*}
+		\used{\Delta} &= \{ \used{e_2} \mid e_2 \in \text{exp}(\Delta) \} \\
+		\avail{\Delta} &= \{ \avail{e_2} \mid e_2 \in \text{exp}(\Delta) \}
+	\end{align*}
+\end{define}
+A branch is then considered as correct if its constraints are satisfiable.
+Otherwise the branch of the proof fails.
 \begin{define}[Satisfaiability of constraints]
 	\label{def:sat}
 	Given a set of constraints $\Lambda$ and a function V
@@ -314,7 +321,7 @@ The purpose of putting formulae and expressions together in the annotated formul
 	we get back a set of constraints.
 \end{define}
 
-We now expand the definition of triadic sequent of \cite{Focusing}, by adding constraints
+We now expand the concept of triadic sequent of \cite{Focusing} by adding constraints
 \begin{define}[Members of the sequent]
 	Given any sequent this can be in either two forms:
 	\begin{itemize}
@@ -323,12 +330,13 @@ We now expand the definition of triadic sequent of \cite{Focusing}, by adding co
 		\item in the asynchronous phase, written:
 			$$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\Phi}$$
 	\end{itemize}
-	These two have more or less the same members, which are
+	Where 
 	\begin{itemize}
-		\item the set $\Psi$ of unrestricted formulae, or all formulae that can be freely discarded or duplicated;
-		\item the multisets $\Delta$ and $\Phi$ of linear (annotated) formulae, these are respectively the formulas ``put to the side'' and the formulae which are being ``worked on'' during a certain moment of the asynchronous phase;
-		\item the sets $\Lambda$ and V as defined in Definition \ref{def:sat}.
-			This approach to constraints helps to make the flow of the variables and solutions through the proof tree more explicit and clear and leaves no ambiguity to where the constraints should be checked.
+		\item $\Psi$ is a set of unrestricted formulae, or all formulae that can be freely discarded or duplicated;
+		\item $\Delta$ and $\Phi$ are multisets of linear (annotated) formulae, these are respectively the formulas ``put to the side'' and the formulae which are being ``worked on'' during a certain moment of the asynchronous phase;
+		\item $\Lambda$ and V are the constraints are solutions as defined in Definition \ref{def:sat}.
+			By adding these members we make the flow of constraints through the proof tree explicit, leaving no ambiguity to where the constraints should be checked.
+			This approach to constraints differs from the one in \cite{HarlandPym}, which, on the other hand, preferred to keep generality.
 			The choice of letters is mainly a mnemonic or visual one, constraints $\Lambda$ ``go-up'' the proof tree and solutions V ``come down'' from the leaves.
 	\end{itemize}
 \end{define}
@@ -337,16 +345,16 @@ As explained in Definition \ref{def:sat}, V may be used as a set of constraint i
 \begin{define}[Splitting]
 	\label{def:split}
 	Given a sequent of annotated formulae $\Delta$ and a set of variables $X$ such that $|\Delta| = |X|$ we define the operation of splitting it as a function
-	$$ \text{split}(\Delta, X) \mapsto (\Delta^L, \Delta^R) $$
+	$$ \text{split}(\Delta, X) \mapsto (\Delta_L, \Delta_R) $$
 	where
 	\begin{align*}
-		\Delta^L &= \{ \af{\phi_i}{x_i \wedge e_i} \mid i \in \{1, \dots, n\}\} \\
-		\Delta^R &= \{ \af{\phi_i}{\varNot{x_i} \wedge e_i} \mid i \in \{1, \dots, n\}\}
+		\Delta_L &= \{ \af{\phi_i}{x_i \wedge e_i} \mid i \in \{1, \dots, n\}\} \\
+		\Delta_R &= \{ \af{\phi_i}{\varNot{x_i} \wedge e_i} \mid i \in \{1, \dots, n\}\}
 	\end{align*}
 	with $n$ the cardinality of $\Delta$, and $\phi_i$ (resp. $e_i$) the formula (resp. the expression) of the $i$-eth annotated formula in $\Delta$ using an arbitrary order.
 	The same holds for $x_i$ and $X$.
 
-	With a slight abuse of notation we will write $\text{split}(\Delta, X)_L$ and $\text{split}(\Delta, X)_R$ respectively as the left projection and the right projection of the pair $(\Delta_L, \Delta_R)$.
+	\noindent With a slight abuse of notation we will write $\text{split}(\Delta, X)_L$ and $\text{split}(\Delta, X)_R$ respectively as the left projection and the right projection of the pair $(\Delta_L, \Delta_R)$.
 \end{define}
 As a small example for clarity, given the sequent
 \begin{align*}
@@ -355,8 +363,8 @@ As a small example for clarity, given the sequent
 \end{align*}
 this is split into
 \begin{align*}
-	\text{split}(\Delta, X)^L &\mapsto \af{a \llten b}{x_3 \varAnd x_1}, \af{\llnot{c}}{x_4 \varAnd x_2} \\
-	\text{split}(\Delta, X)^R &\mapsto \af{a \llten b}{\varNot{x_3} \varAnd x_1}, \af{\llnot{c}}{\varNot{x_4} \varAnd x_2} 
+	\text{split}(\Delta, X)_L &\mapsto \af{a \llten b}{x_3 \varAnd x_1}, \af{\llnot{c}}{x_4 \varAnd x_2} \\
+	\text{split}(\Delta, X)_R &\mapsto \af{a \llten b}{\varNot{x_3} \varAnd x_1}, \af{\llnot{c}}{\varNot{x_4} \varAnd x_2} 
 \end{align*}
 % example of splitting and variables
 
@@ -371,41 +379,41 @@ We are now ready to present the full calculus.
 				    , rows = {abovesep=5pt, belowsep=5pt}
 				    }
 			\SetCell[c=2]{c} {\scriptsize
-			\AxiomC{$\async{\constr{\used{e}, \Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi}$}
+			\Axiom$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
 			\LeftLabel{$[\llpar]$}
-			\UnaryInfC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi}$}
+			\UnaryInf$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
 			\DisplayProof} \\
 			{\scriptsize
-			\AxiomC{$\async{\constr{\used{e}, \Lambda}{\text{V}}}{\Psi}{\Delta}{\Phi}$}
+			\Axiom$\async{\Psi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
 			\LeftLabel{$[\llbot]$}
-			\UnaryInfC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\llbot}{e}, \Phi}$}
+			\UnaryInf$\async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
 			\DisplayProof}
 			&
 			{\scriptsize
 			\AxiomC{}
 			\LeftLabel{$[\lltop]$}
-			\UnaryInfC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\lltop}{-}, \Phi}$}
+			\UnaryInfC{$\async{\Psi}{\Delta}{\af{\lltop}{-}, \Phi} \separator \constr{\Lambda}{\text{V}}$}
 			\DisplayProof
 			}
 			\\
 			\SetCell[c=2]{c} {\scriptsize
-			\AxiomC{$\async{\constr{\used{e}, \Lambda}{\text{V}'}}{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi}$}
-			\AxiomC{$\async{\constr{\used{e}, \Lambda}{\text{V}''}}{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi}$}
+			\AxiomC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}'}$}
+			\AxiomC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}''}$}
 			\LeftLabel{$[\llwith]$}
-			\BinaryInfC{$\async{\constr{\Lambda}{\text{V}', \text{V}''}}{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi}$}	% capisco cosa fanno qui i constraint
+			\BinaryInfC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\text{V}', \text{V}''}$}	% capisco cosa fanno qui i constraint
 			\DisplayProof}
 			\\
 			\SetCell[c=2]{c} {\scriptsize
-			\AxiomC{$\async{\constr{\Lambda}{\text{V}}}{\Psi, \phi}{\Delta}{\Phi}$}
+			\Axiom$\async{\Psi, \phi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
 			\LeftLabel{$[\,?\,]$}
-			\UnaryInfC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi}$}
+			\UnaryInf$\async{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
 			\DisplayProof} 
 			\\
 			\SetCell[c=2]{c} {\scriptsize
 			\AxiomC{$\neg\isAsy{\phi}$}
-			\AxiomC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta, \af{\phi}{e}}{\Phi}$}
+			\AxiomC{$\async{\Psi}{\Delta, \af{\phi}{e}}{\Phi} \separator \constr{\Lambda}{\text{V}}$}
 			\LeftLabel{$[R\!\Uparrow]$}
-			\BinaryInfC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi}{e}, \Phi}$}
+			\BinaryInfC{$\async{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\text{V}}$}
 			\DisplayProof
 			}
 		\end{tblr}
@@ -420,43 +428,43 @@ We are now ready to present the full calculus.
 			    , rows = {abovesep=5pt, belowsep=5pt}
 			    }
 			\SetCell[c=2]{c} {\scriptsize
-			\AxiomC{$\new{X}$}
-			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{\text{V}'}}{\Psi}{\text{split}(\Delta, X)^L}{\text{af}(\phi_1, e)}$}
-			\AxiomC{$\focus{\constr{\text{V}'}{\text{V}''}}{\Psi}{\text{split}(\Delta, X)^R}{\text{af}(\phi_2, e)}$}
+			\AxiomC{$ \new{X} \hspace{.3cm} 
+				\focus{\Psi}{\text{split}(\Delta, X)_L}{\text{af}(\phi_1, e)} \separator \constr{\Lambda, \used{e}}{\text{V}'} \hspace{.3cm} 
+				\focus{\Psi}{\text{split}(\Delta, X)_R}{\text{af}(\phi_2, e)} \separator \constr{\text{V}'}{\text{V}''}$}
 			\LeftLabel{$[\llten]$}
-			\TrinaryInfC{$\focus{\constr{\Lambda}{\text{V}''}}{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)}$}	% capisco il movimento dei constraint
+			\UnaryInfC{$\focus{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)} \separator \constr{\Lambda}{\text{V}''}$}	% capisco il movimento dei constraint
 			\DisplayProof}
 			\\ 
 			{\scriptsize
-			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi_1}{e}} $}
+			\Axiom$\focus{\Psi}{\Delta}{\af{\phi_1}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
 			\LeftLabel{$[\llplus_L]$}
-			\UnaryInfC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}}$}
+			\UnaryInf$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
 			\DisplayProof}
 			&
 			{\scriptsize
-			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi_2}{e}}$}
+			\Axiom$\focus{\Psi}{\Delta}{\af{\phi_2}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
 			\LeftLabel{$[\llplus_R]$}
-			\UnaryInfC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}}$}
+			\UnaryInf$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
 			\DisplayProof}
 			\\
 			{\scriptsize
-			\AxiomC{$\sat{ \used{e_1}, \avail{\Delta}, \Lambda}{\text{V}}$}
+			\AxiomC{$\sat{ \Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$}
 			\LeftLabel{$[1]$}
-			\UnaryInfC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\llone}{e_1}}$}
+			\UnaryInfC{$\focus{\Psi}{\Delta}{\af{\llone}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
 			\DisplayProof} 
 			&
 			{\scriptsize
-			\AxiomC{$\focus{\constr{\used{e_1}, \avail{\Delta}, \Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi}{e_1}}$}
+			\Axiom$\focus{\Psi}{\Delta}{\af{\phi}{e_1}} \fCenter \separator \constr{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$
 			\LeftLabel{$[\,!\,]$}
-			\UnaryInfC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}}$}
+			\UnaryInf$\focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}} \fCenter \separator \constr{\Lambda}{\text{V}}$
 			\DisplayProof
 			}
 			\\
 			\SetCell[c=2]{c} {\scriptsize
 			\AxiomC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
-			\AxiomC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi}{e}}$}
+			\AxiomC{$\async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
 			\LeftLabel{$[R\!\Downarrow]$}
-			\BinaryInfC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi}{e}}$}
+			\BinaryInfC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
 			\DisplayProof
 			}
 		\end{tblr}
@@ -472,30 +480,30 @@ We are now ready to present the full calculus.
 			    , vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
 			    }
 			{\scriptsize
-			\AxiomC{$ \sat{\used{e_1}, \used{e_2}, \avail{\Delta}, \Lambda}{\text{V}}$}
+			\AxiomC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\text{V}}$}
 			\LeftLabel{$[I_1]$}
-			\UnaryInfC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta, \af{\phi}{e_2}}{\af{\llnot{\phi}}{e_1}}$}
+			\UnaryInfC{$\focus{\Psi}{\Delta, \af{\phi}{e_2}}{\af{\llnot{\phi}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
 			\DisplayProof}
 			&
 			{\scriptsize
 			\AxiomC{$\isPosLit{\phi}$}
-			\AxiomC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi}{e}}$}
+			\AxiomC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
 			\LeftLabel{$[D_1]$}
-			\BinaryInfC{$\async{\constr{\Lambda}{\text{V}}}{\Psi}{\Delta, \af{\phi}{e}}{.}$}
+			\BinaryInfC{$\async{\Psi}{\Delta, \af{\phi}{e}}{.} \separator \constr{\Lambda}{\text{V}}$}
 			\DisplayProof}
 			\\
 			{\scriptsize
-			\AxiomC{$ \sat{\used{e_1}, \avail{\Delta}, \Lambda}{\text{V}}$}
+			\AxiomC{$ \sat{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$}
 			\LeftLabel{$[I_2]$}
-			\UnaryInfC{$\focus{\constr{\Lambda}{\text{V}}}{\Psi, \phi}{\Delta}{\af{\llnot{\phi}}{e_1}}$}
+			\UnaryInfC{$\focus{\Psi, \phi}{\Delta}{\af{\llnot{\phi}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
 			\DisplayProof}
 			&
 			{\scriptsize
 			\AxiomC{$\isPosLit{\phi}$}
-			\AxiomC{$\new{e}$}
-			\AxiomC{$\focus{\constr{\used{e}, \Lambda}{\text{V}}}{\Psi}{\Delta}{\af{\phi}{e}} $}
+			\AxiomC{$\new{x}$}
+			\AxiomC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\Lambda, \used{e}}{\text{V}}$}
 			\LeftLabel{$[D_2]$}
-			\TrinaryInfC{$\async{\constr{\Lambda}{\text{V}}}{\Psi, \phi}{\Delta}{.}$}
+			\TrinaryInfC{$\async{\Psi, \phi}{\Delta}{.} \separator \constr{\Lambda}{\text{V}}$}
 			\DisplayProof}
 		\end{tblr}
 		\caption{Identity and decide rules}
@@ -503,24 +511,22 @@ We are now ready to present the full calculus.
 	\caption{Focused constraint calculus for Linear Logic}
 	\label{fig:calculus}
 \end{figure}
+\begin{teor}
+	The calculus of Figure \ref{fig:calculus} is sound % ...
+\end{teor}
+\begin{proof}
+\end{proof}
 
 \chapter{Implementation}
 We now describe the main implementation details of the prover.
-Our mechanism to deal with exponentials borrows a great deal from APLL's one, which we will talk about briefly in \ref{sec:apll}.
-APLL uses the measure of why-not height throught all its implementation.
-\begin{define}[Why-not height]
-	\label{def:why-not-height}
-	Why-not height is the maximum number of nested ``why-not''s in a formula, or
-	$$ \text{wnh}(\phi) = 
-	\begin{cases}	
-		0 & \text{if }\phi \in \{\llbot, \lltop, \llone, \llzero\} \\
-		\max(\text{wnh}(\phi_1), \text{wnh}(\phi_2)) & \text{if } \phi \in \{ \phi_1 \llten \phi_2, \phi_1 \llpar \phi_2, \phi_1 \llplus \phi_2, \phi_1 \llwith \phi_2 \} \\
-		\text{wnh}(\phi_1) & \text{if }\phi \in \{ \llnot{\phi_1}, \llbang{\phi_1}\} \\
-		1 + \text{wnh}(\phi_1) & \text{if }\phi \in \{ \llwn{\phi_1} \} 
-	\end{cases}
-	$$
-\end{define}
-This attribute is used both to deal with unconstrained formulae, and to decide which branch to prove first for any normal operator.
+When explaining the code we will use some common names for variables, these are
+\begin{itemize}
+	\item \texttt{A} is a set (\texttt{ordset}) of unrestricted atoms;
+	\item \texttt{U} is a set (\texttt{ordset}) of unrestriched formulae;
+	\item \texttt{F}, \texttt{F1}, ..., are formulae, and \texttt{Fs} and \texttt{D} are a lists of them;
+	\item \texttt{S} is the queue of currently usable unrestricted formulae;
+	\item \texttt{In} is a list of constraints.
+\end{itemize}
 
 \section{Formula transformations}
 Before beginning the proof a sequent passes through a number of transformations.
@@ -540,10 +546,43 @@ This is possible since classic linear logic is symmetric and negation is involut
 The purpose of this process is to cut away a great deal of possible rules applicable to the sequent, sacrificing some of the structure of the sequent.
 In fact the number of rules we need to implement after normalization is more than halved, since we now need just the right rules, without the ones for negation and linear implication.
 
-As a second transformation, to each formula we assign its why-not height, as defined in Definition \ref{def:why-not-height}.
-Why-not height is used during proof search to decide which branch to do first and which exponential to decide first.
-This is a technique borrowed from APLL and its obvious purpose is to try first the branches with less exponentials: in the case the first probably simpler branch fails, we do not have to try the other.
-After this transformation formulae are attribute trees, with at each node the why not height of the subformula.
+As a second transformation, to each formula we assign its why-not height, a measure borrowed from APLL's implemetation.
+\begin{define}[Why-not height]
+	\label{def:why-not-height}
+	Why-not height is the maximum number of nested ``why-not''s in a formula, or
+	$$ \text{wnh}(\phi) = 
+	\begin{cases}	
+		0 & \text{if }\phi \in \{\llbot, \lltop, \llone, \llzero\} \\
+		\max(\text{wnh}(\phi_1), \text{wnh}(\phi_2)) & \text{if } \phi \in \{ \phi_1 \llten \phi_2, \phi_1 \llpar \phi_2, \phi_1 \llplus \phi_2, \phi_1 \llwith \phi_2 \} \\
+		\text{wnh}(\phi_1) & \text{if }\phi \in \{ \llnot{\phi_1}, \llbang{\phi_1}\} \\
+		1 + \text{wnh}(\phi_1) & \text{if }\phi \in \{ \llwn{\phi_1} \} 
+	\end{cases}
+	$$
+\end{define}
+The purpose of this attribute is to guide the prover to the reasonably simpler choice -- the one with the least nested exponentials -- at different times during proof search.
+This will be seen in Section \ref{sec:focusing_impl}.
+After this transformation formulae are attribute trees, with at each node the why-not height of the subformula.
+For example the formula \texttt{*(a, ?(b))} becomes \texttt{*(a-0, ?(b-0)-1)-1}, or -- as trees --
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\node (root1) {\texttt{*}}
+			child { node {\texttt{a}} }
+			child { 
+				node {\texttt{?}}
+				child { node {\texttt{b}} }
+			};
+
+		\node (arrow) at ([xshift=1.25cm] root1-2.west) {$\overset{\text{wnh}}{\Rightarrow}$};
+		\node (root2) at ([xshift=4cm] root1.west) {\texttt{*-1}}
+			child { node {\texttt{a-0}} }
+			child { 
+				node {\texttt{?-1}}
+				child { node {\texttt{b-0}} }
+			};
+
+	\end{tikzpicture}
+\end{figure}
 
 As a third and final transformation, each formula gets annotated.
 This means we associate a variable to each formula in the sequent as in Definition \ref{def:annotated}.
@@ -566,10 +605,6 @@ which is a simple map over the sequent.
 The constraints returned state that each formula must have its variable to one, that is to say each formulae must be used.
 These are the constraints the proof search starts with.
 
-\section{Constraint propagation}
-Some care is to be given to explaining how the constraints propagate.
-In fact, in constrast to Figure \ref{fig:calculus} the implementation does not have explicit propagation of the solution to the constraints.
-This is because Prolog's unification implicitly propagates a solution from one branch to another.
 % continuo?
 
 \section{Helper predicates}\label{sec:helper}
@@ -600,18 +635,9 @@ Three new Prolog variables are introduced: \texttt{X}, \texttt{Y} and \texttt{Z}
 \end{align*}
 Compare this to the original definition of Definition \ref{def:split}, one can see that the two are basically identical other than the fact that here the name of the variable (the atom) and its value are treated separately.
 
-\section{Focusing}
-When explaining the code we will use some common names for variables, these are
-\begin{itemize}
-	\item \texttt{A} is a set of unrestricted atoms;
-	\item \texttt{U} is a set of unrestriched formulae;
-	\item \texttt{F}, \texttt{F1}, ..., are formulae, and \texttt{Fs} and \texttt{D} are a lists of them;
-	\item \texttt{S} is the queue of currently usable unrestricted formulae;
-	\item \texttt{In} is a list of constraints.
-\end{itemize}
+\section{Focusing}\label{sec:focusing_impl}
 \subsection{Asynchronous and focusing phase}
-During the asynchronous phase we have a list of formulae which are being worked on and a list of formulae which are put to the side.
-With the former being called \texttt{Fss} and the latter \texttt{D}.
+During the asynchronous phase we have a list of formulae which are being worked on and a list of formulae which are put to the side; with the former being called \texttt{Fs} and the latter \texttt{D}.
 At each step we analyze the first element of the list \texttt{Fs}, and we keep scomposing the memebers of the list untill we cannot anymore.
 This process can be seen for example in the predicate for $\llwith$
 \begin{minted}{prolog}
@@ -648,7 +674,7 @@ In our case when we are focusing and we have a positive literal in \texttt{Fs}, 
 If this is true, then the variables of all the other formulae in \texttt{D} are set to zero using the predicate \texttt{set\_to\_zero/2} defined in Section \ref{sec:helper}, and the constraints are checked.
 This is encoded in the clause 
 \begin{minted}{prolog}
-focus(A, U, D, F, _, _, In, node(id_1, A, U, D, F, [])) :-
+focus(A, U, D, F, _, _, In) :-
   F = af(((~ T)-_), _, E1),
   is_term(T),
   select(af((T-_), _, E2), D, D1),
@@ -659,6 +685,10 @@ focus(A, U, D, F, _, _, In, node(id_1, A, U, D, F, [])) :-
 A slightly different process happens if instead a correspondence is found in \texttt{A} instead of \texttt{D}.
 Here \texttt{A} is a special set containing just unrestricted atoms.
 This is a small modification to APLL's approach based on the fact that once negative literals are put in a sequent they can never leave it, and is due to the fact that since \texttt{U} may be sorted many times, we try to keep the number of formulae in it small.
+
+Some care is to be given to explaining how the constraints propagate.
+In fact, in constrast to Figure \ref{fig:calculus} the implementation does not have explicit propagation of the solution of the constraints.
+This is because Prolog's unification implicitly propagates a solution from one branch to another.
 
 \subsection{Decide rules}\label{sec:decide}
 For the decide rules, particularly for $D_2$, we use a modified version of APLL's algorithm defined in Section \ref{sec:apll}.
@@ -680,7 +710,7 @@ async(A, U, D, [], [], M, In) :-
 Here the fifth argument is the queue and the sixth is the bound.
 Two cases arise:
 \begin{itemize}
-	\item if \texttt{S = []} and \texttt{M > 0} then the sequent of unrestricted formulae is taken and it is sorted based on why-not height.	% cambio persona
+	\item if \texttt{S = []} and \texttt{M > 0} then the sequent of unrestricted formulae \texttt{U} is taken and it is sorted based on why-not height.	% cambio persona
 		This can be seen in the predicate \texttt{refill/4}
 		\begin{minted}{prolog}
 refill(U, M, S, M1) :-
@@ -689,7 +719,7 @@ refill(U, M, S, M1) :-
 	sort(2, @=<, U, S), 
 	M1 is M - 1.
 		\end{minted}
-		Here line 4 is to be interpreted as a sort in increasing order on the second attribute (the why-not height) keeping duplicates.
+		Line 4 is a sort in increasing order on the second attribute (the why-not height), keeping duplicates.
 		This new list of unrestricted formule becomes the new \texttt{S} and \texttt{M} is decreased.
 		Otherwise if if \texttt{M} is 0 (line 2) the branch fails.
 	\item if \texttt{S} is not empty, then the first formula in the queue is extracted and added to the working set.	% sistemo
@@ -725,7 +755,8 @@ async(A, U, D, [F|Fs], S, M, In, node(par, A, U, D, [F|Fs], [Tree])) :-
 we can see clearly the structure of the node: a label, the context and an -- optionally empty -- list of subtrees.
 A leaf is just a node with an empty list of subtrees.
 
-This tree can be used in the end to reconstruct the actual proof tree, by visiting it and -- for each formula -- querying whether its variable is set to one, and deleting it otherwise.
+This tree can be used in the end to reconstruct the actual proof tree by visiting it and -- for each formula of each node -- querying whether its variable is set to one, deleting it otherwise.
+A classic proof tree without the focusing infrastructure may be built by removing all the nodes regarding the phases (i.e. $R\!\Downarrow$ $R\!\Uparrow$ and decide rules) and by appending the sequents together as explained in \ref{Focusing}. 
 A more sophisticated algorithm may even cancel out unwanted unrestricted formulae, that otherwise remain lingering in the sequent.
 
 \chapter{State of the art}
@@ -799,13 +830,14 @@ In nix everything must be packaged as a derivation, so derivations are written f
 \begin{itemize}
 	\item the provers, such as APLL or llprover
 	\item the formula generator adapted from APLL described in Section \ref{sec:formula_generator}
-	\item the TPTP parser
+	\item the LLTP parser
 \end{itemize}
-All these derivations, together with a derivation for the python environment, are then used to define a single development environment to run the jupyter notebook with all necessary dependencies.
-Furthermore having used ``flakes'' all dependencies are locked to a certain commit, thus ensuring better reproducibility.
+All these derivations, together with a derivation for the python environment, are then used to define a single development environment to run the jupyter notebook with all the necessary dependencies.
+Furthermore having used ``flakes'' -- a nix experimental feature -- all dependencies are locked to a certain commit, thus ensuring better reproducibility.
 
-The python module \texttt{testprover} on the other hand defines some helper utilities run.
-Here for simplicity, and to avoid parsing of standard output, we assume that a prover returns a code of 0 if it found a solution to a sequent, or any other number otherwise.
+The main logic for the benchmarking is define in the python module \texttt{testprover.py}.
+Here for simplicity we assume that a prover returns a code of 0 if it found a solution to a sequent, or any other number otherwise.
+This condition is already met by our prover and by llprover; for APLL instead a wrapper is provided.
 
 Defining the call to our prover using this library is as simple as writing
 \begin{minted}{python}
@@ -819,23 +851,16 @@ def call_sat_prover(premises, conclusions):
                , f'{premises} |- {conclusions}'
                ]
 \end{minted}
-The innermost decorator (line 3) accepts a dictionary, and is needed to auomatically call the prover with a test entry (as in Section \ref{sec:file_format}), time it and eventually terminate the process it if the prover timeouts.
-The outermost decorator (line 4) instead simply add an entry \texttt{sat-ll} associated to the prover call in the register \texttt{pc}.
-This register is then passed to other functions, which will automatically call all the provers in it.
-Since often the prover take a considerable amount of time to finish, calls are usually done using futures.
+The innermost decorator (line 3) accepts a dictionary, and is needed to auomatically call the prover with a test entry (as in Section \ref{sec:file_format}), time it and eventually terminate the process it if the time runs out.
+The outermost decorator (line 4) instead simply adds an entry \texttt{sat-ll} associated with the prover call to the register \texttt{pc}.
+This register is just an association name to function, and it is what is actually passed to the benchmarking function.
 
-The library then provides two functions
+\noindent The library then provides two functions
 \begin{itemize}
 	\item the function \texttt{testall} accepts a single prover and a test suite and checks if the output of the prover corresponds to the expected value for the test;
 	\item the function \texttt{benchmark} accepts a register and a test suite and returns the times and outcomes of each prover.
 \end{itemize}
-All the outputs of the functions above pandas are \texttt{DataFrame}s, which means that they can be easily queried, dumped to csv, aggregated, or visualized using most plotting libraries.
-
-\subsection{Reproducibility}
-The prover's tests and benchmarks are organized in a jupyter notebook.
-To ensure reproducibility we use Nix which is a build system based on declarative recipes, called \textit{derivations}.
-A docker image is also given, which in turn calls nix without the need to install it on the system.
-% Furthermore for the project infrastructure we used nix flakes, which are an experimental feature of nix that makes the process more hermetic and pure.
+All the outputs of the functions above are pandas \texttt{DataFrame}s, which means that they can be easily queried, dumped to csv, aggregated, or visualized using most plotting libraries.
 
 \subsection{Prefix format}
 Since for benchmarking we will interface with a lot of different provers, each with its own syntax for expressions, the need for a common format which was easy to parse and translate arose.

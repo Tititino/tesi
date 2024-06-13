@@ -33,9 +33,11 @@
 \theoremstyle{plain}
 \newtheorem{teor}{Theorem}[section]
 \newtheorem{fact}{Fact}[section]
+
 \theoremstyle{definition}
 \newtheorem{define}{Definition}[section]
 \newenvironment{myteor}{\begin{teor}\sl}{\end{teor}}
+\renewcommand\qedsymbol{$\blacksquare$}
 
 % \renewcommand{\baselinestretch}{1.5}
 
@@ -69,9 +71,10 @@
 \newcommand{\llwn}[1]{? #1}
 \newcommand{\llbang}[1]{! #1}
 \newcommand{\lolli}{\multimap}
-\newcommand{\focus}[4]{\vdash #2 : #3 \Downarrow #4 \;\Vert\; #1}
-\newcommand{\async}[4]{\vdash #2 : #3 \Uparrow   #4 \;\Vert\; #1}
+\newcommand{\focus}[3]{\vdash #1 : #2 \Downarrow #3}
+\newcommand{\async}[3]{\vdash #1 : #2 \Uparrow   #3} 
 \newcommand{\used}[1]{#1 \; \text{used}}
+\newcommand{\separator}{\; \Vert \;}
 \newcommand{\constr}[2]{#1 : #2}
 \newcommand{\avail}[1]{#1 \; \text{avail}}
 \newcommand{\isAsy}[1]{#1 \; \text{asy}}
@@ -99,4 +102,5 @@
 % 	\\
 % 	\end{lstlisting}
 % 	}
+
 \usemintedstyle{trac}
