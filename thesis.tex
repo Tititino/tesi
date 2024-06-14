@@ -273,10 +273,10 @@ As seen in Figure \ref{fig:var-name} we will call $e$ such a conjuction and $x$ 
 	that associates the formula to the expression.
 	We denote 
 	\begin{itemize}
-		\item $ \text{exp}(\af{\phi}{e}) = e $
-			as the operation of extracting the boolean expression associated to a given formula, and then extend this notation to sequents such that $ \text{exp}(\Delta) $ is the set of all boolean expressions of $\Delta$.
-		\item $\text{vars}(\af{\phi}{e}) = \{ x_i \mid x_i \in e \} $
-			as the operations of extracting the set of variables appearing in the expression $e$, and the extend this notation to sequents such that $ \text{vars}(\Delta)$ is the set of all the variables appearing in the boolean expressions of the annotated formulae of $\Delta$
+		\item $ \mathrm{exp}(\af{\phi}{e}) = e $
+			as the operation of extracting the boolean expression associated to a given formula; and then extend this notation to sequents such that $ \mathrm{exp}(\Delta) $ is the set of all boolean expressions of $\Delta$.
+		\item $\mathrm{vars}(\af{\phi}{e}) = \{ x_i \mid x_i \in e \} $
+			as the operation of extracting the set of variables appearing in the expression $e$; and then extend this notation to sequents such that $ \mathrm{vars}(\Delta)$ is the set of all the variables appearing in the boolean expressions of the annotated formulae of $\Delta$.
 	\end{itemize}
 \end{define}
 It is important to note that only the topmost connective gets annotated, and not the subformulae.
@@ -300,25 +300,25 @@ These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
 	\end{itemize}
 	We then extend these predicates to sequents
 	\begin{align*}
-		\used{\Delta} &= \{ \used{e_2} \mid e_2 \in \text{exp}(\Delta) \} \\
-		\avail{\Delta} &= \{ \avail{e_2} \mid e_2 \in \text{exp}(\Delta) \}
+		\used{\Delta} &= \{ \used{e_2} \mid e_2 \in \mathrm{exp}(\Delta) \} \\
+		\avail{\Delta} &= \{ \avail{e_2} \mid e_2 \in \mathrm{exp}(\Delta) \}
 	\end{align*}
 	We denote
 	\begin{itemize}
-		\item $\text{exp}(\lambda) = e$ where $\lambda$ is either $\used{e}$ or $\avail{e}$;
-		\item $\text{vars}(\lambda) = \text{vars}(\text{exp}(\lambda))$, and extend this notation to a set of constraints $\Lambda$
-			$$ \text{vars}(\Lambda) = \bigcup_{\lambda \in \Lambda} \text{vars}(\lambda) $$
+		\item $\mathrm{exp}(\lambda) = e$ where $\lambda$ is either $\used{e}$ or $\avail{e}$;
+		\item $\mathrm{vars}(\lambda) = \mathrm{vars}(\mathrm{exp}(\lambda))$, and extend this notation to a set of constraints $\Lambda$
+			$$ \mathrm{vars}(\Lambda) = \bigcup_{\lambda \in \Lambda} \mathrm{vars}(\lambda) $$
 	\end{itemize}
 \end{define}
 \begin{define}[Evaluation]
 	Given a boolean expression $e$ and a function V mapping variables to their values 
 	$$ \mathV : \{ x_1, x_2, \dots, x_n \} \rightarrow \{ \top, \bot \} $$
-	with $\text{vars}(e) \subseteq \text{Dom}(\mathV)$; we write
-		$$ e[\mathV] = e[x_i / \mathV(x_i), \dots, x_j / \mathV(x_j)] $$
-	as the value of the $e$ subsituting with the assignment V.
+	with $\mathrm{vars}(e) \subseteq \mathrm{Dom}(\mathV)$; we write
+		$$ e[\mathV] = e[\dots, x_i \subst \mathV(x_i), x_j \subst \mathV(x_j), \dots] $$
+	as the value of the expression $e$ subsituting with the assignment V.
 	We extend this notation, such that
 	\begin{itemize}
-		\item given a constraint $\lambda$ and an assignment V, such that $\text{vars}(\lambda) \subseteq \text{Dom}(\mathV)$
+		\item given a constraint $\lambda$ and an assignment V, such that $\mathrm{vars}(\lambda) \subseteq \mathrm{Dom}(\mathV)$
 			$$ 
 			\begin{cases} 
 				\used{e}[\mathV] = \top & \text{if } e[\mathV] = \top \\
@@ -327,7 +327,7 @@ These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
 				\avail{e}[\mathV] = \bot & \text{if } e[\mathV] = \top \\
 			\end{cases}
 			$$
-		\item given an annotated sequent $\Delta$ and an assignment V, such that $\text{vars}(\Delta) \subseteq \text{Dom}(\mathV)$
+		\item given an annotated sequent $\Delta$ and an assignment V, such that $\mathrm{vars}(\Delta) \subseteq \mathrm{Dom}(\mathV)$
 			$$ \Delta[\mathV] = \{ \phi \mid \af{\phi}{e} \in \Delta , e[\mathV] = \top \} $$
 	\end{itemize}
 \end{define}
@@ -335,7 +335,7 @@ A branch is then considered as correct if its constraints are satisfiable.
 Otherwise the branch of the proof fails.
 \begin{define}[Satisfaiability of constraints]
 	\label{def:sat}
-	Given a set of constraints $\Lambda$ and an assignment function V with $\text{vars}(\Lambda) \subseteq \text{Dom}(\mathV)$; we write 
+	Given a set of constraints $\Lambda$ and an assignment function V with $\mathrm{vars}(\Lambda) \subseteq \mathrm{Dom}(\mathV)$; we write 
 	$$ \sat{\Lambda}{\mathV} \Leftrightarrow \bigwedge_{\lambda \in \Lambda} \lambda[\mathV] = \top $$
 \end{define}
 \begin{fact}
@@ -371,7 +371,7 @@ We now expand the concept of triadic sequent of \cite{Focusing} by adding constr
 \begin{define}[Splitting]
 	\label{def:split}
 	Given a sequent of annotated formulae $\Delta$ and a set of variables $X$ such that $|\Delta| = |X|$ we define the operation of splitting it as a function
-	$$ \text{split}(\Delta, X) \mapsto (\Delta_L, \Delta_R) $$
+	$$ \mathrm{split}(\Delta, X) \mapsto (\Delta_L, \Delta_R) $$
 	where
 	\begin{align*}
 		\Delta_L &= \{ \af{\phi_i}{x_i \wedge e_i} \mid i \in \{1, \dots, n\}\} \\
@@ -552,6 +552,7 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 	Since $e$ is defined as a conjunction on boolean variables, all the variables in it must be true.
 	It is straightforward to see that if the variable added by the split in $\Delta_L^X$ is $x_i$, and the corresponding one in $\Delta_R^X$ is $\varNot{x_i}$, then when $x_i$ is true in the assignement V, $\llnot{x_i}$ is false.
 	Hence $\phi \not \in \Delta_R^X[\mathV]$.
+	The same can be done to show that if $\phi \in \Delta_R^X[\mathV]$ then $\phi \not \in \Delta_L^X[\mathV]$.
 \end{proof}
 \begin{lemma}
 	\label{lemma:cup}
@@ -559,7 +560,7 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 	$$ \Delta[\mathV] = \Delta_L^X[\mathV] \cup \Delta_R^X[\mathV] $$
 \end{lemma}
 \begin{proof}
-	The simpler side is $\Delta_L^X[\mathV] \cup \Delta_R^X[\mathV] \subseteq \Delta$, since it  holds by the definition of the split (Definition \ref{def:split}).
+	The simpler side is $\Delta_L^X[\mathV] \cup \Delta_R^X[\mathV] \subseteq \Delta[\mathV]$, since it  holds by the definition of the split (Definition \ref{def:split}).
 	For the other side, suppose there was a formula $\phi$ such that $\phi \in \Delta[\mathV]$ and $\phi \not \in \Delta_L^X[\mathV] \cup \Delta_R^X[\mathV]$.
 	This means that for some variable $x_i$ 
 	\begin{align*}
@@ -580,8 +581,8 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 	\label{lemma:constr}
 	Forall assignments $\mathV$ and set of constraints $\Lambda$, if (using the translation of Fact \ref{fact:ass-trans})
 	$$ \sat{\mathV, \Lambda}{\mathV'} $$
-	then $\text{Dom}(\mathV) \subseteq \text{Dom}(\mathV')$ and
-	$$ \forall x_i \in \text{Dom}(\mathV) \mid \mathV(x_i) = \mathV'(x_i) $$
+	then $\mathrm{Dom}(\mathV) \subseteq \mathrm{Dom}(\mathV')$ and
+	$$ \forall x_i \in \mathrm{Dom}(\mathV) \mid \mathV(x_i) = \mathV'(x_i) $$
 	In this case we say that $\mathV'$ subsumes $\mathV$.
 \end{lemma}
 \begin{proof}
@@ -604,101 +605,100 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 	As a soundness proof we give a translation to the triadic system defined by Andreoli in \cite{Focusing}:
 	\begin{figure}[H]
 		\centering
-	\begin{tblr}{ colspec = {c c c}
-		    , cells = { mode = dmath } 
-		    , rows = {abovesep=7pt, belowsep=7pt}
-		    , vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
-		    }
-		\AXC{$\async{\Psi}{\Delta}{\Phi}$}
-		\LeftLabel{$[\llbot]$}
-		\UIC{$\async{\Psi}{\Delta}{\llbot, \Phi}$}
-		\DP
-		&
-		\AXC{$\async{\Psi}{\Delta}{\phi_1, \phi_2, \Phi}$}
-		\LeftLabel{$[\llpar]$}
-		\UIC{$\async{\Psi}{\Delta}{\phi_1 \llpar \phi_2, \Phi}$}
-		\DP
-		&
-		\AXC{$\async{\phi, \Psi}{\Delta}{\Phi}$}
-		\LeftLabel{$[\llwn{}]$}
-		\UIC{$\async{\Psi}{\Delta}{\llwn{\phi}, \Phi}$}
-		\DP
-		\\
-		\AXC{}
-		\LeftLabel{$[\lltop]$}
-		\UIC{$\async{\Psi}{\Delta}{\lltop, \Phi}$}
-		\DP
-		&
-		\SetCell[c=2]{c} 
-		\AXC{$\async{\Psi}{\Delta}{\phi_1, \Phi}$}
-		\AXC{$\async{\Psi}{\Delta}{\phi_2, \Phi}$}
-		\LeftLabel{$[\llwith]$}
-		\BIC{$\async{\Psi}{\Delta}{\phi_1 \llwith \phi_2, \Phi}$}
-		\DP
-		\\
-		\AXC{$\focus{\Psi}{\Delta}{\phi_1}$}
-		\LeftLabel{$[\llplus_L]$}
-		\UIC{$\focus{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
-		\DP
-		&
-		\AXC{}
-		\LeftLabel{$[\llone]$}
-		\UIC{$\focus{\Psi}{.}{\llone}$}
-		\DP
-		& 
-		\AXC{$\async{\Psi}{.}{\phi}$}
-		\LeftLabel{$[\llbang{}]$}
-		\UIC{$\focus{\Psi}{.}{\llbang{\phi}}$}
-		\DP
-		\\
-		\AXC{$\focus{\Psi}{\Delta}{\phi_2}$}
-		\LeftLabel{$[\llplus_R]$}
-		\UIC{$\focus{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
-		\DP
-		&
-		\SetCell[c=2]{c} 
-		\AXC{$\focus{\Psi}{\Gamma}{\phi_1}$}
-		\AXC{$\focus{\Psi}{\Delta}{\phi_2}$}
-		\LeftLabel{$[\llten]$}
-		\BIC{$\focus{\Psi}{\Gamma, \Delta}{\phi_1 \llten \phi_2}$}
-		\DP
-		\\
-		\AXC{$\neg \isAsy{\phi}$}
-		\AXC{$\async{\Psi}{\phi, \Delta}{\Phi}$}
-		\LeftLabel{$[R\!\Uparrow]$}
-		\BIC{$\async{\Psi}{\Delta}{\phi, \Phi}$}
-		\DP
-		&
-		\AXC{$\isNegLit{\alpha}$}
-		\LeftLabel{$[I_1]$}
-		\UIC{$\focus{\Psi}{\phi}{\llnot{\phi}}$}
-		\DP
-		&
-		\AXC{$\focus{\Psi}{\Delta}{\phi}$}
-		\LeftLabel{$[D_1]$}
-		\UIC{$\async{\Psi}{\phi, \Delta}{.}$}
-		\DP
-		\\
-		\AXC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
-		\AXC{$\async{\Psi}{\Delta}{\phi}$}
-		\LeftLabel{$[R\!\Downarrow]$}
-		\BIC{$\focus{\Psi}{\Delta}{\phi}$}
-		\DP
-		&
-		\AXC{$\isNegLit{\alpha}$}
-		\LeftLabel{$[I_2]$}
-		\UIC{$\focus{\phi, \Psi}{.}{\llnot{\phi}}$}
-		\DP
-		&
-		\AXC{$\focus{\Psi}{\Delta}{\phi}$}
-		\LeftLabel{$[D_2]$}
-		\UIC{$\async{\phi, \Psi}{\Delta}{.}$}
-		\DP
-	\end{tblr}
-	\caption{J.-M. Andreoli's triadic calculus}
-	\label{fig:triadic}
-\end{figure}
-\end{center}
+		\begin{tblr}{ colspec = {c c c}
+			, cells = { mode = dmath } 
+			, rows = {abovesep=7pt, belowsep=7pt}
+			, vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
+			}
+			\AXC{$\async{\Psi}{\Delta}{\Phi}$}
+			\LeftLabel{$[\llbot]$}
+			\UIC{$\async{\Psi}{\Delta}{\llbot, \Phi}$}
+			\DP
+			&
+			\AXC{$\async{\Psi}{\Delta}{\phi_1, \phi_2, \Phi}$}
+			\LeftLabel{$[\llpar]$}
+			\UIC{$\async{\Psi}{\Delta}{\phi_1 \llpar \phi_2, \Phi}$}
+			\DP
+			&
+			\AXC{$\async{\phi, \Psi}{\Delta}{\Phi}$}
+			\LeftLabel{$[\llwn{}]$}
+			\UIC{$\async{\Psi}{\Delta}{\llwn{\phi}, \Phi}$}
+			\DP
+			\\
+			\AXC{}
+			\LeftLabel{$[\lltop]$}
+			\UIC{$\async{\Psi}{\Delta}{\lltop, \Phi}$}
+			\DP
+			&
+			\SetCell[c=2]{c} 
+			\AXC{$\async{\Psi}{\Delta}{\phi_1, \Phi}$}
+			\AXC{$\async{\Psi}{\Delta}{\phi_2, \Phi}$}
+			\LeftLabel{$[\llwith]$}
+			\BIC{$\async{\Psi}{\Delta}{\phi_1 \llwith \phi_2, \Phi}$}
+			\DP
+			\\
+			\AXC{$\focus{\Psi}{\Delta}{\phi_1}$}
+			\LeftLabel{$[\llplus_L]$}
+			\UIC{$\focus{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
+			\DP
+			&
+			\AXC{}
+			\LeftLabel{$[\llone]$}
+			\UIC{$\focus{\Psi}{.}{\llone}$}
+			\DP
+			& 
+			\AXC{$\async{\Psi}{.}{\phi}$}
+			\LeftLabel{$[\llbang{}]$}
+			\UIC{$\focus{\Psi}{.}{\llbang{\phi}}$}
+			\DP
+			\\
+			\AXC{$\focus{\Psi}{\Delta}{\phi_2}$}
+			\LeftLabel{$[\llplus_R]$}
+			\UIC{$\focus{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
+			\DP
+			&
+			\SetCell[c=2]{c} 
+			\AXC{$\focus{\Psi}{\Gamma}{\phi_1}$}
+			\AXC{$\focus{\Psi}{\Delta}{\phi_2}$}
+			\LeftLabel{$[\llten]$}
+			\BIC{$\focus{\Psi}{\Gamma, \Delta}{\phi_1 \llten \phi_2}$}
+			\DP
+			\\
+			\AXC{$\neg \isAsy{\phi}$}
+			\AXC{$\async{\Psi}{\phi, \Delta}{\Phi}$}
+			\LeftLabel{$[R\!\Uparrow]$}
+			\BIC{$\async{\Psi}{\Delta}{\phi, \Phi}$}
+			\DP
+			&
+			\AXC{$\isNegLit{\alpha}$}
+			\LeftLabel{$[I_1]$}
+			\UIC{$\focus{\Psi}{\phi}{\llnot{\phi}}$}
+			\DP
+			&
+			\AXC{$\focus{\Psi}{\Delta}{\phi}$}
+			\LeftLabel{$[D_1]$}
+			\UIC{$\async{\Psi}{\phi, \Delta}{.}$}
+			\DP
+			\\
+			\AXC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
+			\AXC{$\async{\Psi}{\Delta}{\phi}$}
+			\LeftLabel{$[R\!\Downarrow]$}
+			\BIC{$\focus{\Psi}{\Delta}{\phi}$}
+			\DP
+			&
+			\AXC{$\isNegLit{\alpha}$}
+			\LeftLabel{$[I_2]$}
+			\UIC{$\focus{\phi, \Psi}{.}{\llnot{\phi}}$}
+			\DP
+			&
+			\AXC{$\focus{\Psi}{\Delta}{\phi}$}
+			\LeftLabel{$[D_2]$}
+			\UIC{$\async{\phi, \Psi}{\Delta}{.}$}
+			\DP
+		\end{tblr}
+		\caption{J.-M. Andreoli's triadic calculus}
+		\label{fig:triadic}
+	\end{figure}
 	We proceed with the base cases
 	The three base cases are demonstrated essentially in the same way:
 	\begin{itemize}
@@ -990,12 +990,12 @@ As a second transformation, to each formula we assign its why-not height, a meas
 \begin{define}[Why-not height]
 	\label{def:why-not-height}
 	Why-not height is the maximum number of nested ``why-not''s in a formula, or
-	$$ \text{wnh}(\phi) = 
+	$$ \mathrm{wnh}(\phi) = 
 	\begin{cases}	
 		0 & \text{if }\phi \in \{\llbot, \lltop, \llone, \llzero\} \\
-		\max(\text{wnh}(\phi_1), \text{wnh}(\phi_2)) & \text{if } \phi \in \{ \phi_1 \llten \phi_2, \phi_1 \llpar \phi_2, \phi_1 \llplus \phi_2, \phi_1 \llwith \phi_2 \} \\
-		\text{wnh}(\phi_1) & \text{if }\phi \in \{ \llnot{\phi_1}, \llbang{\phi_1}\} \\
-		1 + \text{wnh}(\phi_1) & \text{if }\phi \in \{ \llwn{\phi_1} \} 
+		\max(\mathrm{wnh}(\phi_1), \mathrm{wnh}(\phi_2)) & \text{if } \phi \in \{ \phi_1 \llten \phi_2, \phi_1 \llpar \phi_2, \phi_1 \llplus \phi_2, \phi_1 \llwith \phi_2 \} \\
+		\mathrm{wnh}(\phi_1) & \text{if }\phi \in \{ \llnot{\phi_1}, \llbang{\phi_1}\} \\
+		1 + \mathrm{wnh}(\phi_1) & \text{if }\phi \in \{ \llwn{\phi_1} \} 
 	\end{cases}
 	$$
 \end{define}
@@ -1013,7 +1013,7 @@ For example the formula \texttt{*(a, ?(b))} becomes \texttt{*(a-0, ?(b-0)-1)-1},
 				child { node {\texttt{b}} }
 			};
 
-		\node (arrow) at ([xshift=1.25cm] root1-2.west) {$\overset{\text{wnh}}{\Rightarrow}$};
+		\node (arrow) at ([xshift=1.25cm] root1-2.west) {$\overset{\mathrm{wnh}}{\Rightarrow}$};
 		\node (root2) at ([xshift=4cm] root1.west) {\texttt{*-1}}
 			child { node {\texttt{a-0}} }
 			child { 
@@ -1196,7 +1196,7 @@ we can see clearly the structure of the node: a label, the context and an -- opt
 A leaf is just a node with an empty list of subtrees.
 
 This tree can be used in the end to reconstruct the actual proof tree by visiting it and -- for each formula of each node -- querying whether its variable is set to one, deleting it otherwise.
-A classic proof tree without the focusing infrastructure may be built by removing all the nodes regarding the phases (i.e. $R\!\Downarrow$ $R\!\Uparrow$ and decide rules) and by appending the sequents together as explained in \ref{Focusing}. 
+A classic proof tree without the focusing infrastructure may be built by removing all the nodes regarding the phases (i.e. $R\!\Downarrow$ $R\!\Uparrow$ and decide rules) and by appending the sequents together as explained in \cite{Focusing}. 
 A more sophisticated algorithm may even cancel out unwanted unrestricted formulae, that otherwise remain lingering in the sequent.
 
 \chapter{State of the art}
@@ -1325,7 +1325,7 @@ For this purpose we define a prefix format for linear logic formulae inspired by
 Furthermore each single character not representing an operator is considered as a variable name.
 Longer names can be specified by enclosing them in single apices as in \texttt{'varname'}.
 As an example we give the translation of DeMorgan for the tensor:
-$$ \text{trans}(\llnot{(a \llten b)} \lolli \llnot{a} \llpar \llnot{b}) = \text{\texttt{@\^{}ab|\^{}a\^{}b}} $$
+$$ \mathrm{trans}(\llnot{(a \llten b)} \lolli \llnot{a} \llpar \llnot{b}) = \text{\texttt{@\^{}ab|\^{}a\^{}b}} $$
 
 % Since most one of the datasets we use is LLTP % cite
 % , which is written in TPTP's format % cite
@@ -1442,13 +1442,13 @@ Using random formulae we can clearly see that our prover outperforms APLL (and l
 		\centering
 		\includegraphics[scale=0.5]{./images/mll.pdf}
 		\caption{Multiplicative case}
-		\label{fig:mll_bars}
+		\label{fig:mll-bars}
 	\end{subfigure}
 	\begin{subfigure}{0.49\textwidth}
 		\centering
 		\includegraphics[scale=0.5]{./images/mall.pdf}
 		\caption{Multiplicative and additive case}
-		\label{fig:mall_bars}
+		\label{fig:mall-bars}
 	\end{subfigure}
 	\caption{Percentage of number of timeouts out of a hundred formulae}
 \end{figure}
@@ -1460,14 +1460,14 @@ As soon as exponentials come into play the differences level out.
 	\centering
 	\includegraphics[scale=0.5]{./images/cll-500-250.pdf}
 	\caption{Full linear logic}
-	\label{fig:cll_bars}
+	\label{fig:cll-bars}
 \end{figure}
-It can be seen in \ref{fig:cll_bars} that in full linear logic our prover performs slightly worse than APLL.
+It can be seen in \ref{fig:cll-bars} that in full linear logic our prover performs slightly worse than APLL.
 
 All these test were done generating suits of 100 tests.
-Figure \ref{fig:mll_bars}'s tests were composed of normalized formulae of \texttt{size} 100, and \texttt{atoms} 50, with just the connectives $\llten$ and $\llpar$.
-Figure \ref{fig:mall_bars}'s tests were composed of normalized formulae formulae of \texttt{size} 500, and \texttt{atoms} 250, with the connectives $\llten, \llpar, \llwith$ and $\llplus$.
-Finally \ref{fig:cll_bars}'s tests were composed of normalized formulae of \texttt{size} 500, and \texttt{atoms} 250, with all the connectives.
+Figure \ref{fig:mll-bars}'s tests were composed of normalized formulae of \texttt{size} 100, and \texttt{atoms} 50, with just the connectives $\llten$ and $\llpar$.
+Figure \ref{fig:mall-bars}'s tests were composed of normalized formulae formulae of \texttt{size} 500, and \texttt{atoms} 250, with the connectives $\llten, \llpar, \llwith$ and $\llplus$.
+Finally \ref{fig:cll-bars}'s tests were composed of normalized formulae of \texttt{size} 500, and \texttt{atoms} 250, with all the connectives.
 
 When looking at the results of full linear logic, it is important to note that unlike the tests with multiplicatives and additives, some of the results may be early failures because of the bound.
 Since llprover uses incremental search, its times are often the slowest.
