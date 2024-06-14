@@ -315,10 +315,17 @@ Otherwise the branch of the proof fails.
 		\used{e} &\Leftrightarrow e = \top \\
 		\avail{e} &\Leftrightarrow e = \bot
 	\end{align*}
-	It is worth noting that simply by rewriting the function V to
-	$$ \text{V} = \{ \dots, x_i = \top, x_j = \bot, \dots \} $$
-	we get back a set of constraints.
 \end{define}
+\begin{fact}
+	\label{fact:ass-trans}
+	Simply by rewriting the function V to
+	\begin{align*}
+		\text{V} &= \{ \dots, (x_i, \top), (x_j, \bot), \dots \} \\
+		         &= \{ \dots, x_i = \top, x_j = \bot, \dots \} \\
+			 &= \{ \dots, \used{x_i}, \avail{x_j}, \dots \}
+	\end{align*}
+	we get back a set of constraints.
+\end{fact}
 
 We now expand the concept of triadic sequent of \cite{Focusing} by adding constraints
 \begin{define}[Members of the sequent]
@@ -514,15 +521,62 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 
 \begin{define}[Constraint evaluation]
 	Given an assignment V, we define
-		$$ e[\text{V}] = e[x_i / V(x_i), \dots, x_j / V(x_j)] $$
+		$$ e[\mathrm{V}] = e[x_i / \mathrm{V}(x_i), \dots, x_j / \mathrm{V}(x_j)] $$
 	as the value of the $e$ subsituting with the assignment V.
 	We then extend this notation to sequents, such that
-		$$ \Delta[\text{V}] = \{ \phi \mid \af{\phi}{e} \in \Delta , e[\text{V}] = \top \} $$
+		$$ \Delta[\mathrm{V}] = \{ \phi \mid \af{\phi}{e} \in \Delta , e[\mathrm{V}] = \top \} $$
 \end{define}
+\begin{lemma}
+	\label{lemma:cap}
+	Forall assignments V and sequents $\Delta$,
+	$$ \Delta_L^X[\mathrm{V}] \cap \Delta_R^X[\mathrm{V}] = \varnothing $$
+\end{lemma}
+\begin{proof}
+	This is a simple consequence of the fact that if $\phi \in \Delta_L^X[\text{V}]$ there is a annotated formula $\af{\phi}{e} \in \Delta$ such that 
+	$$ e[\text{V}] = \top $$
+	since $e$ is defined as a conjunction on boolean variables, all the variables in it must be true.
+	It is straightforward to see that if the variable added by the split in $\Delta_L^X$ is $x_i$, and the corresponding one in $\Delta_R^X$ is $\varNot{x_i}$, then when $x_i$ is true in the assignement V, $\llnot{x_i}$ is false.
+	Hence $\phi \not \in \Delta_R^X[\text{V}]$.
+\end{proof}
+\begin{lemma}
+	\label{lemma:cup}
+	Forall assignments V and sequents $\Delta$,
+	$$ \Delta[\mathV] = \Delta_L^X[\mathV] \cup \Delta_R^X[\mathV] $$
+\end{lemma}
+\begin{proof}
+	Proving that $\Delta_L^X[\mathV] \cup \Delta_R^X[\mathV] \subseteq \Delta$ is given by the definition of the split (Definition \ref{def:split}).
+	For the other side, suppose there was a formula $\phi$ such that $\phi \in \Delta[\mathV]$ and $\phi \not \in \Delta_L^X[\mathV] \cup \Delta_R^X[\mathV]$.
+	This means that for some variable $x_i$ 
+	\begin{align*}
+		\af{\phi}{e} \in \Delta &\Rightarrow e[\mathV] = \top \\
+		\af{\phi}{x_i \varAnd e} \not \in \Delta_L^X &\Rightarrow x_i \varAnd e[\mathV] = \bot \\
+		\af{\phi}{\varNot{x_i} \varAnd e} \not \in \Delta_R^X &\Rightarrow \varNot{x_i} \varAnd e[\mathV] = \bot
+	\end{align*}
+	But either $x_i$ or $\varNot{x_i}$ must be true in a certain assignment, thus either $x_i \varAnd e$ or $\varNot{x_i} \varAnd e$ must be true, contradicting the hypothesis.
+\end{proof}
 
-We show now a translation from our focused method to the one of \cite{HarlandPym}:
-\begin{teor}
-	Let $\vdash \Psi$ The calculus of Figure \ref{fig:calculus} is sound % ...
+\begin{lemma}
+	\label{lemma:constr}
+	Forall assignments V and set of constraints $\Lambda$, if (using the translation of Fact \ref{fact:ass-trans})
+	$$ \sat{\mathV, \Lambda}{\mathV'} $$
+	then $\text{Dom}(\mathV) \subseteq \text{Dom}(\mathV')$ and
+	$$ \forall x_i \in \text{Dom}(\mathV) \mid \mathV(x_i) = \mathV'(x_i) $$
+\end{lemma}
+\begin{proof}
+	The proof is straightforward: 
+	\begin{itemize}
+		\item the first condition trivially holds, since an assignment must be defined for each variable in the constraints and $\mathV'$ is an assignment defined for a superset of the constraints derived from V;
+		\item for the second condition we have that
+			$$ \mathV, \Lambda = \{ \dots, \used{x_i}, \avail{x_j}, \dots \} \cup \Lambda $$
+		and to have that $ \sat{\mathV, \Lambda}{\mathV'} $
+			$$ \bigwedge_{e \in \mathV, \Lambda} e[\dots, x_i / \mathV'(x_i), x_j / \mathV'(x_j), \dots] = \top $$
+		thus the constraints derived from V must still hold with assignment $\mathV'$.
+	\end{itemize}
+	
+\end{proof}
+
+\begin{teor}[Soundness]
+	% Let $\vdash \Psi$ The calculus of Figure \ref{fig:calculus} is sound % ...
 \end{teor}
 \begin{proof}
 	As a soundness proof we give a translation to the triadic system defined by Andreoli in \cite{Focusing}:
