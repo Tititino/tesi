@@ -1,8 +1,7 @@
-LCC=pdflatex
-BTX=bibtex
+LCC=lualatex
 
 all:
-	latexmk -interaction=nonstopmode -pdf -lualatex -latexoption="-shell-escape" thesis.tex
+	latexmk -interaction=nonstopmode -pdf -$(LCC) -latexoption="-shell-escape" thesis.tex
 
 draft:
 	$(LCC) -shell-escape thesis.tex

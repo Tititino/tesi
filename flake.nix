@@ -3,7 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-utils = {
+      url = "github:numtide/flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, flake-utils }: 
@@ -17,12 +20,8 @@
 	      amsmath
 	      amscls
 	      amstex
-	      # amsthm
-	      babel
-	      bibtex
 	      bussproofs
 	      caption
-	      # subcaption
 	      embedall
 	      epstopdf
 	      epstopdf-pkg
@@ -31,13 +30,11 @@
 	      grfext
 	      hyperref
 	      infwarerr
-	      # graphicx
 	      latexmk
 	      latex-bin
 	      listings
 	      minted
 	      ninecolors
-	      # epsfig
 	      setspace
 	      siunitx
 	      tabularray
@@ -57,6 +54,7 @@
 	        coreutils
 	        pygmentize
 		tex
+		which
               ];
 
               src = self;

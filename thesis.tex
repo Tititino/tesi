@@ -12,6 +12,7 @@
 \tableofcontents
 \newpage
 
+
 \chapter{Intro}
 % In 2001 Pym and Harland publish a paper \cite{HarlandPym} where they propose a new way to tackle the problem of splitting sequents during linear logic proof search using boolean constraints.
 % The paper proposes a new calculus for linear logic that associates to each formula a boolean variable, and enforces linearity by constraints on said variables.
@@ -26,19 +27,19 @@
 % $$ \Delta_1 \wedge \dots \wedge \Delta_n \Rightarrow \Gamma_1 \vee \dots \vee \Gamma_m $$
 % In sequent calculus we define some rules to manipulate these sequents, these rules are for example 
 % $$
-% \AxiomC{$\Gamma, \phi \vdash \Delta$}
-% \AxiomC{$\Gamma, \psi \vdash \Delta$}
-% \BinaryInfC{$\Gamma, \phi \vee \psi \vdash \Delta$}
-% \DisplayProof
+% \AXC{$\Gamma, \phi \vdash \Delta$}
+% \AXC{$\Gamma, \psi \vdash \Delta$}
+% \BIC{$\Gamma, \phi \vee \psi \vdash \Delta$}
+% \DP
 % $$
 % means that if $\Gamma, \phi \vdash \Delta$ and $\Gamma, \psi \vdash \Delta$ hold, then $\Gamma, \phi \vee \psi \vdash \Delta$ holds.
 % This for example is the classic rule for $\vee$.
 % 
 % When trying to build a proof bottom up, we utilize these rules inversed to try to arrive at what are called axioms or leafs, rules with no premises.
 % $$
-% \AxiomC{}
-% \UnaryInfC{$\phi \vdash \phi$}
-% \DisplayProof
+% \AXC{}
+% \UIC{$\phi \vdash \phi$}
+% \DP
 % $$
 % 
 % Gentzen introduced the sequent calculus LK for classical logic, this had -- other that the usual rules -- three so called structural rules.
@@ -46,21 +47,21 @@
 % \begin{itemize}
 % 	\item weakening: we can always ``weaken'' the sequent by adding a proposition without changing its truth,
 % 		$$
-% 		\AxiomC{$\Gamma \vdash \Delta$}
-% 		\UnaryInfC{$\Gamma, \phi \vdash \Delta$}
-% 		\DisplayProof
+% 		\AXC{$\Gamma \vdash \Delta$}
+% 		\UIC{$\Gamma, \phi \vdash \Delta$}
+% 		\DP
 % 		$$
 % 	\item contraction: we can always ``contract'' two copies of the same proposition into one without changing the truth of the sequent,
 % 		$$
-% 		\AxiomC{$\Gamma, \phi, \phi \vdash \Delta$}
-% 		\UnaryInfC{$\Gamma, \phi \vdash \Delta$}
-% 		\DisplayProof
+% 		\AXC{$\Gamma, \phi, \phi \vdash \Delta$}
+% 		\UIC{$\Gamma, \phi \vdash \Delta$}
+% 		\DP
 % 		$$
 % 	\item exchange: we can change position of two propositions in a sequent freely without changing its truth
 % 		$$
-% 		\AxiomC{$\Gamma, \phi, \psi \vdash \Delta$}
-% 		\UnaryInfC{$\Gamma, \psi, \phi \vdash \Delta$}
-% 		\DisplayProof
+% 		\AXC{$\Gamma, \phi, \psi \vdash \Delta$}
+% 		\UIC{$\Gamma, \psi, \phi \vdash \Delta$}
+% 		\DP
 % 		$$
 % \end{itemize}
 % and their symmetric right rules.
@@ -78,15 +79,15 @@
 % 
 % $$
 % \begin{array}{cc}
-% \AxiomC{$\Delta \vdash \phi_2, \Gamma$}
-% \AxiomC{$\Delta \vdash \phi_1, \Gamma$}
-% \BinaryInfC{$\Delta \vdash \phi_1 \wedge \phi_2, \Gamma$}
-% \DisplayProof
+% \AXC{$\Delta \vdash \phi_2, \Gamma$}
+% \AXC{$\Delta \vdash \phi_1, \Gamma$}
+% \BIC{$\Delta \vdash \phi_1 \wedge \phi_2, \Gamma$}
+% \DP
 % 	&
-% \AxiomC{$\Delta'' \vdash \phi_2, \Gamma''$}
-% \AxiomC{$\Delta' \vdash \phi_1, \Gamma'$}
-% \BinaryInfC{$\Delta', \Delta'' \vdash \phi_1 \wedge \phi_2, \Gamma', \Gamma''$}
-% \DisplayProof
+% \AXC{$\Delta'' \vdash \phi_2, \Gamma''$}
+% \AXC{$\Delta' \vdash \phi_1, \Gamma'$}
+% \BIC{$\Delta', \Delta'' \vdash \phi_1 \wedge \phi_2, \Gamma', \Gamma''$}
+% \DP
 % \end{array}
 % $$
 % 
@@ -374,45 +375,45 @@ We are now ready to present the full calculus.
 	\begin{subfigure}{\textwidth}
 		\centering
 			\begin{tblr}{ colspec = { cc }
-				    , rows = {abovesep=5pt, belowsep=5pt}
+				    , rows = {abovesep=7pt, belowsep=7pt}
 				    }
 			\SetCell[c=2]{c} {\footnotesize
-			\Axiom$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\AX$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
 			\LeftLabel{$[\llpar]$}
-			\UnaryInf$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
-			\DisplayProof} \\
+			\UI$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\DP} \\
 			{\footnotesize
-			\Axiom$\async{\Psi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\AX$\async{\Psi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
 			\LeftLabel{$[\llbot]$}
-			\UnaryInf$\async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
-			\DisplayProof}
+			\UI$\async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\DP}
 			&
 			{\footnotesize
-			\AxiomC{}
+			\AXC{}
 			\LeftLabel{$[\lltop]$}
-			\UnaryInfC{$\async{\Psi}{\Delta}{\af{\lltop}{-}, \Phi} \separator \constr{\Lambda}{\text{V}}$}
-			\DisplayProof
+			\UIC{$\async{\Psi}{\Delta}{\af{\lltop}{-}, \Phi} \separator \constr{\Lambda}{\text{V}}$}
+			\DP
 			}
 			\\
 			\SetCell[c=2]{c} {\footnotesize
-			\AxiomC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}'}$}
-			\AxiomC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}''}$}
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}'}$}
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}''}$}
 			\LeftLabel{$[\llwith]$}
-			\BinaryInfC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\text{V}', \text{V}''}$}	% capisco cosa fanno qui i constraint
-			\DisplayProof}
+			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\text{V}', \text{V}''}$}	% capisco cosa fanno qui i constraint
+			\DP}
 			\\
 			\SetCell[c=2]{c} {\footnotesize
-			\Axiom$\async{\Psi, \phi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\AX$\async{\Psi, \phi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
 			\LeftLabel{$[\,?\,]$}
-			\UnaryInf$\async{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
-			\DisplayProof} 
+			\UI$\async{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\DP} 
 			\\
 			\SetCell[c=2]{c} {\footnotesize
-			\AxiomC{$\neg\isAsy{\phi}$}
-			\AxiomC{$\async{\Psi}{\Delta, \af{\phi}{e}}{\Phi} \separator \constr{\Lambda}{\text{V}}$}
+			\AXC{$\neg\isAsy{\phi}$}
+			\AXC{$\async{\Psi}{\Delta, \af{\phi}{e}}{\Phi} \separator \constr{\Lambda}{\text{V}}$}
 			\LeftLabel{$[R\!\Uparrow]$}
-			\BinaryInfC{$\async{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\text{V}}$}
-			\DisplayProof
+			\BIC{$\async{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\text{V}}$}
+			\DP
 			}
 		\end{tblr}
 		\caption{Asynchronous rules}
@@ -423,47 +424,47 @@ We are now ready to present the full calculus.
 	\begin{subfigure}{\textwidth}
 		\centering
 		\begin{tblr}{ colspec = { cc } 
-			    , rows = {abovesep=5pt, belowsep=5pt}
+			    , rows = {abovesep=7pt, belowsep=7pt}
 			    }
 			\SetCell[c=2]{c} {\footnotesize
-			\AxiomC{$ \new{X} \hspace{.3cm} 
+			\AXC{$ \new{X} \hspace{.3cm} 
 				\focus{\Psi}{\Delta_L^X}{\text{af}(\phi_1, e)} \separator \constr{\Lambda, \used{e}}{\text{V}'} \hspace{.3cm} 
 				\focus{\Psi}{\Delta_R^X}{\text{af}(\phi_2, e)} \separator \constr{\text{V}'}{\text{V}''}$}
 			\LeftLabel{$[\llten]$}
-			\UnaryInfC{$\focus{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)} \separator \constr{\Lambda}{\text{V}''}$}	% capisco il movimento dei constraint
-			\DisplayProof}
+			\UIC{$\focus{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)} \separator \constr{\Lambda}{\text{V}''}$}	% capisco il movimento dei constraint
+			\DP}
 			\\ 
 			{\footnotesize
-			\Axiom$\focus{\Psi}{\Delta}{\af{\phi_1}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\AX$\focus{\Psi}{\Delta}{\af{\phi_1}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
 			\LeftLabel{$[\llplus_L]$}
-			\UnaryInf$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
-			\DisplayProof}
+			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\DP}
 			&
 			{\footnotesize
-			\Axiom$\focus{\Psi}{\Delta}{\af{\phi_2}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\AX$\focus{\Psi}{\Delta}{\af{\phi_2}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
 			\LeftLabel{$[\llplus_R]$}
-			\UnaryInf$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
-			\DisplayProof}
+			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\DP}
 			\\
 			{\footnotesize
-			\AxiomC{$\sat{ \Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$}
+			\AXC{$\sat{ \Lambda, \used{e}, \avail{\Delta}}{\text{V}}$}
 			\LeftLabel{$[1]$}
-			\UnaryInfC{$\focus{\Psi}{\Delta}{\af{\llone}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
-			\DisplayProof} 
+			\UIC{$\focus{\Psi}{\Delta}{\af{\llone}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\DP} 
 			&
 			{\footnotesize
-			\Axiom$\focus{\Psi}{\Delta}{\af{\phi}{e_1}} \fCenter \separator \constr{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$
+			\AX$\focus{\Psi}{\Delta}{\af{\phi}{e_1}} \fCenter \separator \constr{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$
 			\LeftLabel{$[\,!\,]$}
-			\UnaryInf$\focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}} \fCenter \separator \constr{\Lambda}{\text{V}}$
-			\DisplayProof
+			\UI$\focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\DP
 			}
 			\\
 			\SetCell[c=2]{c} {\footnotesize
-			\AxiomC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
-			\AxiomC{$\async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\AXC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
 			\LeftLabel{$[R\!\Downarrow]$}
-			\BinaryInfC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
-			\DisplayProof
+			\BIC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\DP
 			}
 		\end{tblr}
 		\caption{Synchronous rules}
@@ -474,35 +475,35 @@ We are now ready to present the full calculus.
 	\begin{subfigure}{\textwidth}
 		\centering
 		\begin{tblr}{ colspec = { cc }
-			    , rows = {abovesep=5pt, belowsep=5pt}
+			    , rows = {abovesep=7pt, belowsep=7pt}
 			    , vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
 			    }
 			{\footnotesize
-			\AxiomC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\text{V}}$}
+			\AXC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\text{V}}$}
 			\LeftLabel{$[I_1]$}
-			\UnaryInfC{$\focus{\Psi}{\Delta, \af{\phi}{e_2}}{\af{\llnot{\phi}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
-			\DisplayProof}
+			\UIC{$\focus{\Psi}{\Delta, \af{\alpha}{e_2}}{\af{\llnot{\alpha}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
+			\DP}
 			&
 			{\footnotesize
-			\AxiomC{$\isPosLit{\phi}$}
-			\AxiomC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\AXC{$\neg \isNegLit{\phi}$}
+			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
 			\LeftLabel{$[D_1]$}
-			\BinaryInfC{$\async{\Psi}{\Delta, \af{\phi}{e}}{.} \separator \constr{\Lambda}{\text{V}}$}
-			\DisplayProof}
+			\BIC{$\async{\Psi}{\Delta, \af{\phi}{e}}{.} \separator \constr{\Lambda}{\text{V}}$}
+			\DP}
 			\\
 			{\footnotesize
-			\AxiomC{$ \sat{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$}
+			\AXC{$ \sat{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$}
 			\LeftLabel{$[I_2]$}
-			\UnaryInfC{$\focus{\Psi, \phi}{\Delta}{\af{\llnot{\phi}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
-			\DisplayProof}
+			\UIC{$\focus{\Psi, \alpha}{\Delta}{\af{\llnot{\alpha}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
+			\DP}
 			&
 			{\footnotesize
-			\AxiomC{$\isPosLit{\phi}$}
-			\AxiomC{$\new{x}$}
-			\AxiomC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\Lambda, \used{e}}{\text{V}}$}
+			\AXC{$\neg \isNegLit{\phi}$}
+			\AXC{$\new{x}$}
+			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\Lambda, \used{e}}{\text{V}}$}
 			\LeftLabel{$[D_2]$}
 			\TrinaryInfC{$\async{\Psi, \phi}{\Delta}{.} \separator \constr{\Lambda}{\text{V}}$}
-			\DisplayProof}
+			\DP}
 		\end{tblr}
 		\caption{Identity and decide rules}
 	\end{subfigure}
@@ -511,12 +512,12 @@ We are now ready to present the full calculus.
 \end{figure}
 What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy described by \cite{HarlandPym}.
 
-\begin{define}
-Given an assignment V, we define
-	$$ e[\text{V}] = e[x_i / V(x_i), \dots, x_j / V(x_j)] $$
-as the value of the $e$ using assignment V.
-We then extend this notation to sequents, such that
-	$$ \Delta[\text{V}] = \{ \phi \in \Delta \mid e[\text{V}] = \top \} $$
+\begin{define}[Constraint evaluation]
+	Given an assignment V, we define
+		$$ e[\text{V}] = e[x_i / V(x_i), \dots, x_j / V(x_j)] $$
+	as the value of the $e$ subsituting with the assignment V.
+	We then extend this notation to sequents, such that
+		$$ \Delta[\text{V}] = \{ \phi \mid \af{\phi}{e} \in \Delta , e[\text{V}] = \top \} $$
 \end{define}
 
 We show now a translation from our focused method to the one of \cite{HarlandPym}:
@@ -524,71 +525,159 @@ We show now a translation from our focused method to the one of \cite{HarlandPym
 	Let $\vdash \Psi$ The calculus of Figure \ref{fig:calculus} is sound % ...
 \end{teor}
 \begin{proof}
-	Let $<$ be weakening and $>$ contraction.
+	As a soundness proof we give a translation to the triadic system defined by Andreoli in \cite{Focusing}:
+	\begin{center}
+	\begin{tblr}{ colspec = {c c c}
+		    , cells = { mode = dmath } 
+		    , rows = {abovesep=7pt, belowsep=7pt}
+		    , vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
+		    }
+		\AXC{$\async{\Psi}{\Delta}{\Phi}$}
+		\LeftLabel{$[\llbot]$}
+		\UIC{$\async{\Psi}{\Delta}{\llbot, \Phi}$}
+		\DP
+		&
+		\AXC{$\async{\Psi}{\Delta}{\phi_1, \phi_2, \Phi}$}
+		\LeftLabel{$[\llpar]$}
+		\UIC{$\async{\Psi}{\Delta}{\phi_1 \llpar \phi_2, \Phi}$}
+		\DP
+		&
+		\AXC{$\async{\phi, \Psi}{\Delta}{\Phi}$}
+		\LeftLabel{$[\llwn{}]$}
+		\UIC{$\async{\Psi}{\Delta}{\llwn{\phi}, \Phi}$}
+		\DP
+		\\
+		\AXC{}
+		\LeftLabel{$[\lltop]$}
+		\UIC{$\async{\Psi}{\Delta}{\lltop, \Phi}$}
+		\DP
+		&
+		\SetCell[c=2]{c} 
+		\AXC{$\async{\Psi}{\Delta}{\phi_1, \Phi}$}
+		\AXC{$\async{\Psi}{\Delta}{\phi_2, \Phi}$}
+		\LeftLabel{$[\llwith]$}
+		\BIC{$\async{\Psi}{\Delta}{\phi_1 \llwith \phi_2, \Phi}$}
+		\DP
+		\\
+		\AXC{$\focus{\Psi}{\Delta}{\phi_1}$}
+		\LeftLabel{$[\llplus_L]$}
+		\UIC{$\focus{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
+		\DP
+		&
+		\AXC{}
+		\LeftLabel{$[\llone]$}
+		\UIC{$\focus{\Psi}{.}{\llone}$}
+		\DP
+		& 
+		\AXC{$\async{\Psi}{.}{\phi}$}
+		\LeftLabel{$[\llbang{}]$}
+		\UIC{$\focus{\Psi}{.}{\llbang{\phi}}$}
+		\DP
+		\\
+		\AXC{$\focus{\Psi}{\Delta}{\phi_2}$}
+		\LeftLabel{$[\llplus_R]$}
+		\UIC{$\focus{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
+		\DP
+		&
+		\SetCell[c=2]{c} 
+		\AXC{$\focus{\Psi}{\Gamma}{\phi_1}$}
+		\AXC{$\focus{\Psi}{\Delta}{\phi_2}$}
+		\LeftLabel{$[\llten]$}
+		\BIC{$\focus{\Psi}{\Gamma, \Delta}{\phi_1 \llten \phi_2}$}
+		\DP
+		\\
+		\AXC{$\neg \isAsy{\phi}$}
+		\AXC{$\async{\Psi}{\phi, \Delta}{\Phi}$}
+		\LeftLabel{$[R\!\Uparrow]$}
+		\BIC{$\async{\Psi}{\Delta}{\phi, \Phi}$}
+		\DP
+		&
+		\AXC{}
+		\LeftLabel{$[I_1]$}
+		\UIC{$\focus{\Psi}{\phi}{\llnot{\phi}}$}
+		\DP
+		&
+		\AXC{$\focus{\Psi}{\Delta}{\phi}$}
+		\LeftLabel{$[D_1]$}
+		\UIC{$\async{\Psi}{\phi, \Delta}{.}$}
+		\DP
+		\\
+		\AXC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
+		\AXC{$\async{\Psi}{\Delta}{\phi}$}
+		\LeftLabel{$[R\!\Downarrow]$}
+		\BIC{$\focus{\Psi}{\Delta}{\phi}$}
+		\DP
+		&
+		\AXC{}
+		\LeftLabel{$[I_2]$}
+		\UIC{$\focus{\phi, \Psi}{.}{\llnot{\phi}}$}
+		\DP
+		&
+		\AXC{$\focus{\Psi}{\Delta}{\phi}$}
+		\LeftLabel{$[D_2]$}
+		\UIC{$\async{\phi, \Psi}{\Delta}{.}$}
+		\DP
+	\end{tblr}
+\end{center}
 	We proceed with the base cases
+	The three base cases are demonstrated essentially in the same way:
 	\begin{itemize}
-		\item[$I_1$:] Given a judgment
+		\item[$I_1$:] Given the judgment
 			$$
-			\AxiomC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\text{V}}$}
+			\AXC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\text{V}}$}
 			\LeftLabel{$[I_1]$}
-			\UnaryInfC{$\focus{\Psi}{\Delta, \af{\phi}{e_2}}{\af{\llnot{\phi}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
-			\DisplayProof
+			\UIC{$\focus{\Psi}{\Delta, \af{\phi}{e_2}}{\af{\llnot{\phi}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
+			\DP
 			$$
-			We get that 
+			looking at the constraints we trivially get that
 			$$ (\Delta, \af{\phi}{e_2}, \af{\llnot{\phi}}{e_1})[V] \mapsto \phi, \llnot{\phi}$$
+			so we can rewrite this as
 			$$
-			\AxiomC{}
-			\LeftLabel{$[I]$}
-			\UnaryInfC{$\vdash \phi, \llnot{\phi}$}
-			\LeftLabel{$[<\!*]$}
-			\UnaryInfC{$\vdash \llwn{\Psi}, \phi, \llnot{\phi}$}
-			\DisplayProof
+			\AXC{}
+			\LeftLabel{$[I_1]$}
+			\UIC{$\focus{\Psi}{\phi}{\llnot{\phi}}$}
+			\DP
 			$$
-		\item[$I_2$:]
+			since $\Delta[\text{V}] = \varnothing$ because of $\avail{\Delta}$.
+		\item[$I_2$:] Given the judgement
 			$$
-			\AxiomC{$ \sat{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$}
+			\AXC{$ \sat{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$}
 			\LeftLabel{$[I_2]$}
-			\UnaryInfC{$\focus{\Psi, \phi}{\Delta}{\af{\llnot{\phi}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
-			\DisplayProof
+			\UIC{$\focus{\Psi, \phi}{\Delta}{\af{\llnot{\phi}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
+			\DP
 			$$
-			Again by substituting the variables we get that
+			proceeding as above we get
 			$$
-			\AxiomC{}
-			\LeftLabel{$[I]$}
-			\UnaryInfC{$\vdash \phi, \llnot{\phi}$}
-			\LeftLabel{$[<\!*]$}
-			\UnaryInfC{$\vdash \llwn{\Psi}, \phi, \llnot{\phi}$}
-			\LeftLabel{$[?]$}
-			\UnaryInfC{$\vdash \llwn{\Psi}, \llwn{\phi}, \llnot{\phi}$}
-			\DisplayProof
+			\AXC{}
+			\LeftLabel{$[I_2]$}
+			\UIC{$\focus{\phi, \Psi}{.}{\llnot{\phi}}$}
+			\DP
 			$$
-		\item[$\llone$:]
+		\item[$\llone$:] Given the judgement
 			$$
-			\AxiomC{$\sat{ \Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$}
+			\AXC{$\sat{ \Lambda, \used{e}, \avail{\Delta}}{\text{V}}$}
 			\LeftLabel{$[1]$}
-			\UnaryInfC{$\focus{\Psi}{\Delta}{\af{\llone}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
-			\DisplayProof
+			\UIC{$\focus{\Psi}{\Delta}{\af{\llone}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\DP
 			$$
-			This uses the same reasoning as above:
+			it corresponds to 
 			$$
-			\AxiomC{}
+			\AXC{}
 			\LeftLabel{$[\llone]$}
-			\UnaryInfC{$\vdash \llone$}
-			\LeftLabel{$[<\!*]$}
-			\UnaryInfC{$\vdash \llwn{\Psi}, \llone$}
-			\DisplayProof
+			\UIC{$\focus{\Psi}{.}{\llone}$}
+			\DP
 			$$
 	\end{itemize}
-	Assuming the premises hold we now proceed with the induction sted:
+	Assuming the premises hold we now proceed with the induction step:
 	\begin{itemize}
 		\item[$\llten$:] 
 			$$
-			\AxiomC{$ \new{X} \hspace{.3cm} 
+			\AXC{$ \new{X} \hspace{.3cm} 
 				\focus{\Psi}{\Delta_L^X}{\text{af}(\phi_1, e)} \separator \constr{\Lambda, \used{e}}{\text{V}'} \hspace{.3cm} 
 				\focus{\Psi}{\Delta_R^X}{\text{af}(\phi_2, e)} \separator \constr{\text{V}'}{\text{V}''}$}
 			\LeftLabel{$[\llten]$}
-			\UnaryInfC{$\focus{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)} \separator \constr{\Lambda}{\text{V}''}$}	% capisco il movimento dei constraint
-			\DisplayProof
+			\UIC{$\focus{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)} \separator \constr{\Lambda}{\text{V}''}$}	% capisco il movimento dei constraint
+			\DP
 			$$
 			By inductive hypothesis both
 			\begin{align*}
@@ -600,82 +689,182 @@ We show now a translation from our focused method to the one of \cite{HarlandPym
 			Furthermore, given how the variables are defined, $\Delta_L^X[\text{V}']$ and $\Delta_R^X[\text{V}'']$ must be disjoint.
 			Given this we get that this equals to 
 			$$
-			\AxiomC{$\vdash \llwn{\Psi}, \Delta', \phi_1$}
-			\AxiomC{$\vdash \llwn{\Psi}, \Delta'', \phi_2$}
+			\AXC{$\focus{\Psi}{\Delta_L^X[\text{V}'']}{\phi_1}$}
+			\AXC{$\focus{\Psi}{\Delta_R^X[\text{V}'']}{\phi_2}$}
 			\LeftLabel{$[\llten]$}
-			\BinaryInfC{$\vdash \llwn{\Psi}, \llwn{\Psi}, \Delta', \Delta'', \phi_1 \llten \phi_2$}
-			\LeftLabel{$[>\!*]$}
-			\UnaryInfC{$\vdash \llwn{\Psi}, \Delta', \Delta'', \phi_1 \llten \phi_2$}
-			\DisplayProof
+			\BIC{$\focus{\Psi}{\Delta_L^X[\text{V}''], \Delta_R^X[\text{V}'']}{\phi_1 \llten \phi_2}$}
+			\DP
 			$$
 		\item[$\llbot$:] 
-		\item[$\lltop$:]
+			$$
+			\AX$\async{\Psi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\LeftLabel{$[\llbot]$}
+			\UI$\async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\DP
+			$$
+			and
+			$$
+			\AXC{$\async{\Psi}{\Delta[\text{V}}{\Phi[\text{V}}$}
+			\LeftLabel{$[\llbot]$}
+			\UIC{$\async{\Psi}{\Delta[\text{V}}{\llbot, \Phi[\text{V}]}$}
+			\DP
+			$$
+		%	\item[$\lltop$:]
+		%		$$
+		%		\AXC{}
+		%		\LeftLabel{$[\lltop]$}
+		%		\UIC{$\async{\Psi}{\Delta}{\af{\lltop}{-}, \Phi} \separator \constr{\Lambda}{\text{V}}$}
+		%		\DP
+		%		$$
 		\item[$\llpar$:]
 			$$
-			\Axiom$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\AX$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
 			\LeftLabel{$[\llpar]$}
-			\UnaryInf$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
-			\DisplayProof
+			\UI$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\DP
 			$$
-			Assuming the hypotesis holds
+			By hypothesis there exists a linear proof
 			$$ \async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}}$$
-			We trivially can % recuperare
+			Hence there is a linear proof of 	
 			$$
-			\AxiomC{$\vdash \llwn{\Psi}, \Delta, \phi_1, \phi_2$}
+			\AXC{$\async{\Psi}{\Delta[\text{V}]}{\phi_1, \phi_2, \Phi[\text{V}}$}
 			\LeftLabel{$[\llpar]$}
-			\UnaryInfC{$\vdash \llwn{\Psi}, \Delta, \phi_1 \llpar \phi_2$}
-			\DisplayProof
+			\UIC{$\async{\Psi}{\Delta[\text{V}]}{\phi_1 \llpar \phi_2, \Phi[\text{V}]}$}
+			\DP
 			$$
+			where $\Delta' = \Delta[\text{V}]$.
 		\item[$\llplus_L$:]
 			$$
-			\Axiom$\focus{\Psi}{\Delta}{\af{\phi_1}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\AX$\focus{\Psi}{\Delta}{\af{\phi_1}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
 			\LeftLabel{$[\llplus_L]$}
-			\UnaryInf$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
-			\DisplayProof
+			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\DP
 			$$
 
 			$$
-			\AxiomC{$\vdash \llwn{\Psi}, \Delta, \phi_1$}
+			\AXC{$\focus{\Psi}{\Delta[\text{V}]}{\phi_1}$}
 			\LeftLabel{$[\llplus_L]$}
-			\UnaryInfC{$\vdash \llwn{\Psi}, \Delta, \phi_1 \llplus \phi_2$}
-			\DisplayProof
+			\UIC{$\focus{\Psi}{\Delta[\text{V}]}{\phi_1 \llplus \phi_2}$}
+			\DP
 			$$
 		\item[$\llplus_R$:]
 			$$
-			\Axiom$\focus{\Psi}{\Delta}{\af{\phi_2}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\AX$\focus{\Psi}{\Delta}{\af{\phi_2}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
 			\LeftLabel{$[\llplus_R]$}
-			\UnaryInf$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
-			\DisplayProof
+			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\DP
 			$$
 
 			$$
-			\AxiomC{$\vdash \llwn{\Psi}, \Delta, \phi_2$}
+			\AXC{$\focus{\Psi}{\Delta[\text{V}]}{\phi_2}$}
 			\LeftLabel{$[\llplus_R]$}
-			\UnaryInfC{$\vdash \llwn{\Psi}, \Delta, \phi_1 \llplus \phi_2$}
-			\DisplayProof
+			\UIC{$\focus{\Psi}{\Delta[\text{V}]}{\phi_1 \llplus \phi_2}$}
+			\DP
 			$$
 		\item[$\llwith$:]
 			$$
-			\AxiomC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}'}$}
-			\AxiomC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}''}$}
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}'}$}
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}''}$}
 			\LeftLabel{$[\llwith]$}
-			\BinaryInfC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\text{V}', \text{V}''}$}	% capisco cosa fanno qui i constraint
-			\DisplayProof
+			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\text{V}', \text{V}''}$}	% capisco cosa fanno qui i constraint
+			\DP
 			$$
 
+			% might need to fix
 			$$
-			\AxiomC{$\vdash \llwn{\Psi}, \Delta, \phi_1$}
-			\AxiomC{$\vdash \llwn{\Psi}, \Delta, \phi_2$}
+			\AXC{$\async{\Psi}{\Delta[\text{V}]}{\phi_1, \Phi[\text{V}]}$}
+			\AXC{$\async{\Psi}{\Delta[\text{V}]}{\phi_2, \Phi[\text{V}]}$}
 			\LeftLabel{$[\llwith]$}
-			\BinaryInfC{$\vdash \llwn{\Psi}, \Delta, \phi_1 \llwith \phi_2$}
-			\DisplayProof
+			\BIC{$\async{\Psi}{\Delta[\text{V}]}{\phi_1 \llwith \phi_2, \Phi[\text{V}]}$}
+			\DP
 			$$
-		\item[$\llbang$:]
-		\item[$\llwn$:]
-		\item[$R\!\Downarrow$:]
-		\item[$R\!\Uparrow$:]
+		\item[$\llbang{}$:]
+			$$
+			\AX$\focus{\Psi}{\Delta}{\af{\phi}{e_1}} \fCenter \separator \constr{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$
+			\LeftLabel{$[\,!\,]$}
+			\UI$\focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\DP
+			$$
+			$$
+			\AXC{$\async{\Psi}{.}{\phi}$}
+			\LeftLabel{$[\llbang{}]$}
+			\UIC{$\focus{\Psi}{.}{\llbang{\phi}}$}
+			\DP
+			$$
+		\item[$\llwn{}$:]
+			$$
+			\AX$\async{\Psi, \phi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\LeftLabel{$[\llwn{}]$}
+			\UI$\async{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\DP
+			$$
+			$$
+			\AXC{$\async{\phi, \Psi}{\Delta[\text{V}]}{\Phi[\text{V}]}$}
+			\LeftLabel{$[\llwn{}]$}
+			\UIC{$\async{\Psi}{\Delta[\text{V}]}{\llwn{\phi}, \Phi[\text{V}]}$}
+			\DP
+			$$
+		\item[$R\!\Downarrow$:] This rule is trivial
+			$$
+			\AXC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\LeftLabel{$[R\!\Downarrow]$}
+			\BIC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\DP
+			$$
+			by stripping the constraints we obtain
+			$$
+			\AXC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
+			\AXC{$\async{\Psi}{\Delta[\text{V}]}{\phi}$}
+			\LeftLabel{$[R\!\Downarrow]$}
+			\BIC{$\focus{\Psi}{\Delta[\text{V}]}{\phi}$}
+			\DP
+			$$
+		\item[$R\!\Uparrow$:] This rule is trivial
+			$$
+			\AXC{$\neg\isAsy{\phi}$}
+			\AXC{$\async{\Psi}{\Delta, \af{\phi}{e}}{\Phi} \separator \constr{\Lambda}{\text{V}}$}
+			\LeftLabel{$[R\!\Uparrow]$}
+			\BIC{$\async{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\text{V}}$}
+			\DP
+			$$
+			
+			$$
+			\AXC{$\neg \isAsy{\phi}$}
+			\AXC{$\async{\Psi}{\phi, \Delta[\text{V}]}{\Phi[\text{V}]}$}
+			\LeftLabel{$[R\!\Uparrow]$}
+			\BIC{$\async{\Psi}{\Delta[\text{V}]}{\phi, \Phi[\text{V}]}$}
+			\DP
+			$$
 		\item[$D_1$:]
+			$$
+			\AXC{$\neg \isNegLit{\phi}$}
+			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\LeftLabel{$[D_1]$}
+			\BIC{$\async{\Psi}{\Delta, \af{\phi}{e}}{.} \separator \constr{\Lambda}{\text{V}}$}
+			\DP
+			$$
+			$$
+			\AXC{$\focus{\Psi}{\Delta[\text{V}}{\phi}$}
+			\LeftLabel{$[D_1]$}
+			\UIC{$\async{\Psi}{\phi, \Delta[\text{V}]}{.}$}
+			\DP
+			$$
 		\item[$D_2$:]
+			$$
+			\AXC{$\neg \isNegLit{\phi}$}
+			\AXC{$\new{x}$}
+			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\Lambda, \used{e}}{\text{V}}$}
+			\LeftLabel{$[D_2]$}
+			\TrinaryInfC{$\async{\Psi, \phi}{\Delta}{.} \separator \constr{\Lambda}{\text{V}}$}
+			\DP
+			$$
+			$$
+			\AXC{$\focus{\Psi}{\Delta[\text{V}]}{\phi}$}
+			\LeftLabel{$[D_2]$}
+			\UIC{$\async{\phi, \Psi}{\Delta[\text{V}]}{.}$}
+			\DP
+			$$
 	\end{itemize}
 \end{proof}
 
@@ -722,7 +911,7 @@ As a second transformation, to each formula we assign its why-not height, a meas
 	$$
 \end{define}
 The purpose of this attribute is to guide the prover to the reasonably simpler choice -- the one with the least nested exponentials -- at different times during proof search.
-This will be seen in Section \ref{sec:focusing_impl}.
+This will be seen in Section \ref{sec:focusing-impl}.
 After this transformation formulae are attribute trees, with at each node the why-not height of the subformula.
 For example the formula \texttt{*(a, ?(b))} becomes \texttt{*(a-0, ?(b-0)-1)-1}, or -- as trees --
 \begin{figure}[H]
@@ -797,7 +986,7 @@ Three new Prolog variables are introduced: \texttt{X}, \texttt{Y} and \texttt{Z}
 \end{align*}
 Compare this to the original definition of Definition \ref{def:split}, one can see that the two are basically identical other than the fact that here the name of the variable (the atom) and its value are treated separately.
 
-\section{Focusing}\label{sec:focusing_impl}
+\section{Focusing}\label{sec:focusing-impl}
 \subsection{Asynchronous and focusing phase}
 During the asynchronous phase we have a list of formulae which are being worked on and a list of formulae which are put to the side; with the former being called \texttt{Fs} and the latter \texttt{D}.
 At each step we analyze the first element of the list \texttt{Fs}, and we keep scomposing the memebers of the list untill we cannot anymore.
