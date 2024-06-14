@@ -6,6 +6,9 @@
 % \includegraphics{./images/tesiSCIENZE_TECNOLOGIE.jpg}
 }
 
+\author{Martino D'Adda}
+\date{}
+
 \begin{document}
 \maketitle
 \newpage
@@ -266,11 +269,15 @@ As seen in Figure \ref{fig:var-name} we will call $e$ such a conjuction and $x$ 
 \begin{define}[Annotated formula]
 	\label{def:annotated}
 	Given a formula $\phi$ defined as in Figure \ref{fig:ll-connectives} and a boolean expression $e$ defined as in Definition \ref{def:bool-expr}, an \textit{annotated formula} is simply a term 
-	$$ \text{af}(\phi, e) $$
+	$$ \af{\phi}{e} $$
 	that associates the formula to the expression.
 	We denote 
-	$$ \text{exp}(\af{\phi}{e}) = e $$
-	as the operation of extracting the boolean expression associated to a given formula, and then extend this notation to sequents such that $ \text{exp}(\Delta) $ is the set of all boolean expressions of $\Delta$.
+	\begin{itemize}
+		\item $ \text{exp}(\af{\phi}{e}) = e $
+			as the operation of extracting the boolean expression associated to a given formula, and then extend this notation to sequents such that $ \text{exp}(\Delta) $ is the set of all boolean expressions of $\Delta$.
+		\item $\text{vars}(\af{\phi}{e}) = \{ x_i \mid x_i \in e \} $
+			as the operations of extracting the set of variables appearing in the expression $e$, and the extend this notation to sequents such that $ \text{vars}(\Delta)$ is the set of all the variables appearing in the boolean expressions of the annotated formulae of $\Delta$
+	\end{itemize}
 \end{define}
 It is important to note that only the topmost connective gets annotated, and not the subformulae.
 
@@ -282,7 +289,7 @@ It is important to note that only the topmost connective gets annotated, and not
 These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
 \begin{define}[Constraints]
 	\label{def:constraints}
-	Given an annotated formula $\af{\phi}{e}$ as in Definition \ref{def:annotated}, a constraint may be of two kinds
+	Given an annotated formula $\af{\phi}{e}$ as in Definition \ref{def:annotated}, a constraint $\lambda$ may be of two kinds
 	\begin{itemize}
 		\item ``$\used{e}$'' states that the formula $\phi$ gets consumed in this branch of the proof.
 			This corresponds to saying the expression $e$ is true or
@@ -296,35 +303,49 @@ These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
 		\used{\Delta} &= \{ \used{e_2} \mid e_2 \in \text{exp}(\Delta) \} \\
 		\avail{\Delta} &= \{ \avail{e_2} \mid e_2 \in \text{exp}(\Delta) \}
 	\end{align*}
+	We denote
+	\begin{itemize}
+		\item $\text{exp}(\lambda) = e$ where $\lambda$ is either $\used{e}$ or $\avail{e}$;
+		\item $\text{vars}(\lambda) = \text{vars}(\text{exp}(\lambda))$, and extend this notation to a set of constraints $\Lambda$
+			$$ \text{vars}(\Lambda) = \bigcup_{\lambda \in \Lambda} \text{vars}(\lambda) $$
+	\end{itemize}
+\end{define}
+\begin{define}[Evaluation]
+	Given a boolean expression $e$ and a function V mapping variables to their values 
+	$$ \mathV : \{ x_1, x_2, \dots, x_n \} \rightarrow \{ \top, \bot \} $$
+	with $\text{vars}(e) \subseteq \text{Dom}(\mathV)$; we write
+		$$ e[\mathV] = e[x_i / \mathV(x_i), \dots, x_j / \mathV(x_j)] $$
+	as the value of the $e$ subsituting with the assignment V.
+	We extend this notation, such that
+	\begin{itemize}
+		\item given a constraint $\lambda$ and an assignment V, such that $\text{vars}(\lambda) \subseteq \text{Dom}(\mathV)$
+			$$ 
+			\begin{cases} 
+				\used{e}[\mathV] = \top & \text{if } e[\mathV] = \top \\
+				\used{e}[\mathV] = \bot & \text{if } e[\mathV] = \bot \\
+				\avail{e}[\mathV] = \top & \text{if } e[\mathV] = \bot \\
+				\avail{e}[\mathV] = \bot & \text{if } e[\mathV] = \top \\
+			\end{cases}
+			$$
+		\item given an annotated sequent $\Delta$ and an assignment V, such that $\text{vars}(\Delta) \subseteq \text{Dom}(\mathV)$
+			$$ \Delta[\mathV] = \{ \phi \mid \af{\phi}{e} \in \Delta , e[\mathV] = \top \} $$
+	\end{itemize}
 \end{define}
 A branch is then considered as correct if its constraints are satisfiable.
 Otherwise the branch of the proof fails.
 \begin{define}[Satisfaiability of constraints]
 	\label{def:sat}
-	Given a set of constraints $\Lambda$ and a function V
-	$$ \text{V} : \{ x_1, x_2, \dots, x_n \} \rightarrow \{ \top, \bot \} $$
-	mapping variables to their value, such that
-	\begin{align*}
-		\Lambda &= \{ \dots, \used{e_i}, \avail{e_j}, \dots \} \\
-		\text{V}&= \{ \dots, (x_i, \top), (x_j, \bot), \dots \}
-	\end{align*}
-	we write $\sat{\Lambda}{\text{V}}$ if 
-	$$ \bigwedge_{e \in \Lambda} e[x_1 / \text{V}(x_1), x_2 / \text{V}(x_2), \dots, x_n / \text{V}(x_n)] = \top $$
-	Here we are using the translation given in Definition \ref{def:constraints} such that
-	\begin{align*}
-		\used{e} &\Leftrightarrow e = \top \\
-		\avail{e} &\Leftrightarrow e = \bot
-	\end{align*}
+	Given a set of constraints $\Lambda$ and an assignment function V with $\text{vars}(\Lambda) \subseteq \text{Dom}(\mathV)$; we write 
+	$$ \sat{\Lambda}{\mathV} \Leftrightarrow \bigwedge_{\lambda \in \Lambda} \lambda[\mathV] = \top $$
 \end{define}
 \begin{fact}
 	\label{fact:ass-trans}
-	Simply by rewriting the function V to
+	We can translate an assignment function to a set of constraits using simple reversible transformations:
 	\begin{align*}
-		\text{V} &= \{ \dots, (x_i, \top), (x_j, \bot), \dots \} \\
-		         &= \{ \dots, x_i = \top, x_j = \bot, \dots \} \\
-			 &= \{ \dots, \used{x_i}, \avail{x_j}, \dots \}
+		\mathV &= \{ \dots, (x_i, \top), (x_j, \bot), \dots \} \\
+		       &= \{ \dots, x_i = \top, x_j = \bot, \dots \} \\
+		       &= \{ \dots, \used{x_i}, \avail{x_j}, \dots \}
 	\end{align*}
-	we get back a set of constraints.
 \end{fact}
 
 We now expand the concept of triadic sequent of \cite{Focusing} by adding constraints
@@ -332,9 +353,9 @@ We now expand the concept of triadic sequent of \cite{Focusing} by adding constr
 	Given any sequent this can be in either two forms:
 	\begin{itemize}
 		\item focused or in the synchronous phase, written:
-			$$\focus{\Psi}{\Delta}{\phi} \separator \constr{\Lambda}{\text{V}}$$
+			$$\focus{\Psi}{\Delta}{\phi} \separator \constr{\Lambda}{\mathV}$$
 		\item in the asynchronous phase, written:
-			$$\async{\Psi}{\Delta}{\Phi} \separator \constr{\Lambda}{\text{V}}$$
+			$$\async{\Psi}{\Delta}{\Phi} \separator \constr{\Lambda}{\mathV}$$
 	\end{itemize}
 	Where 
 	\begin{itemize}
@@ -346,7 +367,6 @@ We now expand the concept of triadic sequent of \cite{Focusing} by adding constr
 			The choice of letters is mainly a mnemonic or visual one, constraints $\Lambda$ ``go-up'' the proof tree and solutions V ``come down'' from the leaves.
 	\end{itemize}
 \end{define}
-As explained in Definition \ref{def:sat}, V may be used as a set of constraint itself; this states that a certain solution must be respected in a new one.
 
 \begin{define}[Splitting]
 	\label{def:split}
@@ -385,41 +405,41 @@ We are now ready to present the full calculus.
 				    , rows = {abovesep=7pt, belowsep=7pt}
 				    }
 			\SetCell[c=2]{c} {\footnotesize
-			\AX$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\AX$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
 			\LeftLabel{$[\llpar]$}
-			\UI$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\UI$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP} \\
 			{\footnotesize
-			\AX$\async{\Psi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\AX$\async{\Psi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
 			\LeftLabel{$[\llbot]$}
-			\UI$\async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\UI$\async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP}
 			&
 			{\footnotesize
 			\AXC{}
 			\LeftLabel{$[\lltop]$}
-			\UIC{$\async{\Psi}{\Delta}{\af{\lltop}{-}, \Phi} \separator \constr{\Lambda}{\text{V}}$}
+			\UIC{$\async{\Psi}{\Delta}{\af{\lltop}{-}, \Phi} \separator \constr{\Lambda}{\mathV}$}
 			\DP
 			}
 			\\
 			\SetCell[c=2]{c} {\footnotesize
-			\AXC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}'}$}
-			\AXC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}''}$}
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV'}$}
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV''}$}
 			\LeftLabel{$[\llwith]$}
-			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\text{V}', \text{V}''}$}	% capisco cosa fanno qui i constraint
+			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV', \mathV''}$}	% capisco cosa fanno qui i constraint
 			\DP}
 			\\
 			\SetCell[c=2]{c} {\footnotesize
-			\AX$\async{\Psi, \phi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\AX$\async{\phi, \Psi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\LeftLabel{$[\,?\,]$}
-			\UI$\async{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\UI$\async{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP} 
 			\\
 			\SetCell[c=2]{c} {\footnotesize
 			\AXC{$\neg\isAsy{\phi}$}
-			\AXC{$\async{\Psi}{\Delta, \af{\phi}{e}}{\Phi} \separator \constr{\Lambda}{\text{V}}$}
+			\AXC{$\async{\Psi}{\af{\phi}{e}, \Delta}{\Phi} \separator \constr{\Lambda}{\mathV}$}
 			\LeftLabel{$[R\!\Uparrow]$}
-			\BIC{$\async{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\text{V}}$}
+			\BIC{$\async{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\mathV}$}
 			\DP
 			}
 		\end{tblr}
@@ -435,42 +455,42 @@ We are now ready to present the full calculus.
 			    }
 			\SetCell[c=2]{c} {\footnotesize
 			\AXC{$ \new{X} \hspace{.3cm} 
-				\focus{\Psi}{\Delta_L^X}{\text{af}(\phi_1, e)} \separator \constr{\Lambda, \used{e}}{\text{V}'} \hspace{.3cm} 
-				\focus{\Psi}{\Delta_R^X}{\text{af}(\phi_2, e)} \separator \constr{\text{V}'}{\text{V}''}$}
+				\focus{\Psi}{\Delta_L^X}{\af{\phi_1}{e}} \separator \constr{\Lambda, \used{e}}{\mathV'} \hspace{.3cm} 
+				\focus{\Psi}{\Delta_R^X}{\af{\phi_2}{e}} \separator \constr{\mathV'}{\mathV''}$}
 			\LeftLabel{$[\llten]$}
-			\UIC{$\focus{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)} \separator \constr{\Lambda}{\text{V}''}$}	% capisco il movimento dei constraint
+			\UIC{$\focus{\Psi}{\Delta}{\af{\phi_1 \llten \phi_2}{e}} \separator \constr{\Lambda}{\mathV''}$}	% capisco il movimento dei constraint
 			\DP}
 			\\ 
 			{\footnotesize
-			\AX$\focus{\Psi}{\Delta}{\af{\phi_1}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\AX$\focus{\Psi}{\Delta}{\af{\phi_1}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
 			\LeftLabel{$[\llplus_L]$}
-			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP}
 			&
 			{\footnotesize
-			\AX$\focus{\Psi}{\Delta}{\af{\phi_2}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\AX$\focus{\Psi}{\Delta}{\af{\phi_2}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
 			\LeftLabel{$[\llplus_R]$}
-			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP}
 			\\
 			{\footnotesize
-			\AXC{$\sat{ \Lambda, \used{e}, \avail{\Delta}}{\text{V}}$}
+			\AXC{$\sat{ \Lambda, \used{e}, \avail{\Delta}}{\mathV}$}
 			\LeftLabel{$[1]$}
-			\UIC{$\focus{\Psi}{\Delta}{\af{\llone}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\UIC{$\focus{\Psi}{\Delta}{\af{\llone}{e}} \separator \constr{\Lambda}{\mathV}$}
 			\DP} 
 			&
 			{\footnotesize
-			\AX$\focus{\Psi}{\Delta}{\af{\phi}{e_1}} \fCenter \separator \constr{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$
+			\AX$\focus{\Psi}{\Delta}{\af{\phi}{e_1}} \fCenter \separator \constr{\Lambda, \used{e_1}, \avail{\Delta}}{\mathV}$
 			\LeftLabel{$[\,!\,]$}
-			\UI$\focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\UI$\focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP
 			}
 			\\
 			\SetCell[c=2]{c} {\footnotesize
 			\AXC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
-			\AXC{$\async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV}$}
 			\LeftLabel{$[R\!\Downarrow]$}
-			\BIC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\BIC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV}$}
 			\DP
 			}
 		\end{tblr}
@@ -486,30 +506,32 @@ We are now ready to present the full calculus.
 			    , vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
 			    }
 			{\footnotesize
-			\AXC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\text{V}}$}
+			\AXC{$ \isNegLit{\alpha} $}
+			\AXC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\mathV}$}
 			\LeftLabel{$[I_1]$}
-			\UIC{$\focus{\Psi}{\Delta, \af{\alpha}{e_2}}{\af{\llnot{\alpha}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
+			\BIC{$\focus{\Psi}{\af{\alpha}{e_2}, \Delta}{\af{\llnot{\alpha}}{e_1}} \separator \constr{\Lambda}{\mathV}$}
 			\DP}
 			&
 			{\footnotesize
 			\AXC{$\neg \isNegLit{\phi}$}
-			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV}$}
 			\LeftLabel{$[D_1]$}
-			\BIC{$\async{\Psi}{\Delta, \af{\phi}{e}}{.} \separator \constr{\Lambda}{\text{V}}$}
+			\BIC{$\async{\Psi}{\af{\phi}{e}, \Delta}{.} \separator \constr{\Lambda}{\mathV}$}
 			\DP}
 			\\
 			{\footnotesize
-			\AXC{$ \sat{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$}
+			\AXC{$ \isNegLit{\alpha} $}
+			\AXC{$ \sat{\Lambda, \used{e}, \avail{\Delta}}{\mathV}$}
 			\LeftLabel{$[I_2]$}
-			\UIC{$\focus{\Psi, \alpha}{\Delta}{\af{\llnot{\alpha}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
+			\BIC{$\focus{\alpha, \Psi}{\Delta}{\af{\llnot{\alpha}}{e}} \separator \constr{\Lambda}{\mathV}$}
 			\DP}
 			&
 			{\footnotesize
 			\AXC{$\neg \isNegLit{\phi}$}
 			\AXC{$\new{x}$}
-			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\Lambda, \used{e}}{\text{V}}$}
+			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\Lambda, \used{e}}{\mathV}$}
 			\LeftLabel{$[D_2]$}
-			\TrinaryInfC{$\async{\Psi, \phi}{\Delta}{.} \separator \constr{\Lambda}{\text{V}}$}
+			\TrinaryInfC{$\async{\phi, \Psi}{\Delta}{.} \separator \constr{\Lambda}{\mathV}$}
 			\DP}
 		\end{tblr}
 		\caption{Identity and decide rules}
@@ -519,32 +541,25 @@ We are now ready to present the full calculus.
 \end{figure}
 What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy described by \cite{HarlandPym}.
 
-\begin{define}[Constraint evaluation]
-	Given an assignment V, we define
-		$$ e[\mathrm{V}] = e[x_i / \mathrm{V}(x_i), \dots, x_j / \mathrm{V}(x_j)] $$
-	as the value of the $e$ subsituting with the assignment V.
-	We then extend this notation to sequents, such that
-		$$ \Delta[\mathrm{V}] = \{ \phi \mid \af{\phi}{e} \in \Delta , e[\mathrm{V}] = \top \} $$
-\end{define}
 \begin{lemma}
 	\label{lemma:cap}
-	Forall assignments V and sequents $\Delta$,
-	$$ \Delta_L^X[\mathrm{V}] \cap \Delta_R^X[\mathrm{V}] = \varnothing $$
+	Forall assignments $\mathV$ and sequents $\Delta$,
+	$$ \Delta_L^X[\mathV] \cap \Delta_R^X[\mathV] = \varnothing $$
 \end{lemma}
 \begin{proof}
-	This is a simple consequence of the fact that if $\phi \in \Delta_L^X[\text{V}]$ there is a annotated formula $\af{\phi}{e} \in \Delta$ such that 
-	$$ e[\text{V}] = \top $$
-	since $e$ is defined as a conjunction on boolean variables, all the variables in it must be true.
+	This is a simple consequence of the fact that if $\phi \in \Delta_L^X[\mathV]$ there is a annotated formula $\af{\phi}{e} \in \Delta$ such that 
+	$$ e[\mathV] = \top $$
+	Since $e$ is defined as a conjunction on boolean variables, all the variables in it must be true.
 	It is straightforward to see that if the variable added by the split in $\Delta_L^X$ is $x_i$, and the corresponding one in $\Delta_R^X$ is $\varNot{x_i}$, then when $x_i$ is true in the assignement V, $\llnot{x_i}$ is false.
-	Hence $\phi \not \in \Delta_R^X[\text{V}]$.
+	Hence $\phi \not \in \Delta_R^X[\mathV]$.
 \end{proof}
 \begin{lemma}
 	\label{lemma:cup}
-	Forall assignments V and sequents $\Delta$,
+	Forall assignments $\mathV$ and sequents $\Delta$,
 	$$ \Delta[\mathV] = \Delta_L^X[\mathV] \cup \Delta_R^X[\mathV] $$
 \end{lemma}
 \begin{proof}
-	Proving that $\Delta_L^X[\mathV] \cup \Delta_R^X[\mathV] \subseteq \Delta$ is given by the definition of the split (Definition \ref{def:split}).
+	The simpler side is $\Delta_L^X[\mathV] \cup \Delta_R^X[\mathV] \subseteq \Delta$, since it  holds by the definition of the split (Definition \ref{def:split}).
 	For the other side, suppose there was a formula $\phi$ such that $\phi \in \Delta[\mathV]$ and $\phi \not \in \Delta_L^X[\mathV] \cup \Delta_R^X[\mathV]$.
 	This means that for some variable $x_i$ 
 	\begin{align*}
@@ -554,13 +569,20 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 	\end{align*}
 	But either $x_i$ or $\varNot{x_i}$ must be true in a certain assignment, thus either $x_i \varAnd e$ or $\varNot{x_i} \varAnd e$ must be true, contradicting the hypothesis.
 \end{proof}
+\begin{lemma}
+	Given any assignment $\mathV$ and any sequent $\Delta$, splitting induces a partition on the sequent $\Delta[\mathV]$.
+\end{lemma}
+\begin{proof}
+	See Lemma \ref{lemma:cap} and \ref{lemma:cup}.
+\end{proof}
 
 \begin{lemma}
 	\label{lemma:constr}
-	Forall assignments V and set of constraints $\Lambda$, if (using the translation of Fact \ref{fact:ass-trans})
+	Forall assignments $\mathV$ and set of constraints $\Lambda$, if (using the translation of Fact \ref{fact:ass-trans})
 	$$ \sat{\mathV, \Lambda}{\mathV'} $$
 	then $\text{Dom}(\mathV) \subseteq \text{Dom}(\mathV')$ and
 	$$ \forall x_i \in \text{Dom}(\mathV) \mid \mathV(x_i) = \mathV'(x_i) $$
+	In this case we say that $\mathV'$ subsumes $\mathV$.
 \end{lemma}
 \begin{proof}
 	The proof is straightforward: 
@@ -569,7 +591,7 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 		\item for the second condition we have that
 			$$ \mathV, \Lambda = \{ \dots, \used{x_i}, \avail{x_j}, \dots \} \cup \Lambda $$
 		and to have that $ \sat{\mathV, \Lambda}{\mathV'} $
-			$$ \bigwedge_{e \in \mathV, \Lambda} e[\dots, x_i / \mathV'(x_i), x_j / \mathV'(x_j), \dots] = \top $$
+			$$ \bigwedge_{\lambda \in \mathV, \Lambda} \lambda[\mathV'] = \top $$
 		thus the constraints derived from V must still hold with assignment $\mathV'$.
 	\end{itemize}
 	
@@ -580,7 +602,8 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 \end{teor}
 \begin{proof}
 	As a soundness proof we give a translation to the triadic system defined by Andreoli in \cite{Focusing}:
-	\begin{center}
+	\begin{figure}[H]
+		\centering
 	\begin{tblr}{ colspec = {c c c}
 		    , cells = { mode = dmath } 
 		    , rows = {abovesep=7pt, belowsep=7pt}
@@ -646,7 +669,7 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 		\BIC{$\async{\Psi}{\Delta}{\phi, \Phi}$}
 		\DP
 		&
-		\AXC{}
+		\AXC{$\isNegLit{\alpha}$}
 		\LeftLabel{$[I_1]$}
 		\UIC{$\focus{\Psi}{\phi}{\llnot{\phi}}$}
 		\DP
@@ -662,7 +685,7 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 		\BIC{$\focus{\Psi}{\Delta}{\phi}$}
 		\DP
 		&
-		\AXC{}
+		\AXC{$\isNegLit{\alpha}$}
 		\LeftLabel{$[I_2]$}
 		\UIC{$\focus{\phi, \Psi}{.}{\llnot{\phi}}$}
 		\DP
@@ -672,49 +695,67 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 		\UIC{$\async{\phi, \Psi}{\Delta}{.}$}
 		\DP
 	\end{tblr}
+	\caption{J.-M. Andreoli's triadic calculus}
+	\label{fig:triadic}
+\end{figure}
 \end{center}
 	We proceed with the base cases
 	The three base cases are demonstrated essentially in the same way:
 	\begin{itemize}
 		\item[$I_1$:] Given the judgment
 			$$
-			\AXC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\text{V}}$}
+			\AXC{$\isNegLit{\alpha}$}
+			\AXC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\mathV}$}
 			\LeftLabel{$[I_1]$}
-			\UIC{$\focus{\Psi}{\Delta, \af{\phi}{e_2}}{\af{\llnot{\phi}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
+			\BIC{$\focus{\Psi}{\Delta, \af{\alpha}{e_2}}{\af{\llnot{\alpha}}{e_1}} \separator \constr{\Lambda}{\mathV}$}
 			\DP
 			$$
 			looking at the constraints we trivially get that
-			$$ (\Delta, \af{\phi}{e_2}, \af{\llnot{\phi}}{e_1})[V] \mapsto \phi, \llnot{\phi}$$
+			\begin{align*}
+				\Delta[\mathV] &= . \tag{Because of $\avail{\Delta}$} \\
+				\af{\llnot{\alpha}}{e_1}[\mathV] &= \llnot{\alpha} \tag{Because of $\used{e_1}$} \\
+				\af{\alpha}{e_2}[\mathV] &= \alpha \tag{Because of $\used{e_2}$}
+			\end{align*}
 			so we can rewrite this as
 			$$
-			\AXC{}
+			\AXC{$\isNegLit{\alpha}$}
 			\LeftLabel{$[I_1]$}
 			\UIC{$\focus{\Psi}{\phi}{\llnot{\phi}}$}
 			\DP
 			$$
-			since $\Delta[\text{V}] = \varnothing$ because of $\avail{\Delta}$.
 		\item[$I_2$:] Given the judgement
 			$$
-			\AXC{$ \sat{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$}
+			\AXC{$\isNegLit{\alpha}$}
+			\AXC{$ \sat{\Lambda, \used{e}, \avail{\Delta}}{\mathV}$}
 			\LeftLabel{$[I_2]$}
-			\UIC{$\focus{\Psi, \phi}{\Delta}{\af{\llnot{\phi}}{e_1}} \separator \constr{\Lambda}{\text{V}}$}
+			\BIC{$\focus{\Psi, \alpha}{\Delta}{\af{\llnot{\alpha}}{e}} \separator \constr{\Lambda}{\mathV}$}
 			\DP
 			$$
 			proceeding as above we get
+			\begin{align*}
+				\Delta[\mathV] &= . \\
+				\af{\llnot{\alpha}}{e}[\mathV] &= \llnot{\alpha}
+			\end{align*}
+			thus
 			$$
-			\AXC{}
+			\AXC{$\isNegLit{\alpha}$}
 			\LeftLabel{$[I_2]$}
-			\UIC{$\focus{\phi, \Psi}{.}{\llnot{\phi}}$}
+			\UIC{$\focus{\alpha, \Psi}{.}{\llnot{\alpha}}$}
 			\DP
 			$$
 		\item[$\llone$:] Given the judgement
 			$$
-			\AXC{$\sat{ \Lambda, \used{e}, \avail{\Delta}}{\text{V}}$}
+			\AXC{$\sat{ \Lambda, \used{e}, \avail{\Delta}}{\mathV}$}
 			\LeftLabel{$[1]$}
-			\UIC{$\focus{\Psi}{\Delta}{\af{\llone}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\UIC{$\focus{\Psi}{\Delta}{\af{\llone}{e}} \separator \constr{\Lambda}{\mathV}$}
 			\DP
 			$$
-			it corresponds to 
+			proceeding as above we get
+			\begin{align*}
+				\Delta[\mathV] &= . \\
+				\af{\llone}{e}[\mathV] &= \llone
+			\end{align*}
+			thus
 			$$
 			\AXC{}
 			\LeftLabel{$[\llone]$}
@@ -722,120 +763,115 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 			\DP
 			$$
 	\end{itemize}
-	Assuming the premises hold we now proceed with the induction step:
+	The induction step is rather mechanic, with the exception of the tensor rule:
 	\begin{itemize}
 		\item[$\llten$:] 
 			$$
 			\AXC{$ \new{X} \hspace{.3cm} 
-				\focus{\Psi}{\Delta_L^X}{\text{af}(\phi_1, e)} \separator \constr{\Lambda, \used{e}}{\text{V}'} \hspace{.3cm} 
-				\focus{\Psi}{\Delta_R^X}{\text{af}(\phi_2, e)} \separator \constr{\text{V}'}{\text{V}''}$}
+				\focus{\Psi}{\Delta_L^X}{\af{\phi_1}{e}} \separator \constr{\Lambda, \used{e}}{\mathV'} \hspace{.3cm} 
+				\focus{\Psi}{\Delta_R^X}{\af{\phi_2}{e}} \separator \constr{\mathV'}{\mathV''}$}
 			\LeftLabel{$[\llten]$}
-			\UIC{$\focus{\Psi}{\Delta}{\text{af}(\phi_1 \llten \phi_2, e)} \separator \constr{\Lambda}{\text{V}''}$}	% capisco il movimento dei constraint
+			\UIC{$\focus{\Psi}{\Delta}{\af{\phi_1 \llten \phi_2}{e}} \separator \constr{\Lambda}{\mathV''}$}	% capisco il movimento dei constraint
 			\DP
 			$$
-			By inductive hypothesis both
-			\begin{align*}
-				\focus{\Psi}{\Delta_L^X}{\text{af}(\phi_1, e)} & \separator \constr{\Lambda, \used{e}}{\text{V}'} \\
-				\focus{\Psi}{\Delta_R^X}{\text{af}(\phi_2, e)}  & \separator \constr{\text{V}'}{\text{V}''}
-			\end{align*}
-			hold.
-			Now the set of all the variables referenced in the conclusion must be a subset of the sets of the variables of the branches, since a branch can only add new variables.
-			Furthermore, given how the variables are defined, $\Delta_L^X[\text{V}']$ and $\Delta_R^X[\text{V}'']$ must be disjoint.
+			By the Lemma \ref{lemma:constr} we can say that $\Delta_L^X[\mathV'] = \Delta_L^X[\mathV'']$, since $\mathV''$ subsumes $\mathV'$.
+			This being said, using Lemma \ref{lemma:cap} we have that $\Delta_L^X[\mathV'']$ and $\Delta_R^X[\mathV'']$ are disjoint, so the contextes of the two branches are separated.
+			Finally Lemma \ref{lemma:cup} guarantees that the union of the two contexes returns the whole original context.
 			Given this we get that this equals to 
 			$$
-			\AXC{$\focus{\Psi}{\Delta_L^X[\text{V}'']}{\phi_1}$}
-			\AXC{$\focus{\Psi}{\Delta_R^X[\text{V}'']}{\phi_2}$}
+			\AXC{$\focus{\Psi}{\Delta_L^X[\mathV'']}{\phi_1}$}
+			\AXC{$\focus{\Psi}{\Delta_R^X[\mathV'']}{\phi_2}$}
 			\LeftLabel{$[\llten]$}
-			\BIC{$\focus{\Psi}{\Delta_L^X[\text{V}''], \Delta_R^X[\text{V}'']}{\phi_1 \llten \phi_2}$}
+			\BIC{$\focus{\Psi}{\Delta_L^X[\mathV''], \Delta_R^X[\mathV'']}{\phi_1 \llten \phi_2}$}
 			\DP
 			$$
 		\item[$\llbot$:] 
 			$$
-			\AX$\async{\Psi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\AX$\async{\Psi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
 			\LeftLabel{$[\llbot]$}
-			\UI$\async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\UI$\async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP
 			$$
 			and
 			$$
-			\AXC{$\async{\Psi}{\Delta[\text{V}]}{\Phi[\text{V}]}$}
+			\AXC{$\async{\Psi}{\Delta[\mathV]}{\Phi[\mathV]}$}
 			\LeftLabel{$[\llbot]$}
-			\UIC{$\async{\Psi}{\Delta[\text{V}]}{\llbot, \Phi[\text{V}]}$}
+			\UIC{$\async{\Psi}{\Delta[\mathV]}{\llbot, \Phi[\mathV]}$}
 			\DP
 			$$
 		%	\item[$\lltop$:]
 		%		$$
 		%		\AXC{}
 		%		\LeftLabel{$[\lltop]$}
-		%		\UIC{$\async{\Psi}{\Delta}{\af{\lltop}{-}, \Phi} \separator \constr{\Lambda}{\text{V}}$}
+		%		\UIC{$\async{\Psi}{\Delta}{\af{\lltop}{-}, \Phi} \separator \constr{\Lambda}{\mathV}$}
 		%		\DP
 		%		$$
 		\item[$\llpar$:]
 			$$
-			\AX$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\AX$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
 			\LeftLabel{$[\llpar]$}
-			\UI$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\UI$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP
 			$$
 			By hypothesis there exists a linear proof
-			$$ \async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}}$$
+			$$ \async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV}$$
 			Hence there is a linear proof of 	
 			$$
-			\AXC{$\async{\Psi}{\Delta[\text{V}]}{\phi_1, \phi_2, \Phi[\text{V}]}$}
+			\AXC{$\async{\Psi}{\Delta[\mathV]}{\phi_1, \phi_2, \Phi[\mathV]}$}
 			\LeftLabel{$[\llpar]$}
-			\UIC{$\async{\Psi}{\Delta[\text{V}]}{\phi_1 \llpar \phi_2, \Phi[\text{V}]}$}
+			\UIC{$\async{\Psi}{\Delta[\mathV]}{\phi_1 \llpar \phi_2, \Phi[\mathV]}$}
 			\DP
 			$$
 		\item[$\llplus_L$:]
 			$$
-			\AX$\focus{\Psi}{\Delta}{\af{\phi_1}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\AX$\focus{\Psi}{\Delta}{\af{\phi_1}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
 			\LeftLabel{$[\llplus_L]$}
-			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP
 			$$
 
 			$$
-			\AXC{$\focus{\Psi}{\Delta[\text{V}]}{\phi_1}$}
+			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi_1}$}
 			\LeftLabel{$[\llplus_L]$}
-			\UIC{$\focus{\Psi}{\Delta[\text{V}]}{\phi_1 \llplus \phi_2}$}
+			\UIC{$\focus{\Psi}{\Delta[\mathV]}{\phi_1 \llplus \phi_2}$}
 			\DP
 			$$
 		\item[$\llplus_R$:]
 			$$
-			\AX$\focus{\Psi}{\Delta}{\af{\phi_2}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\text{V}}$
+			\AX$\focus{\Psi}{\Delta}{\af{\phi_2}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
 			\LeftLabel{$[\llplus_R]$}
-			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP
 			$$
 
 			$$
-			\AXC{$\focus{\Psi}{\Delta[\text{V}]}{\phi_2}$}
+			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi_2}$}
 			\LeftLabel{$[\llplus_R]$}
-			\UIC{$\focus{\Psi}{\Delta[\text{V}]}{\phi_1 \llplus \phi_2}$}
+			\UIC{$\focus{\Psi}{\Delta[\mathV]}{\phi_1 \llplus \phi_2}$}
 			\DP
 			$$
 		\item[$\llwith$:]
 			$$
-			\AXC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}'}$}
-			\AXC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\text{V}''}$}
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV'}$}
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV''}$}
 			\LeftLabel{$[\llwith]$}
-			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\text{V}', \text{V}''}$}	% capisco cosa fanno qui i constraint
+			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV', \mathV''}$}	% capisco cosa fanno qui i constraint
 			\DP
 			$$
 
 			% might need to fix
 			$$
-			\AXC{$\async{\Psi}{\Delta[\text{V}]}{\phi_1, \Phi[\text{V}]}$}
-			\AXC{$\async{\Psi}{\Delta[\text{V}]}{\phi_2, \Phi[\text{V}]}$}
+			\AXC{$\async{\Psi}{\Delta[\mathV]}{\phi_1, \Phi[\mathV]}$}
+			\AXC{$\async{\Psi}{\Delta[\mathV]}{\phi_2, \Phi[\mathV]}$}
 			\LeftLabel{$[\llwith]$}
-			\BIC{$\async{\Psi}{\Delta[\text{V}]}{\phi_1 \llwith \phi_2, \Phi[\text{V}]}$}
+			\BIC{$\async{\Psi}{\Delta[\mathV]}{\phi_1 \llwith \phi_2, \Phi[\mathV]}$}
 			\DP
 			$$
 		\item[$\llbang{}$:]
 			$$
-			\AX$\focus{\Psi}{\Delta}{\af{\phi}{e_1}} \fCenter \separator \constr{\Lambda, \used{e_1}, \avail{\Delta}}{\text{V}}$
+			\AX$\focus{\Psi}{\Delta}{\af{\phi}{e_1}} \fCenter \separator \constr{\Lambda, \used{e_1}, \avail{\Delta}}{\mathV}$
 			\LeftLabel{$[\,!\,]$}
-			\UI$\focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\UI$\focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP
 			$$
 			$$
@@ -846,76 +882,76 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 			$$
 		\item[$\llwn{}$:]
 			$$
-			\AX$\async{\Psi, \phi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\AX$\async{\Psi, \phi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\LeftLabel{$[\llwn{}]$}
-			\UI$\async{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi} \fCenter \separator \constr{\Lambda}{\text{V}}$
+			\UI$\async{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP
 			$$
 			$$
-			\AXC{$\async{\phi, \Psi}{\Delta[\text{V}]}{\Phi[\text{V}]}$}
+			\AXC{$\async{\phi, \Psi}{\Delta[\mathV]}{\Phi[\mathV]}$}
 			\LeftLabel{$[\llwn{}]$}
-			\UIC{$\async{\Psi}{\Delta[\text{V}]}{\llwn{\phi}, \Phi[\text{V}]}$}
+			\UIC{$\async{\Psi}{\Delta[\mathV]}{\llwn{\phi}, \Phi[\mathV]}$}
 			\DP
 			$$
 		\item[$R\!\Downarrow$:] This rule is trivial
 			$$
 			\AXC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
-			\AXC{$\async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV}$}
 			\LeftLabel{$[R\!\Downarrow]$}
-			\BIC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\BIC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV}$}
 			\DP
 			$$
 			by stripping the constraints we obtain
 			$$
 			\AXC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
-			\AXC{$\async{\Psi}{\Delta[\text{V}]}{\phi}$}
+			\AXC{$\async{\Psi}{\Delta[\mathV]}{\phi}$}
 			\LeftLabel{$[R\!\Downarrow]$}
-			\BIC{$\focus{\Psi}{\Delta[\text{V}]}{\phi}$}
+			\BIC{$\focus{\Psi}{\Delta[\mathV]}{\phi}$}
 			\DP
 			$$
 		\item[$R\!\Uparrow$:] This rule is trivial
 			$$
 			\AXC{$\neg\isAsy{\phi}$}
-			\AXC{$\async{\Psi}{\Delta, \af{\phi}{e}}{\Phi} \separator \constr{\Lambda}{\text{V}}$}
+			\AXC{$\async{\Psi}{\Delta, \af{\phi}{e}}{\Phi} \separator \constr{\Lambda}{\mathV}$}
 			\LeftLabel{$[R\!\Uparrow]$}
-			\BIC{$\async{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\text{V}}$}
+			\BIC{$\async{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\mathV}$}
 			\DP
 			$$
 			
 			$$
 			\AXC{$\neg \isAsy{\phi}$}
-			\AXC{$\async{\Psi}{\phi, \Delta[\text{V}]}{\Phi[\text{V}]}$}
+			\AXC{$\async{\Psi}{\phi, \Delta[\mathV]}{\Phi[\mathV]}$}
 			\LeftLabel{$[R\!\Uparrow]$}
-			\BIC{$\async{\Psi}{\Delta[\text{V}]}{\phi, \Phi[\text{V}]}$}
+			\BIC{$\async{\Psi}{\Delta[\mathV]}{\phi, \Phi[\mathV]}$}
 			\DP
 			$$
 		\item[$D_1$:]
 			$$
 			\AXC{$\neg \isNegLit{\phi}$}
-			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\text{V}}$}
+			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV}$}
 			\LeftLabel{$[D_1]$}
-			\BIC{$\async{\Psi}{\Delta, \af{\phi}{e}}{.} \separator \constr{\Lambda}{\text{V}}$}
+			\BIC{$\async{\Psi}{\Delta, \af{\phi}{e}}{.} \separator \constr{\Lambda}{\mathV}$}
 			\DP
 			$$
 			$$
-			\AXC{$\focus{\Psi}{\Delta[\text{V}]}{\phi}$}
+			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi}$}
 			\LeftLabel{$[D_1]$}
-			\UIC{$\async{\Psi}{\phi, \Delta[\text{V}]}{.}$}
+			\UIC{$\async{\Psi}{\phi, \Delta[\mathV]}{.}$}
 			\DP
 			$$
 		\item[$D_2$:]
 			$$
 			\AXC{$\neg \isNegLit{\phi}$}
 			\AXC{$\new{x}$}
-			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\Lambda, \used{e}}{\text{V}}$}
+			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\Lambda, \used{e}}{\mathV}$}
 			\LeftLabel{$[D_2]$}
-			\TrinaryInfC{$\async{\Psi, \phi}{\Delta}{.} \separator \constr{\Lambda}{\text{V}}$}
+			\TrinaryInfC{$\async{\Psi, \phi}{\Delta}{.} \separator \constr{\Lambda}{\mathV}$}
 			\DP
 			$$
 			$$
-			\AXC{$\focus{\Psi}{\Delta[\text{V}]}{\phi}$}
+			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi}$}
 			\LeftLabel{$[D_2]$}
-			\UIC{$\async{\phi, \Psi}{\Delta[\text{V}]}{.}$}
+			\UIC{$\async{\phi, \Psi}{\Delta[\mathV]}{.}$}
 			\DP
 			$$
 	\end{itemize}
