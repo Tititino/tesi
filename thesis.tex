@@ -604,101 +604,100 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 	As a soundness proof we give a translation to the triadic system defined by Andreoli in \cite{Focusing}:
 	\begin{figure}[H]
 		\centering
-	\begin{tblr}{ colspec = {c c c}
-		    , cells = { mode = dmath } 
-		    , rows = {abovesep=7pt, belowsep=7pt}
-		    , vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
-		    }
-		\AXC{$\async{\Psi}{\Delta}{\Phi}$}
-		\LeftLabel{$[\llbot]$}
-		\UIC{$\async{\Psi}{\Delta}{\llbot, \Phi}$}
-		\DP
-		&
-		\AXC{$\async{\Psi}{\Delta}{\phi_1, \phi_2, \Phi}$}
-		\LeftLabel{$[\llpar]$}
-		\UIC{$\async{\Psi}{\Delta}{\phi_1 \llpar \phi_2, \Phi}$}
-		\DP
-		&
-		\AXC{$\async{\phi, \Psi}{\Delta}{\Phi}$}
-		\LeftLabel{$[\llwn{}]$}
-		\UIC{$\async{\Psi}{\Delta}{\llwn{\phi}, \Phi}$}
-		\DP
-		\\
-		\AXC{}
-		\LeftLabel{$[\lltop]$}
-		\UIC{$\async{\Psi}{\Delta}{\lltop, \Phi}$}
-		\DP
-		&
-		\SetCell[c=2]{c} 
-		\AXC{$\async{\Psi}{\Delta}{\phi_1, \Phi}$}
-		\AXC{$\async{\Psi}{\Delta}{\phi_2, \Phi}$}
-		\LeftLabel{$[\llwith]$}
-		\BIC{$\async{\Psi}{\Delta}{\phi_1 \llwith \phi_2, \Phi}$}
-		\DP
-		\\
-		\AXC{$\focus{\Psi}{\Delta}{\phi_1}$}
-		\LeftLabel{$[\llplus_L]$}
-		\UIC{$\focus{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
-		\DP
-		&
-		\AXC{}
-		\LeftLabel{$[\llone]$}
-		\UIC{$\focus{\Psi}{.}{\llone}$}
-		\DP
-		& 
-		\AXC{$\async{\Psi}{.}{\phi}$}
-		\LeftLabel{$[\llbang{}]$}
-		\UIC{$\focus{\Psi}{.}{\llbang{\phi}}$}
-		\DP
-		\\
-		\AXC{$\focus{\Psi}{\Delta}{\phi_2}$}
-		\LeftLabel{$[\llplus_R]$}
-		\UIC{$\focus{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
-		\DP
-		&
-		\SetCell[c=2]{c} 
-		\AXC{$\focus{\Psi}{\Gamma}{\phi_1}$}
-		\AXC{$\focus{\Psi}{\Delta}{\phi_2}$}
-		\LeftLabel{$[\llten]$}
-		\BIC{$\focus{\Psi}{\Gamma, \Delta}{\phi_1 \llten \phi_2}$}
-		\DP
-		\\
-		\AXC{$\neg \isAsy{\phi}$}
-		\AXC{$\async{\Psi}{\phi, \Delta}{\Phi}$}
-		\LeftLabel{$[R\!\Uparrow]$}
-		\BIC{$\async{\Psi}{\Delta}{\phi, \Phi}$}
-		\DP
-		&
-		\AXC{$\isNegLit{\alpha}$}
-		\LeftLabel{$[I_1]$}
-		\UIC{$\focus{\Psi}{\phi}{\llnot{\phi}}$}
-		\DP
-		&
-		\AXC{$\focus{\Psi}{\Delta}{\phi}$}
-		\LeftLabel{$[D_1]$}
-		\UIC{$\async{\Psi}{\phi, \Delta}{.}$}
-		\DP
-		\\
-		\AXC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
-		\AXC{$\async{\Psi}{\Delta}{\phi}$}
-		\LeftLabel{$[R\!\Downarrow]$}
-		\BIC{$\focus{\Psi}{\Delta}{\phi}$}
-		\DP
-		&
-		\AXC{$\isNegLit{\alpha}$}
-		\LeftLabel{$[I_2]$}
-		\UIC{$\focus{\phi, \Psi}{.}{\llnot{\phi}}$}
-		\DP
-		&
-		\AXC{$\focus{\Psi}{\Delta}{\phi}$}
-		\LeftLabel{$[D_2]$}
-		\UIC{$\async{\phi, \Psi}{\Delta}{.}$}
-		\DP
-	\end{tblr}
-	\caption{J.-M. Andreoli's triadic calculus}
-	\label{fig:triadic}
-\end{figure}
-\end{center}
+		\begin{tblr}{ colspec = {c c c}
+			, cells = { mode = dmath } 
+			, rows = {abovesep=7pt, belowsep=7pt}
+			, vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
+			}
+			\AXC{$\async{\Psi}{\Delta}{\Phi}$}
+			\LeftLabel{$[\llbot]$}
+			\UIC{$\async{\Psi}{\Delta}{\llbot, \Phi}$}
+			\DP
+			&
+			\AXC{$\async{\Psi}{\Delta}{\phi_1, \phi_2, \Phi}$}
+			\LeftLabel{$[\llpar]$}
+			\UIC{$\async{\Psi}{\Delta}{\phi_1 \llpar \phi_2, \Phi}$}
+			\DP
+			&
+			\AXC{$\async{\phi, \Psi}{\Delta}{\Phi}$}
+			\LeftLabel{$[\llwn{}]$}
+			\UIC{$\async{\Psi}{\Delta}{\llwn{\phi}, \Phi}$}
+			\DP
+			\\
+			\AXC{}
+			\LeftLabel{$[\lltop]$}
+			\UIC{$\async{\Psi}{\Delta}{\lltop, \Phi}$}
+			\DP
+			&
+			\SetCell[c=2]{c} 
+			\AXC{$\async{\Psi}{\Delta}{\phi_1, \Phi}$}
+			\AXC{$\async{\Psi}{\Delta}{\phi_2, \Phi}$}
+			\LeftLabel{$[\llwith]$}
+			\BIC{$\async{\Psi}{\Delta}{\phi_1 \llwith \phi_2, \Phi}$}
+			\DP
+			\\
+			\AXC{$\focus{\Psi}{\Delta}{\phi_1}$}
+			\LeftLabel{$[\llplus_L]$}
+			\UIC{$\focus{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
+			\DP
+			&
+			\AXC{}
+			\LeftLabel{$[\llone]$}
+			\UIC{$\focus{\Psi}{.}{\llone}$}
+			\DP
+			& 
+			\AXC{$\async{\Psi}{.}{\phi}$}
+			\LeftLabel{$[\llbang{}]$}
+			\UIC{$\focus{\Psi}{.}{\llbang{\phi}}$}
+			\DP
+			\\
+			\AXC{$\focus{\Psi}{\Delta}{\phi_2}$}
+			\LeftLabel{$[\llplus_R]$}
+			\UIC{$\focus{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
+			\DP
+			&
+			\SetCell[c=2]{c} 
+			\AXC{$\focus{\Psi}{\Gamma}{\phi_1}$}
+			\AXC{$\focus{\Psi}{\Delta}{\phi_2}$}
+			\LeftLabel{$[\llten]$}
+			\BIC{$\focus{\Psi}{\Gamma, \Delta}{\phi_1 \llten \phi_2}$}
+			\DP
+			\\
+			\AXC{$\neg \isAsy{\phi}$}
+			\AXC{$\async{\Psi}{\phi, \Delta}{\Phi}$}
+			\LeftLabel{$[R\!\Uparrow]$}
+			\BIC{$\async{\Psi}{\Delta}{\phi, \Phi}$}
+			\DP
+			&
+			\AXC{$\isNegLit{\alpha}$}
+			\LeftLabel{$[I_1]$}
+			\UIC{$\focus{\Psi}{\phi}{\llnot{\phi}}$}
+			\DP
+			&
+			\AXC{$\focus{\Psi}{\Delta}{\phi}$}
+			\LeftLabel{$[D_1]$}
+			\UIC{$\async{\Psi}{\phi, \Delta}{.}$}
+			\DP
+			\\
+			\AXC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
+			\AXC{$\async{\Psi}{\Delta}{\phi}$}
+			\LeftLabel{$[R\!\Downarrow]$}
+			\BIC{$\focus{\Psi}{\Delta}{\phi}$}
+			\DP
+			&
+			\AXC{$\isNegLit{\alpha}$}
+			\LeftLabel{$[I_2]$}
+			\UIC{$\focus{\phi, \Psi}{.}{\llnot{\phi}}$}
+			\DP
+			&
+			\AXC{$\focus{\Psi}{\Delta}{\phi}$}
+			\LeftLabel{$[D_2]$}
+			\UIC{$\async{\phi, \Psi}{\Delta}{.}$}
+			\DP
+		\end{tblr}
+		\caption{J.-M. Andreoli's triadic calculus}
+		\label{fig:triadic}
+	\end{figure}
 	We proceed with the base cases
 	The three base cases are demonstrated essentially in the same way:
 	\begin{itemize}
@@ -1442,13 +1441,13 @@ Using random formulae we can clearly see that our prover outperforms APLL (and l
 		\centering
 		\includegraphics[scale=0.5]{./images/mll.pdf}
 		\caption{Multiplicative case}
-		\label{fig:mll_bars}
+		\label{fig:mll-bars}
 	\end{subfigure}
 	\begin{subfigure}{0.49\textwidth}
 		\centering
 		\includegraphics[scale=0.5]{./images/mall.pdf}
 		\caption{Multiplicative and additive case}
-		\label{fig:mall_bars}
+		\label{fig:mall-bars}
 	\end{subfigure}
 	\caption{Percentage of number of timeouts out of a hundred formulae}
 \end{figure}
@@ -1460,14 +1459,14 @@ As soon as exponentials come into play the differences level out.
 	\centering
 	\includegraphics[scale=0.5]{./images/cll-500-250.pdf}
 	\caption{Full linear logic}
-	\label{fig:cll_bars}
+	\label{fig:cll-bars}
 \end{figure}
-It can be seen in \ref{fig:cll_bars} that in full linear logic our prover performs slightly worse than APLL.
+It can be seen in \ref{fig:cll-bars} that in full linear logic our prover performs slightly worse than APLL.
 
 All these test were done generating suits of 100 tests.
-Figure \ref{fig:mll_bars}'s tests were composed of normalized formulae of \texttt{size} 100, and \texttt{atoms} 50, with just the connectives $\llten$ and $\llpar$.
-Figure \ref{fig:mall_bars}'s tests were composed of normalized formulae formulae of \texttt{size} 500, and \texttt{atoms} 250, with the connectives $\llten, \llpar, \llwith$ and $\llplus$.
-Finally \ref{fig:cll_bars}'s tests were composed of normalized formulae of \texttt{size} 500, and \texttt{atoms} 250, with all the connectives.
+Figure \ref{fig:mll-bars}'s tests were composed of normalized formulae of \texttt{size} 100, and \texttt{atoms} 50, with just the connectives $\llten$ and $\llpar$.
+Figure \ref{fig:mall-bars}'s tests were composed of normalized formulae formulae of \texttt{size} 500, and \texttt{atoms} 250, with the connectives $\llten, \llpar, \llwith$ and $\llplus$.
+Finally \ref{fig:cll-bars}'s tests were composed of normalized formulae of \texttt{size} 500, and \texttt{atoms} 250, with all the connectives.
 
 When looking at the results of full linear logic, it is important to note that unlike the tests with multiplicatives and additives, some of the results may be early failures because of the bound.
 Since llprover uses incremental search, its times are often the slowest.
