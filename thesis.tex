@@ -1,6 +1,6 @@
 \documentclass[a4paper, 12pt, english]{report}
 
-\usepackage[dbg]{thesis}
+\usepackage OPTIONS {thesis}
 
 \title{Proof Search in Propositional Linear Logic via Boolean Constraints Satisfaction
 % \includegraphics{./images/tesiSCIENZE_TECNOLOGIE.jpg}
@@ -137,7 +137,7 @@
 
 
 \section{Why Prolog}
-Prolog as a language and as an environment has been historically tied to automated theorem proving for its ability to express these kind of algorithmns naturally.
+Prolog as a language and as an environment has been historically tied to automated theorem proving for its ability to express its algorithmns naturally.
 % In particular we chose SWI-Prolog because it offers a comprehensive and mature free Prolog environment.
 One particularly conventient characteristic of Prolog is its automatic management of backtracking, in most other languages we would have had to use exceptions to walk down the stack, or a queue of unfinished computations, which would have made the code much less readable.
 
@@ -152,8 +152,8 @@ X * Y.
 X =:= Y.
 \end{minted}
 
-Usually constraints will be accumualted in a list, for this reason \CLPB provides the functor \texttt{*(L)} to express the conjunction of its members.
-A constraint may be checked using the predicate \texttt{sat/1}, which succeds iff the constraint is satisfiable.
+Usually constraints will be accumualted in a list, for this reason \CLPB{} provides the functor \texttt{*(L)} to express the conjunction of its members.
+A constraint may be checked using the predicate \texttt{sat/1}, which succeds iff it is satisfiable.
 Since we only deal with conjunctions we define the helper predicate \texttt{check/1}
 \begin{minted}{prolog}
 check(L) :-
@@ -176,11 +176,8 @@ Here we can see three different cases:
 	\item the third case shows how one constraint (\texttt{X =:= 1}) can force a variable to be unified to a value.
 \end{itemize}
 We use the library with the flag \texttt{clpb\_monotonic} set to \texttt{true}.
-This make the algorithm many order of magnitude faster but mandates that all variables be wrapped by the functor \texttt{v/1}.
+This makes the algorithm many orders of magnitude faster but mandates that all variables be wrapped by the functor \texttt{v/1}.
 This small explanation sums up the extent of the library we use in our prover.
-
-One other characteristic of Prolog which revealed to be very handy for our prover is unification.
-Using this we didn't have to explicitly propagate the solutions of the SAT-solver, which instead were automatically propagated between branches.
 
 \chapter{The focused calculus}
 % Before describing the calculus we must give some preliminary definitions
@@ -190,7 +187,9 @@ Using this we didn't have to explicitly propagate the solutions of the SAT-solve
 \section{Normalization}
 Since in linear logic negation is symmetric and involutive, it is usual to work only with formulae in negated normal form.
 \begin{define}[Negated Normal Form -- NNF]
-	A farmula is in NNF if all its linear implications ($\lolli$) are expanded to pars ($\llpar$) and negation is found only at atoms.
+	A farmula is in NNF if all its linear implications ($\lolli$) are expanded to pars ($\llpar$) using the tautology
+	$$ a \lolli b \Leftrightarrow \llnot{a} \llpar b$$
+	and negation is pushed down to atoms.	% terms?
 	Intuitively, a sequent is in NNF if all its formulae are in NNF.
 \end{define}
 A generic formula is then normalized applying recursively the DeMorgan rules for linear logic, untill NNF is reached.
@@ -200,7 +199,7 @@ and transforms it into a one-sided judgement
 $$ \vdash \Delta' $$
 where the right side is composed of the normalization of $\Gamma$ and $\llnot{\Delta}$.
 
-This choice has some implementation-wise advantages, but for now we will only care about the fact that it shrinks the size of the complete calulus by roughly half since we only have to deal with the right rules of the connectives.
+This choice has some implementation-wise advantages, but for now we will only care about the fact that it shrinks the size of the complete calulus by roughly half; since we only have to deal with the right rules of the connectives.
 \begin{figure}[H]
 	\centering
 	\begin{tblr}{ colspec = {cccccccccr}
@@ -228,7 +227,7 @@ These two phases are respectively called asynchronous and synchronous phase.
 	conversely we define ``$\isSync{\phi}$'' to indicate that the rule for the toplevel connective of $\phi$ is synchronous on the right, these are
 	$$ \llten, \llplus, \llbang{}, \llone $$
 \end{define}
-Furthermore in focusing everything is assigned a polarity of positive or negative.
+Furthermore in focusing everything is assigned a negative or positive polarity.
 Synchronous connectives are defined to have a positive polarity, whereas asynchronous connectives are define to have a negative polarity.
 Terms also have a polarity, which may be assigned with some arbitrarly complex mechanisms.
 We will follow \cite{LiangMiller} and simply assing atoms with a negative polarity and negated atoms with a positive one.
@@ -238,6 +237,7 @@ We will follow \cite{LiangMiller} and simply assing atoms with a negative polari
 \end{define}
 
 \section{Constraints}
+
 Our calculus uses constraints to manage the resources.
 \begin{define}[Variables, expressions]
 	\label{def:bool-expr}
@@ -509,7 +509,7 @@ We are now ready to present the full calculus.
 			\AXC{$ \isNegLit{\alpha} $}
 			\AXC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\mathV}$}
 			\LeftLabel{$[I_1]$}
-			\BIC{$\focus{\Psi}{\af{\alpha}{e_2}, \Delta}{\af{\llnot{\alpha}}{e_1}} \separator \constr{\Lambda}{\mathV}$}
+			\BIC{$\focus{\Psi}{\af{\alpha}{e_1}, \Delta}{\af{\llnot{\alpha}}{e_2}} \separator \constr{\Lambda}{\mathV}$}
 			\DP}
 			&
 			{\footnotesize
@@ -595,7 +595,17 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 			$$ \bigwedge_{\lambda \in \mathV, \Lambda} \lambda[\mathV'] = \top $$
 		thus the constraints derived from V must still hold with assignment $\mathV'$.
 	\end{itemize}
-	
+\end{proof}
+\begin{lemma}
+	\label{lemma:subsume}
+	Forall sets of constraints $\Lambda$ and forall assignments $\mathV$, if
+	$$ \sat{\Lambda}{\mathV} $$
+	then for any $\Lambda' \subseteq \Lambda$
+	$$ \sat{\Lambda'}{\mathV} $$
+\end{lemma}
+\begin{proof}
+	Following the Definition \ref{def:sat} of satisfabiability, every constraint in $\Lambda$ must hold under assignment $\mathV$.
+	This trivially means that all the constraints in $\Lambda'$ must also hold.
 \end{proof}
 
 \begin{teor}[Soundness]
@@ -672,7 +682,7 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 			&
 			\AXC{$\isNegLit{\alpha}$}
 			\LeftLabel{$[I_1]$}
-			\UIC{$\focus{\Psi}{\phi}{\llnot{\phi}}$}
+			\UIC{$\focus{\Psi}{\alpha}{\llnot{\alpha}}$}
 			\DP
 			&
 			\AXC{$\focus{\Psi}{\Delta}{\phi}$}
@@ -688,7 +698,7 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 			&
 			\AXC{$\isNegLit{\alpha}$}
 			\LeftLabel{$[I_2]$}
-			\UIC{$\focus{\phi, \Psi}{.}{\llnot{\phi}}$}
+			\UIC{$\focus{\alpha, \Psi}{.}{\llnot{\alpha}}$}
 			\DP
 			&
 			\AXC{$\focus{\Psi}{\Delta}{\phi}$}
@@ -707,20 +717,20 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 			\AXC{$\isNegLit{\alpha}$}
 			\AXC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\mathV}$}
 			\LeftLabel{$[I_1]$}
-			\BIC{$\focus{\Psi}{\Delta, \af{\alpha}{e_2}}{\af{\llnot{\alpha}}{e_1}} \separator \constr{\Lambda}{\mathV}$}
+			\BIC{$\focus{\Psi}{\Delta, \af{\alpha}{e_1}}{\af{\llnot{\alpha}}{e_2}} \separator \constr{\Lambda}{\mathV}$}
 			\DP
 			$$
 			looking at the constraints we trivially get that
 			\begin{align*}
 				\Delta[\mathV] &= . \tag{Because of $\avail{\Delta}$} \\
-				\af{\llnot{\alpha}}{e_1}[\mathV] &= \llnot{\alpha} \tag{Because of $\used{e_1}$} \\
-				\af{\alpha}{e_2}[\mathV] &= \alpha \tag{Because of $\used{e_2}$}
+				\af{\alpha}{e_1}[\mathV] &= \alpha \tag{Because of $\used{e_1}$} \\
+				\af{\llnot{\alpha}}{e_2}[\mathV] &= \llnot{\alpha} \tag{Because of $\used{e_2}$}
 			\end{align*}
 			so we can rewrite this as
 			$$
 			\AXC{$\isNegLit{\alpha}$}
 			\LeftLabel{$[I_1]$}
-			\UIC{$\focus{\Psi}{\phi}{\llnot{\phi}}$}
+			\UIC{$\focus{\Psi}{\alpha}{\llnot{\alpha}}$}
 			\DP
 			$$
 		\item[$I_2$:] Given the judgement
@@ -855,16 +865,16 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 			\AXC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV'}$}
 			\AXC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV''}$}
 			\LeftLabel{$[\llwith]$}
-			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV', \mathV''}$}	% capisco cosa fanno qui i constraint
+			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV'}$}	
 			\DP
 			$$
-
-			% might need to fix
+			Or equivalently choosing $\mathV''$.
+			This holds because of Lamma \ref{lemma:subsume} and because $\Lambda \subseteq \used{e}, \Lambda$.
 			$$
-			\AXC{$\async{\Psi}{\Delta[\mathV]}{\phi_1, \Phi[\mathV]}$}
-			\AXC{$\async{\Psi}{\Delta[\mathV]}{\phi_2, \Phi[\mathV]}$}
+			\AXC{$\async{\Psi}{\Delta[\mathV']}{\phi_1, \Phi[\mathV']}$}
+			\AXC{$\async{\Psi}{\Delta[\mathV'']}{\phi_2, \Phi[\mathV'']}$}
 			\LeftLabel{$[\llwith]$}
-			\BIC{$\async{\Psi}{\Delta[\mathV]}{\phi_1 \llwith \phi_2, \Phi[\mathV]}$}
+			\BIC{$\async{\Psi}{\Delta[\mathV']}{\phi_1 \llwith \phi_2, \Phi[\mathV']}$}
 			\DP
 			$$
 		\item[$\llbang{}$:]
@@ -1057,13 +1067,13 @@ The other helper predicate implements the split function defined in Definition \
 split_ctx(Afs, Pos, Neg, PCns, NCns) :-
   maplist([ af(F, N, E)
           , af(F, VarPos, Y)
-  	  , af(F, VarNeg, Z)
-  	  , v(Y) =:= v(X) * v(E)
-  	  , v(Z) =:= (~ v(X)) * v(E)
-  	  ]>>(
-  	    gensym(x, V),
-  	    atomic_list_concat([N, V], '.', VarPos),
-  	    atomic_list_concat([N, V], '.~', VarNeg)
+          , af(F, VarNeg, Z)
+          , v(Y) =:= v(X) * v(E)
+          , v(Z) =:= (~ v(X)) * v(E)
+          ]>>(
+  	     gensym(x, V),
+  	     atomic_list_concat([N, V], '.', VarPos),
+  	     atomic_list_concat([N, V], '.~', VarNeg)
   ), Afs, Pos, Neg, PCns, NCns).
 \end{minted}
 It is again a map over the list of formulae, that generates the new formulae and the constraints accordingly.
@@ -1071,7 +1081,7 @@ Three new Prolog variables are introduced: \texttt{X}, \texttt{Y} and \texttt{Z}
 \texttt{X} is the new variable, the annotated formulae refer to the variable \texttt{Y} and \texttt{Z}, and constraints are added so that
 \begin{align*}
 	y &= x \varAnd e \\
-	y &= \varNot{x} \varAnd e \\
+	y &= \varNot{x} \varAnd e
 \end{align*}
 Compare this to the original definition of Definition \ref{def:split}, one can see that the two are basically identical other than the fact that here the name of the variable (the atom) and its value are treated separately.
 
@@ -1154,10 +1164,10 @@ Two cases arise:
 		This can be seen in the predicate \texttt{refill/4}
 		\begin{minted}{prolog}
 refill(U, M, S, M1) :-
-	\+ M = 0,
-	\+ U = [], 
-	sort(2, @=<, U, S), 
-	M1 is M - 1.
+  \+ M = 0,
+  \+ U = [], 
+  sort(2, @=<, U, S), 
+  M1 is M - 1.
 		\end{minted}
 		Line 4 is a sort in increasing order on the second attribute (the why-not height), keeping duplicates.
 		This new list of unrestricted formule becomes the new \texttt{S} and \texttt{M} is decreased.

@@ -3,10 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
-    flake-utils = {
-      url = "github:numtide/flake-utils";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs = { self, nixpkgs, flake-utils }: 
@@ -43,8 +40,8 @@
 	      xcolor;
 	  });
     in rec {
-        packages = rec {
-	  thesis = 
+        packages = 
+	  let makeThesis = flags:
 	    stdenvNoCC.mkDerivation rec {
               name = "thesis";
 
@@ -52,6 +49,7 @@
 
               buildInputs = [
 	        coreutils
+		gnumake
 	        pygmentize
 		tex
 		which
@@ -62,13 +60,12 @@
               phases = ["unpackPhase" "buildPhase" "installPhase"];
 
 	      buildPhase = ''
-                export PATH="${pkgs.lib.makeBinPath buildInputs}";
+	        appendToVar PATH ${toString buildInputs}
                 mkdir -p .cache/texmf-var
-                env TEXMFHOME=.cache TEXMFVAR=.cache/texmf-var \
+		substituteInPlace thesis.tex --replace 'OPTIONS' '[${toString flags}]'
+                env TEXMFHOME=.cache TEXMFVAR=.cache/texmf-var    \
                   SOURCE_DATE_EPOCH=${toString self.lastModified} \
-                  latexmk -interaction=nonstopmode -pdf -lualatex -latexoption="-shell-escape" \
-		  -pretex="\pdfvariable suppressoptionalinfo 512\relax" \
-		  -usepretex thesis.tex
+		  make all
 	      '';
 
               installPhase = ''
@@ -76,9 +73,10 @@
 		  cp thesis.pdf $out/thesis.pdf
 	      '';
             };
-
-	    default = thesis;
-
+	in rec {
+	  thesis = makeThesis [];
+	  debug = makeThesis ["dbg"];
+	  default = thesis;
         };
 
         devShells = rec {
@@ -90,6 +88,7 @@
 	        pygmentize
 		tex
 		gnumake
+		gnused
               ];
             };
 
