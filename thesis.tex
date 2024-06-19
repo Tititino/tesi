@@ -184,9 +184,10 @@ This small explanation sums up the extent of the library we use in our prover.
 
 % Explaination on constraints why we use them ecc ecc ecc
 
-\section{Normalization}
+\section{Normalization}\label{sec:normalization}
 Since in linear logic negation is symmetric and involutive, it is usual to work only with formulae in negated normal form.
 \begin{define}[Negated Normal Form -- NNF]
+	\label{def:nnf}
 	A farmula is in NNF if all its linear implications ($\lolli$) are expanded to pars ($\llpar$) using the tautology
 	$$ a \lolli b \Leftrightarrow \llnot{a} \llpar b$$
 	and negation is pushed down to atoms.	% terms?
@@ -199,7 +200,7 @@ and transforms it into a one-sided judgement
 $$ \vdash \Delta' $$
 where the right side is composed of the normalization of $\Gamma$ and $\llnot{\Delta}$.
 
-This choice has some implementation-wise advantages, but for now we will only care about the fact that it shrinks the size of the complete calulus by roughly half; since we only have to deal with the right rules of the connectives.
+This choice has some implementation-wise advantages, but for now we will only care about the fact that it shrinks the size of the complete calulus by roughly half since we only have to deal with the right rules of the connectives.
 \begin{figure}[H]
 	\centering
 	\begin{tblr}{ colspec = {cccccccccr}
@@ -300,8 +301,8 @@ These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
 	\end{itemize}
 	We then extend these predicates to sequents
 	\begin{align*}
-		\used{\Delta} &= \{ \used{e_2} \mid e_2 \in \mathrm{exp}(\Delta) \} \\
-		\avail{\Delta} &= \{ \avail{e_2} \mid e_2 \in \mathrm{exp}(\Delta) \}
+		\used{\Delta} &= \{ \used{e} \mid e \in \mathrm{exp}(\Delta) \} \\
+		\avail{\Delta} &= \{ \avail{e} \mid e \in \mathrm{exp}(\Delta) \}
 	\end{align*}
 	We denote
 	\begin{itemize}
@@ -363,7 +364,7 @@ We now expand the concept of triadic sequent of \cite{Focusing} by adding constr
 		\item $\Delta$ and $\Phi$ are multisets of linear (annotated) formulae, these are respectively the formulas ``put to the side'' and the formulae which are being ``worked on'' during a certain moment of the asynchronous phase;
 		\item $\Lambda$ and V are the constraints and the solution as defined in Definition \ref{def:sat}.
 			By adding these members we make the flow of constraints through the proof tree explicit, leaving no ambiguity to where the constraints should be checked.
-			This approach to constraints differs from the one in \cite{HarlandPym}, which, on the other hand, preferred to keep generality.
+			This approach to constraints differs from the one in \cite{HarlandPym}, which prioritizes generality.
 			The choice of letters is mainly a mnemonic or visual one, constraints $\Lambda$ ``go-up'' the proof tree and solutions V ``come down'' from the leaves.
 	\end{itemize}
 \end{define}
@@ -389,8 +390,8 @@ As a small example for clarity, given the sequent
 \end{align*}
 this is split into
 \begin{align*}
-	\Delta_L^X &\mapsto \af{a \llten b}{x_3 \varAnd x_1}, \af{\llnot{c}}{x_4 \varAnd x_2} \\
-	\Delta_R^X &\mapsto \af{a \llten b}{\varNot{x_3} \varAnd x_1}, \af{\llnot{c}}{\varNot{x_4} \varAnd x_2} 
+	\Delta_L^X &= \af{a \llten b}{x_3 \varAnd x_1}, \af{\llnot{c}}{x_4 \varAnd x_2} \\
+	\Delta_R^X &= \af{a \llten b}{\varNot{x_3} \varAnd x_1}, \af{\llnot{c}}{\varNot{x_4} \varAnd x_2} 
 \end{align*}
 % example of splitting and variables
 
@@ -426,7 +427,7 @@ We are now ready to present the full calculus.
 			\AXC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV'}$}
 			\AXC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV''}$}
 			\LeftLabel{$[\llwith]$}
-			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV', \mathV''}$}	% capisco cosa fanno qui i constraint
+			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV''}$}	
 			\DP}
 			\\
 			\SetCell[c=2]{c} {\footnotesize
@@ -608,7 +609,7 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 	This trivially means that all the constraints in $\Lambda'$ must also hold.
 \end{proof}
 
-\begin{teor}[Soundness]
+\begin{teor}[Soundness]\label{thm:soundness}
 	% Let $\vdash \Psi$ The calculus of Figure \ref{fig:calculus} is sound % ...
 \end{teor}
 \begin{proof}
@@ -706,11 +707,10 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 			\UIC{$\async{\phi, \Psi}{\Delta}{.}$}
 			\DP
 		\end{tblr}
-		\caption{J.-M. Andreoli's triadic calculus}
+		\caption{J.-M. Andreoli's triadic calculus.}
 		\label{fig:triadic}
 	\end{figure}
-	We proceed with the base cases
-	The three base cases are demonstrated essentially in the same way:
+	The three base cases are proved essentially in the same way:
 	\begin{itemize}
 		\item[$I_1$:] Given the judgment
 			$$
@@ -773,13 +773,13 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 			\DP
 			$$
 	\end{itemize}
-	The induction step is rather mechanic, with the exception of the tensor rule:
+	The induction step is rather mechanic, with the exception of 
 	\begin{itemize}
-		\item[$\llten$:] 
+		\item the tensor rule ($\llten$):
 			$$
 			\AXC{$ \new{X} \hspace{.3cm} 
-				\focus{\Psi}{\Delta_L^X}{\af{\phi_1}{e}} \separator \constr{\Lambda, \used{e}}{\mathV'} \hspace{.3cm} 
-				\focus{\Psi}{\Delta_R^X}{\af{\phi_2}{e}} \separator \constr{\mathV'}{\mathV''}$}
+			\focus{\Psi}{\Delta_L^X}{\af{\phi_1}{e}} \separator \constr{\Lambda, \used{e}}{\mathV'} \hspace{.3cm} 
+			\focus{\Psi}{\Delta_R^X}{\af{\phi_2}{e}} \separator \constr{\mathV'}{\mathV''}$}
 			\LeftLabel{$[\llten]$}
 			\UIC{$\focus{\Psi}{\Delta}{\af{\phi_1 \llten \phi_2}{e}} \separator \constr{\Lambda}{\mathV''}$}	% capisco il movimento dei constraint
 			\DP
@@ -795,20 +795,125 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 			\BIC{$\focus{\Psi}{\Delta_L^X[\mathV''], \Delta_R^X[\mathV'']}{\phi_1 \llten \phi_2}$}
 			\DP
 			$$
-		\item[$\llbot$:] 
+		\item the with rule ($\llwith$):
 			$$
-			\AX$\async{\Psi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
-			\LeftLabel{$[\llbot]$}
-			\UI$\async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV'}$}
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV''}$}
+			\LeftLabel{$[\llwith]$}
+			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV''}$}
 			\DP
 			$$
-			and
+			which after erasing the unused formulae using the assignment becomes
 			$$
+			\AXC{$\async{\Psi}{\Delta[\mathV']}{\phi_2, \Phi[\mathV']}$}
+			\AXC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Phi[\mathV'']}$}
+			\LeftLabel{$[\llwith]$}
+			\BIC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1 \llwith \phi_2, \Phi[\mathV'']}$}
+			\DP
+			$$
+			or equivalently 
+			$$
+			\AXC{$\async{\Psi}{\Delta[\mathV']}{\phi_2, \Phi[\mathV']}$}
+			\AXC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Phi[\mathV'']}$}
+			\LeftLabel{$[\llwith]$}
+			\BIC{$\async{\Psi}{\Delta[\mathV']}{\phi_1 \llwith \phi_2, \Phi[\mathV']}$}
+			\DP
+			$$
+			since  $\Lambda \subseteq \used{e}, \Lambda$ and Lemma \ref{lemma:subsume}.
+	\end{itemize}
+	The rest of the translations are just a matter of cancelling out the members of the sequent using the assignment function.
+	\begin{center}
+		\begin{tblr}{ colspec = { ccc }
+			    , cells = { mode = dmath } 
+			    , rows = {abovesep=5pt, belowsep=5pt}
+			    }
+			\llbot
+			& \mapsto
+			& 
 			\AXC{$\async{\Psi}{\Delta[\mathV]}{\Phi[\mathV]}$}
-			\LeftLabel{$[\llbot]$}
 			\UIC{$\async{\Psi}{\Delta[\mathV]}{\llbot, \Phi[\mathV]}$}
 			\DP
-			$$
+			\\
+			\llpar
+			& \mapsto
+			& 
+ 			\AXC{$\async{\Psi}{\Delta[\mathV]}{\phi_1, \phi_2, \Phi[\mathV]}$}
+ 			\UIC{$\async{\Psi}{\Delta[\mathV]}{\phi_1 \llpar \phi_2, \Phi[\mathV]}$}
+ 			\DP
+			\\
+			\llplus_L
+			& \mapsto
+			& 
+ 			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi_1}$}
+ 			\UIC{$\focus{\Psi}{\Delta[\mathV]}{\phi_1 \llplus \phi_2}$}
+ 			\DP
+			\\
+			\llplus_R
+			& \mapsto
+			& 
+ 			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi_2}$}
+ 			\UIC{$\focus{\Psi}{\Delta[\mathV]}{\phi_1 \llplus \phi_2}$}
+ 			\DP
+			\\
+			\llbang{}
+			& \mapsto
+			& 
+ 			\AXC{$\async{\Psi}{.}{\phi}$}
+ 			\UIC{$\focus{\Psi}{.}{\llbang{\phi}}$}
+ 			\DP
+			\\
+			\llwn{}
+			& \mapsto
+			&
+ 			\AXC{$\async{\phi, \Psi}{\Delta[\mathV]}{\Phi[\mathV]}$}
+ 			\UIC{$\async{\Psi}{\Delta[\mathV]}{\llwn{\phi}, \Phi[\mathV]}$}
+ 			\DP
+			\\
+			R \!\Downarrow 
+			& \mapsto
+			& 
+ 			\AXC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
+ 			\AXC{$\async{\Psi}{\Delta[\mathV]}{\phi}$}
+ 			\BIC{$\focus{\Psi}{\Delta[\mathV]}{\phi}$}
+ 			\DP
+			\\
+			R\!\Uparrow 
+			& \mapsto
+			& 
+ 			\AXC{$\neg \isAsy{\phi}$}
+ 			\AXC{$\async{\Psi}{\phi, \Delta[\mathV]}{\Phi[\mathV]}$}
+ 			\BIC{$\async{\Psi}{\Delta[\mathV]}{\phi, \Phi[\mathV]}$}
+ 			\DP
+			\\
+			D_1
+			& \mapsto
+			& 
+ 			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi}$}
+ 			\UIC{$\async{\Psi}{\phi, \Delta[\mathV]}{.}$}
+ 			\DP
+			\\
+			D_2
+			& \mapsto
+			& 
+			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi}$}
+	 		\UIC{$\async{\phi, \Psi}{\Delta[\mathV]}{.}$}
+ 			\DP
+			\\
+			I_1
+			& \mapsto
+			& 
+			\AXC{$\isNegLit{\alpha}$}
+			\UIC{$\focus{\Psi}{\alpha}{\llnot{\alpha}}$}
+			\DP
+			\\
+			I_2
+			& \mapsto
+			& 
+			\AXC{$\isNegLit{\alpha}$}
+			\UIC{$\focus{\alpha, \Psi}{.}{\llnot{\alpha}}$}
+			\DP
+		\end{tblr}
+	\end{center}
 		%	\item[$\lltop$:]
 		%		$$
 		%		\AXC{}
@@ -816,165 +921,16 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 		%		\UIC{$\async{\Psi}{\Delta}{\af{\lltop}{-}, \Phi} \separator \constr{\Lambda}{\mathV}$}
 		%		\DP
 		%		$$
-		\item[$\llpar$:]
-			$$
-			\AX$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
-			\LeftLabel{$[\llpar]$}
-			\UI$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
-			\DP
-			$$
-			By hypothesis there exists a linear proof
-			$$ \async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV}$$
-			Hence there is a linear proof of 	
-			$$
-			\AXC{$\async{\Psi}{\Delta[\mathV]}{\phi_1, \phi_2, \Phi[\mathV]}$}
-			\LeftLabel{$[\llpar]$}
-			\UIC{$\async{\Psi}{\Delta[\mathV]}{\phi_1 \llpar \phi_2, \Phi[\mathV]}$}
-			\DP
-			$$
-		\item[$\llplus_L$:]
-			$$
-			\AX$\focus{\Psi}{\Delta}{\af{\phi_1}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
-			\LeftLabel{$[\llplus_L]$}
-			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
-			\DP
-			$$
-
-			$$
-			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi_1}$}
-			\LeftLabel{$[\llplus_L]$}
-			\UIC{$\focus{\Psi}{\Delta[\mathV]}{\phi_1 \llplus \phi_2}$}
-			\DP
-			$$
-		\item[$\llplus_R$:]
-			$$
-			\AX$\focus{\Psi}{\Delta}{\af{\phi_2}{e}} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
-			\LeftLabel{$[\llplus_R]$}
-			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
-			\DP
-			$$
-
-			$$
-			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi_2}$}
-			\LeftLabel{$[\llplus_R]$}
-			\UIC{$\focus{\Psi}{\Delta[\mathV]}{\phi_1 \llplus \phi_2}$}
-			\DP
-			$$
-		\item[$\llwith$:]
-			$$
-			\AXC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV'}$}
-			\AXC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV''}$}
-			\LeftLabel{$[\llwith]$}
-			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV'}$}	
-			\DP
-			$$
-			Or equivalently choosing $\mathV''$.
-			This holds because of Lamma \ref{lemma:subsume} and because $\Lambda \subseteq \used{e}, \Lambda$.
-			$$
-			\AXC{$\async{\Psi}{\Delta[\mathV']}{\phi_1, \Phi[\mathV']}$}
-			\AXC{$\async{\Psi}{\Delta[\mathV'']}{\phi_2, \Phi[\mathV'']}$}
-			\LeftLabel{$[\llwith]$}
-			\BIC{$\async{\Psi}{\Delta[\mathV']}{\phi_1 \llwith \phi_2, \Phi[\mathV']}$}
-			\DP
-			$$
-		\item[$\llbang{}$:]
-			$$
-			\AX$\focus{\Psi}{\Delta}{\af{\phi}{e_1}} \fCenter \separator \constr{\Lambda, \used{e_1}, \avail{\Delta}}{\mathV}$
-			\LeftLabel{$[\,!\,]$}
-			\UI$\focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}} \fCenter \separator \constr{\Lambda}{\mathV}$
-			\DP
-			$$
-			$$
-			\AXC{$\async{\Psi}{.}{\phi}$}
-			\LeftLabel{$[\llbang{}]$}
-			\UIC{$\focus{\Psi}{.}{\llbang{\phi}}$}
-			\DP
-			$$
-		\item[$\llwn{}$:]
-			$$
-			\AX$\async{\Psi, \phi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
-			\LeftLabel{$[\llwn{}]$}
-			\UI$\async{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
-			\DP
-			$$
-			$$
-			\AXC{$\async{\phi, \Psi}{\Delta[\mathV]}{\Phi[\mathV]}$}
-			\LeftLabel{$[\llwn{}]$}
-			\UIC{$\async{\Psi}{\Delta[\mathV]}{\llwn{\phi}, \Phi[\mathV]}$}
-			\DP
-			$$
-		\item[$R\!\Downarrow$:] This rule is trivial
-			$$
-			\AXC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
-			\AXC{$\async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV}$}
-			\LeftLabel{$[R\!\Downarrow]$}
-			\BIC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV}$}
-			\DP
-			$$
-			by stripping the constraints we obtain
-			$$
-			\AXC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
-			\AXC{$\async{\Psi}{\Delta[\mathV]}{\phi}$}
-			\LeftLabel{$[R\!\Downarrow]$}
-			\BIC{$\focus{\Psi}{\Delta[\mathV]}{\phi}$}
-			\DP
-			$$
-		\item[$R\!\Uparrow$:] This rule is trivial
-			$$
-			\AXC{$\neg\isAsy{\phi}$}
-			\AXC{$\async{\Psi}{\Delta, \af{\phi}{e}}{\Phi} \separator \constr{\Lambda}{\mathV}$}
-			\LeftLabel{$[R\!\Uparrow]$}
-			\BIC{$\async{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\mathV}$}
-			\DP
-			$$
-			
-			$$
-			\AXC{$\neg \isAsy{\phi}$}
-			\AXC{$\async{\Psi}{\phi, \Delta[\mathV]}{\Phi[\mathV]}$}
-			\LeftLabel{$[R\!\Uparrow]$}
-			\BIC{$\async{\Psi}{\Delta[\mathV]}{\phi, \Phi[\mathV]}$}
-			\DP
-			$$
-		\item[$D_1$:]
-			$$
-			\AXC{$\neg \isNegLit{\phi}$}
-			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV}$}
-			\LeftLabel{$[D_1]$}
-			\BIC{$\async{\Psi}{\Delta, \af{\phi}{e}}{.} \separator \constr{\Lambda}{\mathV}$}
-			\DP
-			$$
-			$$
-			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi}$}
-			\LeftLabel{$[D_1]$}
-			\UIC{$\async{\Psi}{\phi, \Delta[\mathV]}{.}$}
-			\DP
-			$$
-		\item[$D_2$:]
-			$$
-			\AXC{$\neg \isNegLit{\phi}$}
-			\AXC{$\new{x}$}
-			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\Lambda, \used{e}}{\mathV}$}
-			\LeftLabel{$[D_2]$}
-			\TrinaryInfC{$\async{\Psi, \phi}{\Delta}{.} \separator \constr{\Lambda}{\mathV}$}
-			\DP
-			$$
-			$$
-			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi}$}
-			\LeftLabel{$[D_2]$}
-			\UIC{$\async{\phi, \Psi}{\Delta[\mathV]}{.}$}
-			\DP
-			$$
-	\end{itemize}
 \end{proof}
 
 \chapter{Implementation}
 We now describe the main implementation details of the prover.
 When explaining the code we will use some common names for variables, these are
 \begin{itemize}
-	\item \texttt{A} is a set (\texttt{ordset}) of unrestricted atoms;
-	\item \texttt{U} is a set (\texttt{ordset}) of unrestriched formulae;
+	\item \texttt{A} is a set of unrestricted atoms, which purpose will be explained in Section \ref{sec:identity};
+	\item \texttt{U} is a set of unrestriched formulae;
 	\item \texttt{F}, \texttt{F1}, ..., are formulae, and \texttt{Fs} and \texttt{D} are a lists of them;
-	\item \texttt{S} is the queue of currently usable unrestricted formulae;
+	\item \texttt{S} is the queue of currently usable unrestricted formulae, which purpose will be explained in Section \ref{sec:decide};
 	\item \texttt{In} is a list of constraints.
 \end{itemize}
 
@@ -982,19 +938,17 @@ When explaining the code we will use some common names for variables, these are
 Before beginning the proof a sequent passes through a number of transformations.
 These transformations both preprocess the sequent to a more convenient form, and also add information about the subformulae.
 
-As a first transformation the sequent gets normalized into a sequent in negated normal form (NNF).
-NNF is the form where all negations are pushed down to atoms and all linear implications ($\lolli$) are expanded into pars ($\llpar$) using the following tautology
-$$ a \lolli b \Leftrightarrow \llnot{a} \llpar b $$
+As a first transformation the sequent gets normalized into a sequent in negated normal form (NNF) as defined in Definition \ref{def:nnf}.
 Normalization is a common technique -- used in all the provers we compare with.
-The process is composed of just two steps
+The process has just two steps
 \begin{enumerate}
 	\item the left sequent is negated and appended to the right sequent, implemented by the predicate \texttt{negate\_premises/3};
 	\item the predicate \texttt{nnf/2}, which encodes the DeMorgan rules, is mapped recursively over the new sequent
 \end{enumerate}
 This is possible since classic linear logic is symmetric and negation is involutive.
 
-The purpose of this process is to cut away a great deal of possible rules applicable to the sequent, sacrificing some of the structure of the sequent.
-In fact the number of rules we need to implement after normalization is more than halved, since we now need just the right rules, without the ones for negation and linear implication.
+The purpose of normalization is to cut away a great deal of possible rules applicable to the sequent, sacrificing some of the structure of the sequent.
+In fact the number of rules one needs to implement, and thus the number of different choices the prover may have in a certain moment, is more than halved as said in Section \ref{sec:normalization}.
 
 As a second transformation, to each formula we assign its why-not height, a measure borrowed from APLL's implemetation.
 \begin{define}[Why-not height]
@@ -1011,8 +965,8 @@ As a second transformation, to each formula we assign its why-not height, a meas
 \end{define}
 The purpose of this attribute is to guide the prover to the reasonably simpler choice -- the one with the least nested exponentials -- at different times during proof search.
 This will be seen in Section \ref{sec:focusing-impl}.
-After this transformation formulae are attribute trees, with at each node the why-not height of the subformula.
-For example the formula \texttt{*(a, ?(b))} becomes \texttt{*(a-0, ?(b-0)-1)-1}, or -- as trees --
+After this transformation formulae are attribute trees with at each node the why-not.
+For example the formula \texttt{*(a, ?(b))} becomes \texttt{*(a-0, ?(b-0)-1)-1}, or
 \begin{figure}[H]
 	\centering
 	\begin{tikzpicture}
@@ -1034,27 +988,14 @@ For example the formula \texttt{*(a, ?(b))} becomes \texttt{*(a-0, ?(b-0)-1)-1},
 	\end{tikzpicture}
 \end{figure}
 
-As a third and final transformation, each formula gets annotated.
-This means we associate a variable to each formula in the sequent as in Definition \ref{def:annotated}.
-Given a sequent $\Delta$ we obtain
+As a third and final transformation, each formula gets annotated as in Definition \ref{def:annotated}:
+given a sequent $\Delta$ we obtain
 $$ \hat{\Delta} = \{ \af{\phi}{x} \mid \new{x}, \phi \in \Delta \} $$
 To be clear, a variable is only assigned to the ``top-level'' formula, and subformulae are left unchanged.
 
-In the implementation the concept of variable is split in two: the name of the variable -- represented by a Prolog atom, and the value of the variable -- represented by a Prolog variable.
-This is needed since, after checking the constraints, the SAT-solver unifies the variable to its value if it finds a satisfaiable solution, so the purpose of the atom is to associate the variable value to its name if the final proof.
-The process of annotation is implemented by the predicate \texttt{annotate/3}
-\begin{minted}{prolog}
-%! annotate(+[Formulae], -[AFs], -[Constraints]) is det.
-annotate(Fs, Afs, Cns) :-
-  maplist([ F
-          , af(F, X, Var)
-	  , v(Var) =:= 1
-	  ]>>(gensym(x, X)), Fs, Afs, Cns).
-\end{minted}
-which is a simple map over the sequent.
-The constraints returned state that each formula must have its variable to one, that is to say each formulae must be used.
-These are the constraints the proof search starts with.
-
+The process of annotation is implemented by the predicate \texttt{annotate/3}.
+This also returns the initial constraints, with set each variable to ``used''.
+Thus stating that in the proof each and every formula must be used.
 % continuo?
 
 \section{Helper predicates}\label{sec:helper}
@@ -1084,12 +1025,14 @@ Three new Prolog variables are introduced: \texttt{X}, \texttt{Y} and \texttt{Z}
 	y &= \varNot{x} \varAnd e
 \end{align*}
 Compare this to the original definition of Definition \ref{def:split}, one can see that the two are basically identical other than the fact that here the name of the variable (the atom) and its value are treated separately.
+In the implementation the concept of variable is split in two: the name of the variable -- represented by a Prolog atom, and the value of the variable -- represented by a Prolog variable.
+This is needed since, after checking the constraints, the SAT-solver unifies the variable to its value if it finds a satisfaiable solution; the purpose of the atom is to associate the variable value to its name if the final proof.
 
 \section{Focusing}\label{sec:focusing-impl}
 \subsection{Asynchronous and focusing phase}
 During the asynchronous phase we have a list of formulae which are being worked on and a list of formulae which are put to the side; with the former being called \texttt{Fs} and the latter \texttt{D}.
 At each step we analyze the first element of the list \texttt{Fs}, and we keep scomposing the memebers of the list untill we cannot anymore.
-This process can be seen for example in the predicate for $\llwith$
+This process can be seen for example in the predicate for with ($\llwith$)
 \begin{minted}{prolog}
 async(A, U, D, [F|Fs], S, M, In, _) :-
   F = af(((F1-H1) & (F2-H2))-_), N, E), !,
@@ -1102,7 +1045,7 @@ async(A, U, D, [F|Fs], S, M, In, _) :-
 \end{minted}
 Here we can see both the choice being made based on the why-not height of the two subformulae, and how the with is scomposed.
 Compare this with the $\llwith$ rule in Figure \ref{fig:calculus}.
-The cut at line 2 represents the main concept of the asynchronous phase: if an asynchronous connective is encountered the only thing we ought to do is to scompose it.
+The cut at line 2 is essential: it signifies that when an asynchronous connective is encountered the only thing to do is to break it apart.
 
 If a formula cannot be further be broken apart -- i.e. it is either an atom, a negated atom, or it has a toplevel synchronous connective -- then it is put to the side in \texttt{D}.
 This can be seen in the rule \texttt{to\_delta} which implements the rule $R\!\Uparrow$
@@ -1117,9 +1060,9 @@ This process goes as long as \texttt{Fs} has still formulae inside.
 When \texttt{Fs} is empty the phase switches, and the focusing process begins: we choose a formula -- called \texttt{decide} -- from either \texttt{D} or \texttt{U} and we scompose it untill either an asynchronous connective is left or a negated atom.
 This is represented by the rules $D_1$ and $D_2$ that will be discussed further ahead in Section \ref{sec:decide}.
 
-\subsection{Identity rules}
-This process of alternating asynchronous and synchronous phases in classic focusing goes on untill we have a only positive literal (in our case a negated atom) in \texttt{Fs} and the corresponding negative literal (in our case just an atom) in either \texttt{U} or \texttt{D}.
-When this happens the axioms -- rules $I_1$ or $I_2$ -- are applied to close the branch.
+\subsection{Identity rules}\label{sec:identity}
+This process of alternating asynchronous and synchronous phases in classic focusing goes on untill only a positive literal (in our case a negated atom) in \texttt{Fs} is left; and the corresponding negative literal (in our case just an atom) in either \texttt{U} or \texttt{D}.
+When this happens the axioms -- rules $I_1$ or $I_2$ -- are applied to close the branch of the proofs.
 In our case when we are focusing and we have a positive literal in \texttt{Fs}, we check if the corresponding negative literal exists in \texttt{D}.
 If this is true, then the variables of all the other formulae in \texttt{D} are set to zero using the predicate \texttt{set\_to\_zero/2} defined in Section \ref{sec:helper}, and the constraints are checked.
 This is encoded in the clause 
@@ -1142,8 +1085,8 @@ This is because Prolog's unification implicitly propagates a solution from one b
 
 \subsection{Decide rules}\label{sec:decide}
 For the decide rules, particularly for $D_2$, we use a modified version of APLL's algorithm defined in Section \ref{sec:apll}.
-The method consists of not using directly the set $\Psi$ in the $D_2$ rule, but instead we keep a queue of ordered unrestricted formulae which can be refilled only a certain number of times per-branch.
-This can be seen in the definition of the rule \texttt{decide\_2}
+The method consists of not using directly the set $\Psi$ in the $D_2$ rule, but instead a queue of ordered unrestricted formulae which can be refilled only a certain number of times per-branch.
+This can be seen in the definition of the rule \texttt{decide\_2} for the \texttt{async/8} predicate
 \begin{minted}{prolog}
 async(A, U, D, [], [H|T], M, In) :-
   \+ U = [],
@@ -1175,7 +1118,7 @@ refill(U, M, S, M1) :-
 	\item if \texttt{S} is not empty, then the first formula in the queue is extracted and added to the working set.	% sistemo
 		If the branch fails the formula gets discarded and the next one in the queue is tried.	% sistemo
 \end{itemize}
-In particular, if the queue \texttt{S} is refilled, we do not directly call \texttt{async/8}, but instead call another predicate: \texttt{early\_stop/7} (line 11).
+In particular, if the queue \texttt{S} is refilled, we do not directly call \texttt{async/8}, but instead call the predicate \texttt{early\_stop/7} (line 11), defined as:
 \begin{minted}{prolog}
 early_stop(_, _, _, [], _, _) :-
   false.
@@ -1190,10 +1133,9 @@ What \texttt{early\_stop/7} does is fail if the queue has just been refilled and
 
 All the rules $D_1$, $I_1$ are defined before the unrestricted counterparts, so that they are tried first.
 
-
 \section{Building the tree}
-In the listings above we omitted one parameter of the predicates, which purpose is to build the proof tree.
-At each call of async and focus one node of the proof tree is built.
+In the listings above we omitted one parameter of the predicates which purpose is to build the proof tree.
+In fact at each call of \texttt{async/8} and \texttt{focus/8} one node of the proof tree is built.
 This contains the context of the call.
 For example in
 \begin{minted}{prolog}
@@ -1205,7 +1147,7 @@ async(A, U, D, [F|Fs], S, M, In, node(par, A, U, D, [F|Fs], [Tree])) :-
 we can see clearly the structure of the node: a label, the context and an -- optionally empty -- list of subtrees.
 A leaf is just a node with an empty list of subtrees.
 
-This tree can be used in the end to reconstruct the actual proof tree by visiting it and -- for each formula of each node -- querying whether its variable is set to one, deleting it otherwise.
+This tree can be used in the end to reconstruct the actual proof tree by visiting it and -- for each formula of each node -- querying whether its variable is set to one, deleting it otherwise (this process is the same used in the proof for Theorem \ref{thm:soundness}).
 A classic proof tree without the focusing infrastructure may be built by removing all the nodes regarding the phases (i.e. $R\!\Downarrow$ $R\!\Uparrow$ and decide rules) and by appending the sequents together as explained in \cite{Focusing}. 
 A more sophisticated algorithm may even cancel out unwanted unrestricted formulae, that otherwise remain lingering in the sequent.
 
@@ -1264,7 +1206,20 @@ let rec split_list_aux (acc1, acc2) l k = match l with
 \texttt{llprover} is a prover by Naoyuki Tamura.
 Where APLL had different provers for implicative and classical linear logic, this prover encodes all the rules as the same predicate \texttt{rule/6}, using the first argument as a selector for the system.
 Using classical logic as the system uses all the rules, included the ones for implicative linear logic.
-For this reason the prover does not implement normalization.
+For this reason the prover does not implement normalization to NNF before proof search; instead the option is given to transform the two-sided proof to a one-sided one.
+
+Tensor splitting is implemented similarly to APLL by trying every possible partition
+\begin{minted}{prolog}
+rule([ill,0], no,  r(*), S, [S1, S2], [r(N),r(N1),r(N2)]) :-
+  match(S,  ([X]-->[Y1,[A*B],Y2])),
+  merge(X1, X2, X),
+  merge(Y11, Y12, Y1),
+  merge(Y21, Y22, Y2),
+  match(S1, ([X1]-->[Y11,[A],Y21])),
+  match(S2, ([X2]-->[Y12,[B],Y22])),
+  length(Y1, N), length(Y11, N1), length(Y12, N2).
+\end{minted}
+Here \texttt{merge/3} (lines 3, 4 and 5) generates all possible lists that when merged together return the original sequents.
 
 Another particular characteristic of llprover is that it uses a local bound with iterative deepening, so in the benchmarks for formulae which need a lot of contractions, it will perform slightly worse.
 
@@ -1416,7 +1371,7 @@ The benchmarks are done using a timeout of \qty{60}{\second} and a bound of 3.
 	\begin{tblr}{ 
 		colspec = { l c c c c c c },
 		vlines = {2,3,4,5,7,8,9,10}{solid},
-		cells = { preto = {\small} },
+		cells = { preto = {\footnotesize} },
 		% cells{2,7} = { preto = {\small}, cmd = {\textbf} }
 		}
 		\SetCell[c=7]{c} Kleene CBN \\
@@ -1425,16 +1380,18 @@ The benchmarks are done using a timeout of \qty{60}{\second} and a bound of 3.
 		\hline
 		\hline
 		APLL & 0 & 16 & 72 & $\approx 0.80$ & \qty{0.037}{\second} & \qty{0.055}{\second} \\
+		\hline
 		llprover & 20 & 6 & 62 & $\approx 0.70$ & \qty{1.709}{\second} & \qty{3.253}{\second} \\
+		\hline
 		sat-ll & 4 & 18 & 66 & $\approx 0.75$ & \qty{0.130}{\second} & \qty{0.185}{\second} \\
 		\hline
 		\SetCell[c=7]{c} Kleene CBV \\
 		\hline
-		prover & timeouts & failures & successes & success rate & avg. time (succ.) & avg. time (tot.) \\
-		\hline
 		\hline
 		APLL & 0 & 17 & 71 & $\approx 0.80$ & \qty{0.035}{\second} & \qty{0.326}{\second} \\
+		\hline
 		llprover & 20 & 6 & 62 & $\approx 0.70$ & \qty{0.981}{\second} & \qty{2.179}{\second} \\
+		\hline
 		sat-ll & 5 & 15 & 68 & $\approx 0.77$ & \qty{0.443}{\second} & \qty{0.496}{\second} \\
 		\hline
 	\end{tblr}
@@ -1483,8 +1440,43 @@ When looking at the results of full linear logic, it is important to note that u
 Since llprover uses incremental search, its times are often the slowest.
 Similarly our prover is consistently slightly slower that APLL, this difference is negligible and due to the fact that APLL is compiled, whereas our prover is interpreted.
 
-% \chapter{Conclusions}
-% We showed that -- given appropriate modifications -- Harland\&Pym's method is competitive to other provers, and in some cases (see multiplicatives) may be even faster.
+\begin{table}[H]
+	\centering
+	\begin{tblr}{ 
+		colspec = { l c c c c },
+		vlines = {1,3,4,5,7,8,9,11,12,13}{solid},
+		% cells = { preto = {\footnotesize} },
+		% cells{2,7} = { preto = {\small}, cmd = {\textbf} }
+		}
+		\hline
+		prover & timeouts & successes & success rate & avg. time (succ.) \\
+		\hline
+		\SetCell[c=5]{c} mll-100-50 \\
+		\hline
+		APLL & 34 & 66 & $0.66$ & \qty{1.441}{\second}  \\
+		\hline
+		llprover & 50 & 50 & $0.50$ & \qty{3.006}{\second}  \\
+		\hline
+		sat-ll & 7 & 93 & $0.93$ & \qty{1.874}{\second} \\
+		\hline
+		\SetCell[c=5]{c} mall-500-250 \\
+		\hline
+		APLL & 24 & 76 & $0.76 $ & \qty{1.213}{\second}  \\
+		\hline
+		llprover & 42 & 58 & $0.58$ & \qty{0.807}{\second}  \\
+		\hline
+		sat-ll & 7 & 93 & $0.93$ & \qty{1.289}{\second} \\
+		\hline
+		\SetCell[c=5]{c} cll-500-250 \\
+		\hline
+		APLL & 17 & 83 & $0.83 $ & \qty{0.967}{\second}  \\
+		\hline
+		llprover & 72 & 28 & $0.28 $ & \qty{0.409}{\second}  \\
+		\hline
+		sat-ll & 20 & 80 & $0.80 $ & \qty{1.940}{\second} \\
+		\hline
+	\end{tblr}
+\end{table}
 
 \bibliographystyle{plain}
 \bibliography{refs}

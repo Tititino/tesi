@@ -1,4 +1,5 @@
 LCC=lualatex
+OPTIONS=[]
 
 ifeq ($(LCC), lualatex)
 	PRETEX="\pdfvariable suppressoptionalinfo 512\relax"
@@ -10,11 +11,14 @@ endif
 
 .PHONY: all draft clean
 all:
+	sed 's/OPTIONS/$(OPTIONS)/' thesis.tex > out.tex
 	latexmk -interaction=nonstopmode -pdf -$(LCC) -latexoption="-shell-escape" 	\
 		-pretex=$(PRETEX)							\
-		-usepretex thesis.tex
+		-usepretex out.tex
+	mv out.pdf thesis.pdf
 
 clean:
+	rm out.*
 	latexmk -c
 
 draft:

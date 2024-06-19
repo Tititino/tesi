@@ -62,10 +62,9 @@
 	      buildPhase = ''
 	        appendToVar PATH ${toString buildInputs}
                 mkdir -p .cache/texmf-var
-		substituteInPlace thesis.tex --replace 'OPTIONS' '[${toString flags}]'
                 env TEXMFHOME=.cache TEXMFVAR=.cache/texmf-var    \
                   SOURCE_DATE_EPOCH=${toString self.lastModified} \
-		  make all
+		  make OPTIONS='[${toString flags}]' all
 	      '';
 
               installPhase = ''
