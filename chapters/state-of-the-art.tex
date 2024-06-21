@@ -16,7 +16,7 @@ We will focus on the backwards algorithm for classic linear logic.
 
 
 The program is written in OCaML and implements a standard focused proof search on normalized formulae as seen in \cite{LiangMiller}.
-In this section we will illustrate two noteworthy charateristics of its implementation:
+In this section we will illustrate two noteworthy characteristics of its implementation:
 \begin{itemize}
 	\item Sequent splitting when encountering a tensor is done by generating all the numbers up to $2^{|\Delta|}$ -- where $\Delta$ is the sequent -- and using the bit representation of those to create the two subsets.
 		This can be seen in the function \texttt{split\_list}, which in turn calls \texttt{split\_list\_aux}

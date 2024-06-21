@@ -30,7 +30,7 @@ def call_sat_prover(premises, conclusions):
     , f'{premises} |- {conclusions}'
     ]
 \end{minted}
-The innermost decorator (line 3) accepts a dictionary, and is needed to auomatically call the prover with a test entry (as in Section \ref{sec:file format}), time it and eventually terminate the process it if the time runs out.
+The innermost decorator (line 3) accepts a dictionary, and is needed to automatically call the prover with a test entry (as in Section \ref{sec:file format}), time it and eventually terminate the process it if the time runs out.
 The outermost decorator (line 4) instead simply adds an entry \texttt{'sat-ll'} associated with the prover call to the register \texttt{pc}.
 This register is just an association name to function, and it is what is actually passed to the benchmarking functions which will use the names in the output tables.
 
@@ -62,7 +62,7 @@ For this purpose we define a prefix format for linear logic formulae inspired by
 	\end{tblr}
 \end{table}
 Furthermore each single character not representing an operator is considered as a variable name.
-Longer names can be specified by enclosing them in single apices as in \texttt{'varname'}.
+Longer names can be specified by enclosing them in single quotes as in \texttt{'varname'}.
 As an example we give the translation of DeMorgan for the tensor:
 $$ \mathrm{trans}(\llnot{(a \llten b)} \lolli \llnot{a} \llpar \llnot{b}) = \text{\texttt{@\^{}ab|\^{}a\^{}b}} $$
 
@@ -129,11 +129,11 @@ A noteworthy detail is how the parameters \texttt{size} and \texttt{atoms} menti
 % Finding a comprehensive test suite for linear logic, moreover one which is not made up mostly of translations of other theorems to linear logic, is not easy.
 % Most of the theorems we use for testing are llprover's %cite
 We'll mainly use three sources for formulae: llprover's tests; LLTP, especially the translations of Kleene's intuitionistic formulae; and randomly generated formulae made by the generator described in \ref{sec:formula generator}.
-Out of these, llprover's tests are composed primarly of simple linear logic tautologies, such as the DeMorgan rules; for this reason these tests are used to quickly check for obvious bugs.
+Out of these, llprover's tests are composed primarily of simple linear logic tautologies, such as the DeMorgan rules; for this reason these tests are used to quickly check for obvious bugs.
 
 Randomly generated tests are only used for non-exponential for the following reasons:
 \begin{itemize}
-	\item datasets of linear logic theorems whithout exponentials are rare and most often the formulae in them do not have a significative size; so we have to resort to generating these;
+	\item datasets of linear logic theorems without exponentials are rare and most often the formulae in them do not have a significant size; so we have to resort to generating these;
 	\item when dealing with exponential formulae a prover may answer a certain formula is false just because it exhausted its number of contractions.
 		This is a problem in the case of generated tests: since the expected output is not known we do not know if the prover terminated because it exhausted the bound, or if the test is actually a non-theorem.
 \end{itemize}

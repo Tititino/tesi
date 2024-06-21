@@ -119,9 +119,9 @@
 
 
 \section{Why Prolog}
-Prolog as a language and as an environment has been historically tied to automated theorem proving for its ability to express its algorithmns naturally.
+Prolog as a language and as an environment has been historically tied to automated theorem proving for its ability to express its algorithms naturally.
 % In particular we chose SWI-Prolog because it offers a comprehensive and mature free Prolog environment.
-One particularly conventient characteristic of Prolog is its automatic management of backtracking, in most other languages we would have had to use exceptions to walk down the stack, or a queue of unfinished computations, which would have made the code much less readable.
+One particularly convenient characteristic of Prolog is its automatic management of backtracking, in most other languages we would have had to use exceptions to walk down the stack, or a queue of unfinished computations, which would have made the code much less readable.
 
 Most Prolog implementations also support CLP or constraint logic programming.
 This is implemented through a series of libraries, these libraries allow to express constraint in the body of the clauses referencing some attribute of the variables;
@@ -134,14 +134,14 @@ X * Y.
 X =:= Y.
 \end{minted}
 
-Usually constraints will be accumualted in a list, for this reason \CLPB{} provides the functor \texttt{*(L)} to express the conjunction of its members.
-A constraint may be checked using the predicate \texttt{sat/1}, which succeds iff it is satisfiable.
+Usually constraints will be accumulated in a list, for this reason \CLPB{} provides the functor \texttt{*(L)} to express the conjunction of its members.
+A constraint may be checked using the predicate \texttt{sat/1}, which succeeds iff it is satisfiable.
 Since we only deal with conjunctions we define the helper predicate \texttt{check/1}
 \begin{minted}{prolog}
 check(L) :-
 	sat(*(L)).
 \end{minted}
-The predicate \texttt{sat/1} may work a bit unexpectedly, to clarify its possibile outcomes we give a little example:
+The predicate \texttt{sat/1} may work a bit unexpectedly, to clarify its possible outcomes we give a little example:
 \begin{minted}{prolog}
 ?- L = [X * Y =:= 1, X =:= 0], sat(*(L)).
 false.
