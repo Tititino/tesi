@@ -1,6 +1,6 @@
 \documentclass[a4paper, 12pt, english]{report}
 
-\usepackage[dbg]{thesis}
+\usepackage OPTIONS {thesis}
 
 \title{Proof Search in Propositional Linear Logic via Boolean Constraints Satisfaction
 % \includegraphics{./images/tesiSCIENZE_TECNOLOGIE.jpg}
@@ -14,6 +14,7 @@
 \newpage
 \tableofcontents
 \newpage
+
 
 
 \chapter{Intro}
@@ -1474,6 +1475,13 @@ Similarly our prover is consistently slightly slower that APLL, this difference 
 
 % \chapter{Conclusions}
 % We showed that -- given appropriate modifications -- Harland\&Pym's method is competitive to other provers, and in some cases (see multiplicatives) may be even faster.
+=======
+\include{chapters/intro}
+\include{chapters/calculus}
+\include{chapters/implementation}
+\include{chapters/state-of-the-art}
+\include{chapters/testing}
+
 
 \bibliographystyle{plain}
 \bibliography{refs}

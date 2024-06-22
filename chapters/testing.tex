@@ -1,0 +1,257 @@
+\chapter{Testing}
+\section{Infrastructure}
+The infrastructure for the project is divided in two parts:
+\begin{itemize}
+	\item the nix ``glue''
+	\item python utilities to call and confront provers
+\end{itemize}
+In nix everything must be packaged as a derivation, so derivations are written for all the programs we interact with:
+\begin{itemize}
+	\item the provers, such as APLL or llprover;
+	\item the formula generator adapted from APLL described in Section \ref{sec:formula generator};
+	\item the LLTP parser.
+\end{itemize}
+All these derivations, together with a derivation for the python environment, are then used to define a single development environment to run the jupyter notebook with all the necessary dependencies.
+Furthermore having used ``flakes'' -- a nix experimental feature -- all dependencies are locked to a certain commit, thus ensuring better reproducibility.
+
+The main logic for the benchmarking and testing is defined in the python module \texttt{testprover.py}.
+Here for simplicity we assume that the executable of a prover returns a code of 0 if it has found a proof to a sequent, or any other number otherwise.
+This condition is already met by our prover and by llprover; for APLL we instead provide a wrapper.
+
+Defining the call to our prover using this library is as simple as writing
+\begin{minted}[linenos]{python}
+pc = Registered()
+
+@pc.register('sat-ll')
+@call_prover(PrefixTree.SAT_LL_DICT)
+def call_sat_prover(premises, conclusions):
+  return [ 'sat-ll'
+    , '-b', '3'
+    , f'{premises} |- {conclusions}'
+    ]
+\end{minted}
+The innermost decorator (line 3) accepts a dictionary, and is needed to automatically call the prover with a test entry (as in Section \ref{sec:file format}), time it and eventually terminate the process it if the time runs out.
+The outermost decorator (line 4) instead simply adds an entry \texttt{'sat-ll'} associated with the prover call to the register \texttt{pc}.
+This register is just an association name to function, and it is what is actually passed to the benchmarking functions which will use the names in the output tables.
+
+\noindent The library then provides two functions
+\begin{itemize}
+	\item \texttt{testall} accepts a single prover and a test suite; the function checks if the output of the prover corresponds to the expected value for the test;
+	\item \texttt{benchmark} accepts a register and a test suite and returns the times and outcomes of each prover.
+\end{itemize}
+All the outputs of the functions above are pandas \texttt{DataFrame}s, which means that they can be easily queried, dumped to csv, aggregated, or visualized using most plotting libraries.
+
+\subsection{Prefix format}
+Since for benchmarking we will interface with a lot of different provers, each with its own syntax for expressions, the need for a common format which was easy to parse and translate arose.
+For this purpose we define a prefix format for linear logic formulae inspired by the format used by \cite{TarauPaiva} for implicational formulae
+\begin{table}[H]
+	\centering
+	\begin{tblr}{ colspec = {cc} }
+		\hline
+			formula & symbol \\
+		\hline
+		\hline
+			$\phi_A \llten \phi_B$  & \texttt{*AB} \\
+			$\phi_A \llpar \phi_B$  & \texttt{|AB} \\
+			$\phi_A \llplus \phi_B$ & \texttt{+AB} \\
+			$\phi_A \llwith \phi_B$ & \texttt{\&AB} \\
+			$\phi_A \lolli \phi_B$  & \texttt{@AB} \\
+			$\llnot{\phi_A}$        & \texttt{\^{}A} \\
+			$\llwn{\phi_A}$         & \texttt{?A} \\
+			$\llbang{\phi_A}$       & \texttt{!A} \\
+	\end{tblr}
+\end{table}
+Furthermore each single character not representing an operator is considered as a variable name.
+Longer names can be specified by enclosing them in single quotes as in \texttt{'varname'}.
+As an example we give the translation of DeMorgan for the tensor:
+$$ \mathrm{trans}(\llnot{(a \llten b)} \lolli \llnot{a} \llpar \llnot{b}) = \text{\texttt{@\^{}ab|\^{}a\^{}b}} $$
+
+% Since most one of the datasets we use is LLTP % cite
+% , which is written in TPTP's format % cite
+% , we define a parser for this using Haskell's parser generator happy. % cite
+
+\subsection{File formats}\label{sec:file format}
+We use json as a standard format to store the tests because of its vast adoption by most programming languages.
+A test suite is thus defined as a list of test cases, where a test case is just an object with these three mandatory fields:
+\begin{center}
+\begin{tblr}{ colspec = {l l}
+	    , cell{1,2,3}{2} = {cmd=\parbox{11cm}}
+	}
+	\textbf{id} & is a number with the sole purpose of tracing back the test case from the output; \\
+	\textbf{premises} & is a list of premises as prefix formulae; \\
+	\textbf{conclusions} & a list of conclusions as prefix formulae. \\
+\end{tblr}
+\end{center}
+For example
+\begin{minted}{json}
+{
+	"id": 1,
+	"premises": [ "^*ab" ],
+	"conclusions": [ "|^a^b" ]
+}
+\end{minted}
+is the test case representing $\llnot{(a \llten b)} \lolli \llnot{a} \llpar \llnot{b}$.
+Other arbitrary fields may be present; for example we will use the following optional fields:
+\begin{center}
+\begin{tblr}{ colspec = {l l}
+	    , cell{1,2,3,4,5}{2} = {cmd=\parbox{11cm}}
+	}
+	\textbf{thm} & whether this test case is a tautology or not, may be null; \\
+	\textbf{*, +, ?, ...} &the number of times a specific connective appears in the test case; \\
+	\textbf{notes} & human readable text about the test case, e.g. its infix representation; \\
+	\textbf{size} & an indicative number of the size of the formula; \\
+	\textbf{atoms} & the upper bound on the number of atoms.
+\end{tblr}
+\end{center}
+The fields \texttt{size} and \texttt{atoms} will be further explained in Section \ref{sec:formula generator}.
+
+\subsection{Formula generation}\label{sec:formula generator}
+One of the sources of formulae we'll use in Section \ref{sec:benchmarking} is APLL's random formula generator.
+The version we'll use is a slight modification of it where:
+\begin{itemize}
+	\item the output is in the json format described in Section \ref{sec:file format}
+	\item one can choose to generate normalized formulae or not;
+	\item one can choose which connectives appear in the generated formula.
+\end{itemize}
+A noteworthy detail is how the parameters \texttt{size} and \texttt{atoms} mentioned in Section \ref{sec:file format} are defined, since these are directly related to how the formulae are generated:
+\begin{itemize}
+	\item when one specifies a number of atoms \texttt{atoms}, the generator initializes an array containing \texttt{atoms} atoms, their negations, and the constants $\bot, \top, \dots$.
+		During the generation of the formula this array is randomly accessed, choosing an element when needed.
+		This means that \texttt{atoms} represents an upper bound to the number of different atoms that may appear in the formula, not their exact number.
+	\item when a formula is generated, at each step it is chosen whether to generate a unary or binary connective based on a threshold:
+		\begin{itemize}
+			\item if a unary connective is chosen, the process continues with a size of $\text{\texttt{size}} - 1$;
+			\item if a binary connective is chosen, the program chooses a random value between 0 and \texttt{size}, and it generates the two branches of the formula, with size respectively $k$ and $\text{\texttt{size}} - k$.
+		\end{itemize}
+\end{itemize}
+
+\section{Benchmarking}\label{sec:benchmarking}
+% Finding a comprehensive test suite for linear logic, moreover one which is not made up mostly of translations of other theorems to linear logic, is not easy.
+% Most of the theorems we use for testing are llprover's %cite
+We'll mainly use three sources for formulae: llprover's tests; LLTP, especially the translations of Kleene's intuitionistic formulae; and randomly generated formulae made by the generator described in \ref{sec:formula generator}.
+Out of these, llprover's tests are composed primarily of simple linear logic tautologies, such as the DeMorgan rules; for this reason these tests are used to quickly check for obvious bugs.
+
+Randomly generated tests are only used for non-exponential for the following reasons:
+\begin{itemize}
+	\item datasets of linear logic theorems without exponentials are rare and most often the formulae in them do not have a significant size; so we have to resort to generating these;
+	\item when dealing with exponential formulae a prover may answer a certain formula is false just because it exhausted its number of contractions.
+		This is a problem in the case of generated tests: since the expected output is not known we do not know if the prover terminated because it exhausted the bound, or if the test is actually a non-theorem.
+\end{itemize}
+
+Using random formulae we can clearly see that our prover outperforms APLL (and llprover) when dealing with formulae rich in multiplicatives.
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\includegraphics[scale=0.5]{./images/mll.pdf}
+		\caption{Multiplicative case}
+		\label{fig:mll-bars}
+	\end{subfigure}
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\includegraphics[scale=0.5]{./images/mall.pdf}
+		\caption{Multiplicative and additive case}
+		\label{fig:mall-bars}
+	\end{subfigure}
+	\caption{Percentage of number of timeouts out of a hundred formulae}
+\end{figure}
+\begin{table}[h!]
+	\begin{subtable}{\textwidth}
+		\centering
+		\begin{tblr}{ 
+			colspec = { | l c c c c | },
+			cells = { preto = {\footnotesize} },
+			row{1} = {cmd=\textbf}
+			}
+			\hline
+			prover & timeouts & successes & success rate & avg. time (succ.) \\
+			\hline
+			\hline
+			APLL & 34 & 66 & $0.66$ & \qty{1.441}{\second}  \\
+			llprover & 50 & 50 & $0.50$ & \qty{3.006}{\second}  \\
+			sat-ll & 7 & 93 & $0.93$ & \qty{1.874}{\second} \\
+			\hline
+		\end{tblr}
+		\caption{Data corresponding to Figure \ref{fig:mll-bars}}
+		\label{table:mll}
+	\end{subtable}\vspace{.5cm}
+	\begin{subtable}{\textwidth}
+		\centering
+		\begin{tblr}{ 
+			colspec = { | l c c c c | },
+			cells = { preto = {\footnotesize} },
+			row{1} = { cmd = \textbf }
+			}
+			\hline
+			prover & timeouts & successes & success rate & avg. time (succ.) \\
+			\hline
+			\hline
+			APLL & 24 & 76 & $0.76 $ & \qty{1.213}{\second}  \\
+			llprover & 42 & 58 & $0.58$ & \qty{0.807}{\second}  \\
+			sat-ll & 7 & 93 & $0.93$ & \qty{1.289}{\second} \\
+			\hline
+		\end{tblr}
+		\caption{Data corresponding to Figure \ref{fig:mall-bars}}
+		\label{table:mall}
+	\end{subtable}
+	\caption{Non exponential tests.}
+\end{table}
+We can see that in the multiplicative and additive case the difference begin to level.
+The additive case is not that significant as the formulae remain manageable and no major differences can be seen.
+When reviewing these outputs it is important to remember that randomly generated tests lack the structure of real formulae, and this may impact the quality of the measurement.
+All these test were done generating suites of 100 tests using a timeout of \qty{60}{\second}:
+\begin{itemize}
+	\item Figure \ref{fig:mll-bars}'s tests were composed of formulae of \texttt{size} 100, and \texttt{atoms} 50, using just tensor ($\llten$) and par ($\llpar$) as connectives;
+	\item Figure \ref{fig:mall-bars}'s tests were composed of formulae of \texttt{size} 500, and \texttt{atoms} 250, with all the connectives, except the exponentials ($\llten, \llpar, \llwith$ and $\llplus$)
+\end{itemize}
+
+\begin{table}[h!]
+	\begin{subtable}{\textwidth}
+		\centering
+		\begin{tblr}{ 
+			colspec = { | l c c c c c c | },
+			cells = { preto = {\footnotesize} },
+			row{1} = { cmd = \textbf },
+			}
+			\hline
+			prover & timeouts & failures & successes & success rate & avg. (succ.) & avg. (tot.) \\
+			\hline
+			\hline
+			APLL & 0 & 17 & 71 & $\approx 0.80$ & \qty{0.035}{\second} & \qty{0.326}{\second} \\
+			llprover & 20 & 6 & 62 & $\approx 0.70$ & \qty{0.981}{\second} & \qty{2.179}{\second} \\
+			sat-ll & 5 & 15 & 68 & $\approx 0.77$ & \qty{0.443}{\second} & \qty{0.496}{\second} \\
+			\hline
+		\end{tblr}
+		\caption{Outputs for KLE-cbv}
+		\label{table:KLE-cbv}
+	\end{subtable}\vspace{.5cm}
+	\begin{subtable}{\textwidth}
+		\centering
+		\begin{tblr}{ 
+			colspec = { | l c c c c c c | },
+			cells = { preto = {\footnotesize} },
+			row{1} = {cmd=\textbf}
+			}
+			\hline
+			prover & timeouts & failures & successes & success rate & avg. (succ.) & avg. (tot.) \\
+			\hline
+			\hline
+			APLL & 0 & 16 & 72 & $\approx 0.80$ & \qty{0.037}{\second} & \qty{0.055}{\second} \\
+			llprover & 20 & 6 & 62 & $\approx 0.70$ & \qty{1.709}{\second} & \qty{3.253}{\second} \\
+			sat-ll & 4 & 18 & 66 & $\approx 0.75$ & \qty{0.130}{\second} & \qty{0.185}{\second} \\
+			\hline
+		\end{tblr}
+		\caption{Outputs for KLE-cbn}
+		\label{table:KLE-cbn}
+	\end{subtable}
+	\caption{Exponential tests.}
+\end{table}
+We now show the results of running the provers on two datasets: KLE-cbn and KLE-cbv, respectively the call-by-name and call-by-value translations of Kleene's theorems.
+These translations introduce a high number of exponentials; this causes -- apart from the timeouts because of the added complexity -- some failures.
+These failures are not due to bugs, but instead happen because the prover has reached its bound on contractions for the proof.
+The benchmarks are done using a timeout of \qty{60}{\second} and a bound of 3.
+It can be seen in Table \ref{table:KLE-cbn} and \ref{table:KLE-cbv} that in this case our prover performs slightly worse than APLL.
+
+Overall, since llprover uses incremental search, its times are often skewed towards the slower side.
+Similarly our prover is consistently slightly slower that APLL, this difference is negligible and due to the fact that APLL is compiled, whereas our prover is interpreted.
+
