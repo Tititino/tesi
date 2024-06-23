@@ -1,4 +1,13 @@
+- figure: OK, ma io mi aspettavo la gestione esplicita dei vincoli. Così non corisponde al calcolo presentato.
 
+in 3.1 quando si parla di why not height meglio anticipare a cosa
+serve.  Ma a cosa serve? in 3.3.1 da preferenza in &, ma fa lo stesso
+per par e tensor? Serve nel sorting di U, ma poi quale è la relazione
+tra contrazione e wn-height? (tra parentesi andrebbe spiegato che LL è
+indecidibile e dobbiamo approssimare). Cioè: Bound sulle contrazione =
+wn-height? Non sarebbe meglio un piccolo polinomio?
+
+----------------------
 - Prima di fare la soundness con LL, andrebbe chiarita la relazione tra il
   suo calcolo e quello di Pym (anche one sided).
 
