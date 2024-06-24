@@ -5,7 +5,7 @@
 \RequirePackage{amssymb}
 \RequirePackage{amsmath}
 \RequirePackage{amsthm}
-\RequirePackage[margin=3cm]{geometry}
+\RequirePackage{geometry}
 % \RequirePackage[english]{babel}
 \RequirePackage{bussproofs}
 \RequirePackage{cancel}
@@ -31,6 +31,7 @@
 \DeclareOption{dbg}{\overfullrule=5pt}
 \ProcessOptions\relax
 
+\graphicspath{ {./images/} }
 
 \theoremstyle{plain}
 \newtheorem{teor}{Theorem}[section]
@@ -41,8 +42,6 @@
 \newtheorem{define}{Definition}[section]
 \newenvironment{myteor}{\begin{teor}\sl}{\end{teor}}
 \renewcommand\qedsymbol{$\blacksquare$}
-
-% \renewcommand{\baselinestretch}{1.5}
 
 \definecolor{codegray}{gray}{0.95}
 % \lstdefinestyle{mystyle}{
@@ -112,3 +111,105 @@
 \usemintedstyle{bw}
 
 \EnableBpAbbreviations
+
+\oddsidemargin 0.5in \evensidemargin 0in
+\marginparwidth 40pt \marginparsep 10pt
+\topmargin 0pt \headsep .5in
+\textheight 8.1in \textwidth 6in
+
+\brokenpenalty=10000
+
+\renewcommand{\baselinestretch}{1.0}
+
+\def\cl@chapter{\@elt{section}\@elt{footnote}}
+\def\thefigure{\@arabic\c@figure}
+\def\thetable{\@arabic\c@table}
+\def\theequation{\arabic{equation}}
+
+\newif\iffigurespage \newif\iftablespage
+\figurespagefalse
+\tablespagefalse
+
+\def\frontespizio{
+	\pagenumbering{gobble}
+	\begin{center}
+		{\LARGE \uppercase{Universit\`a degli Studi di Milano}}\\
+		\uppercase{Facolt\`a di Scienze e Tecnologie}\\
+		\vskip 0.4 cm
+		\uppercase{Dipartimento di Informatica\\{``Giovanni Degli Antoni''}}\\
+		\vskip 0.6 cm
+		\centerline{\includegraphics[height=30mm]{unimi}}
+		\vskip 0.4 cm
+		\uppercase{\myCDL}
+	\end{center}
+	
+	\vfill
+	\vskip 1.5 cm
+
+    \begin{spacing}{1.5}
+	   \begin{center}
+        {\Huge\uppercase\expandafter{\myTitle}}
+	   \end{center}
+    \end{spacing}
+	
+	\vfill
+	\vskip 1.5 cm
+	
+	\begin{tabular}{ll}
+		{\large Relatore:} & \myRefereeA\\
+		\@ifundefined{myRefereeB}{}{{\large Correlatore:} & \myRefereeB\\}
+		\@ifundefined{myRefereeC}{}{{\large Correlatore:} & \myRefereeC\\}
+	\end{tabular}
+	
+	\vfill
+	\vskip 1 cm
+	
+	\begin{tabular}{r}
+		\hspace{9cm}{\large Tesi di Laurea di}\\
+		\hspace{9cm}{\large \myName}\\
+		\hspace{9cm}{\large \myMat}\\
+	\end{tabular}
+	
+	\vfill
+	\vskip 2.5 cm
+	
+	\begin{center}
+		\sc anno accademico \myYY
+	\end{center}\vskip.5in
+	\newpage
+}
+
+\def\beforepreface{
+	\pagenumbering{roman}
+	\pagestyle{plain}}
+
+\def\prefacesection#1{%
+	\chapter*{#1}
+	\addcontentsline{toc}{chapter}{#1}}
+
+\def\afterpreface{\newpage
+	\addcontentsline{toc}{chapter}{Index}
+	\tableofcontents
+	\newpage
+	\iftablespage
+	{\addvspace{10pt}
+		\let\saveaddvspace=\addvspace
+		\def\addvspace##1{}
+		\addcontentsline{toc}{chapter}{Elenco delle tabelle}
+		\listoftables
+		\let\addvspace=\saveaddvspace}
+	\newpage
+	\fi
+	\iffigurespage
+	{\addvspace{10pt}
+		\let\saveaddvspace=\addvspace
+		\def\addvspace##1{}
+		\addcontentsline{toc}{chapter}{Elenco delle figure}
+		\listoffigures
+		\let\addvspace=\saveaddvspace}
+	\newpage
+	\fi
+	\pagenumbering{arabic}
+	\pagestyle{headings}}
+
+\pagestyle{headings}
