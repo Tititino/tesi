@@ -2,7 +2,7 @@
 \section{Infrastructure}
 The infrastructure for the project is divided in two parts:
 \begin{itemize}
-	\item the nix ``glue''
+	\item the nix ``glue''		% modifico
 	\item python utilities to call and confront provers
 \end{itemize}
 In nix everything must be packaged as a derivation, so derivations are written for all the programs we interact with:
@@ -11,7 +11,7 @@ In nix everything must be packaged as a derivation, so derivations are written f
 	\item the formula generator adapted from APLL described in Section \ref{sec:formula generator};
 	\item the LLTP parser.
 \end{itemize}
-All these derivations, together with a derivation for the python environment, are then used to define a single development environment to run the jupyter notebook with all the necessary dependencies.
+All these derivations, together with one for the python environment, are then used to define a single development environment to run the jupyter notebook with all the necessary dependencies.
 Furthermore having used ``flakes'' -- a nix experimental feature -- all dependencies are locked to a certain commit, thus ensuring better reproducibility.
 
 The main logic for the benchmarking and testing is defined in the python module \texttt{testprover.py}.
@@ -30,7 +30,7 @@ def call_sat_prover(premises, conclusions):
     , f'{premises} |- {conclusions}'
     ]
 \end{minted}
-The innermost decorator (line 3) accepts a dictionary, and is needed to automatically call the prover with a test entry (as in Section \ref{sec:file format}), time it and eventually terminate the process it if the time runs out.
+The innermost decorator (line 3) accepts a dictionary, and is needed to automatically call the prover with a test entry (as in Section \ref{sec:file format}), time it and eventually terminate the process if the time runs out.
 The outermost decorator (line 4) instead simply adds an entry \texttt{'sat-ll'} associated with the prover call to the register \texttt{pc}.
 This register is just an association name to function, and it is what is actually passed to the benchmarking functions which will use the names in the output tables.
 
@@ -42,7 +42,7 @@ This register is just an association name to function, and it is what is actuall
 All the outputs of the functions above are pandas \texttt{DataFrame}s, which means that they can be easily queried, dumped to csv, aggregated, or visualized using most plotting libraries.
 
 \subsection{Prefix format}
-Since for benchmarking we will interface with a lot of different provers, each with its own syntax for expressions, the need for a common format which was easy to parse and translate arose.
+Since for benchmarking we will interface with a lot of different provers -- each with its own syntax for expressions -- the need arose for a common format which was easy to parse and translate.
 For this purpose we define a prefix format for linear logic formulae inspired by the format used by \cite{TarauPaiva} for implicational formulae
 \begin{table}[H]
 	\centering
@@ -90,7 +90,7 @@ For example
 	"conclusions": [ "|^a^b" ]
 }
 \end{minted}
-is the test case representing $\llnot{(a \llten b)} \lolli \llnot{a} \llpar \llnot{b}$.
+is the test case representing $\llnot{(a \llten b)} \vdash \llnot{a} \llpar \llnot{b}$.
 Other arbitrary fields may be present; for example we will use the following optional fields:
 \begin{center}
 \begin{tblr}{ colspec = {l l}
@@ -107,12 +107,13 @@ The fields \texttt{size} and \texttt{atoms} will be further explained in Section
 
 \subsection{Formula generation}\label{sec:formula generator}
 One of the sources of formulae we'll use in Section \ref{sec:benchmarking} is APLL's random formula generator.
-The version we'll use is a slight modification of it where:
+The version we'll use is a slight modification of it, where:
 \begin{itemize}
-	\item the output is in the json format described in Section \ref{sec:file format}
-	\item one can choose to generate normalized formulae or not;
+	\item the output is in the json format described in Section \ref{sec:file format};
+	\item one can whether choose to generate normalized formulae or not;
 	\item one can choose which connectives appear in the generated formula.
 \end{itemize}
+% TODO: sistemo
 A noteworthy detail is how the parameters \texttt{size} and \texttt{atoms} mentioned in Section \ref{sec:file format} are defined, since these are directly related to how the formulae are generated:
 \begin{itemize}
 	\item when one specifies a number of atoms \texttt{atoms}, the generator initializes an array containing \texttt{atoms} atoms, their negations, and the constants $\bot, \top, \dots$.
@@ -120,7 +121,8 @@ A noteworthy detail is how the parameters \texttt{size} and \texttt{atoms} menti
 		This means that \texttt{atoms} represents an upper bound to the number of different atoms that may appear in the formula, not their exact number.
 	\item when a formula is generated, at each step it is chosen whether to generate a unary or binary connective based on a threshold:
 		\begin{itemize}
-			\item if a unary connective is chosen, the process continues with a size of $\text{\texttt{size}} - 1$;
+			\item if a unary connective is chosen, the process continues with a size of 
+				$$\text{\texttt{size}} - 1$$
 			\item if a binary connective is chosen, the program chooses a random value between 0 and \texttt{size}, and it generates the two branches of the formula, with size respectively $k$ and $\text{\texttt{size}} - k$.
 		\end{itemize}
 \end{itemize}
@@ -131,6 +133,7 @@ A noteworthy detail is how the parameters \texttt{size} and \texttt{atoms} menti
 We'll mainly use three sources for formulae: llprover's tests; LLTP, especially the translations of Kleene's intuitionistic formulae; and randomly generated formulae made by the generator described in \ref{sec:formula generator}.
 Out of these, llprover's tests are composed primarily of simple linear logic tautologies, such as the DeMorgan rules; for this reason these tests are used to quickly check for obvious bugs.
 
+% TODO: sistemo
 Randomly generated tests are only used for non-exponential for the following reasons:
 \begin{itemize}
 	\item datasets of linear logic theorems without exponentials are rare and most often the formulae in them do not have a significant size; so we have to resort to generating these;

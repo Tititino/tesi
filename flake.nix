@@ -18,6 +18,7 @@
 	      amscls
 	      amstex
 	      bussproofs
+	      cancel
 	      caption
 	      embedall
 	      epstopdf

@@ -216,6 +216,93 @@ this is split into
 
 % One simple but important detail that will be useful later when explaining the Prolog implementation is noting that the variables in common between two branches with the same root are always introduced before the two branches diverge.
 % Or -- put differently -- all new variables introduced in any point of a path from the root of the proof to a leaf may appear only in the subtrees.	% sistemo
+\begin{figure}[H]
+	\begin{subfigure}{\textwidth}
+		\centering
+			\begin{tblr}{ colspec = { cc }
+				    , rows = {abovesep=7pt, belowsep=7pt}
+				    }
+			\SetCell[c=2]{c} {\footnotesize
+			\AX$\vdash \Delta, \af{\phi_1}{e}, \af{\phi_2}{e}\fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
+			\LeftLabel{$[\llpar]$}
+			\UI$\vdash \Delta, \af{\phi_1 \llpar \phi_2}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
+			\DP} \\
+			{\footnotesize
+			\AX$\vdash \Delta \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
+			\LeftLabel{$[\llbot]$}
+			\UI$\vdash \Delta, \af{\llbot}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
+			\DP}
+			&
+			{\footnotesize
+			\AXC{}
+			\LeftLabel{$[\lltop]$}
+			\UIC{$\vdash \Delta, \af{\lltop}{-} \separator \constr{\Lambda}{\mathV}$}
+			\DP
+			}
+			\\
+			\SetCell[c=2]{c} {\footnotesize
+			\AXC{$\vdash \Delta, \af{\phi_2}{e} \separator \constr{\Lambda, \used{e}}{\mathV'}$}
+			\AXC{$\vdash \Delta, \af{\phi_1}{e} \separator \constr{\Lambda, \used{e}}{\mathV''}$}
+			\LeftLabel{$[\llwith]$}
+			\BIC{$\vdash \Delta, \af{\phi_1 \llwith \phi_2}{e} \separator \constr{\Lambda}{\mathV''}$}	
+			\DP}
+			\\
+			\SetCell[c=2]{c} {\footnotesize
+			\AXC{$\vdash \Delta_L^X, \af{\phi_1}{e} \separator \constr{\Lambda, \used{e}}{\mathV'}$}
+			\AXC{$\vdash \Delta_R^X, \af{\phi_2}{e} \separator \constr{\mathV'}{\mathV''}$}
+			\LeftLabel{$[\llten]$}
+			\BIC{$\vdash \Delta, \af{\phi_1 \llten \phi_2}{e} \separator \constr{\Lambda}{\mathV''}$}	% capisco il movimento dei constraint
+			\DP}
+			\\ 
+			\SetCell[c=2]{c} {\footnotesize
+			\AXC{$\new{x}$}
+			\AXC{$\vdash \Delta, \af{\phi_1}{x}, \af{\phi_2}{\varNot{x}} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$}
+			\LeftLabel{$[\llplus]$}
+			\BIC{$\vdash \Delta, \af{\phi_1 \llplus \phi_2}{e} \fCenter \separator \constr{\Lambda}{\mathV}$}
+			\DP}
+			\\
+			{\footnotesize
+			\AXC{$\sat{ \Lambda, \used{e}, \avail{\Delta}}{\mathV}$}
+			\LeftLabel{$[1]$}
+			\UIC{$\vdash \Delta, \af{\llone}{e} \separator \constr{\Lambda}{\mathV}$}
+			\DP} 
+			&
+			{\footnotesize
+			\AX$\vdash \llwn{\Delta}, \af{\phi}{e} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
+			\LeftLabel{$[\,\llbang{}\,]$}
+			\UI$\vdash \llwn{\Delta}, \af{\llbang{\phi}}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
+			\DP
+			}
+			\\
+			\SetCell[c=2]{c} {\footnotesize
+			\AX$\vdash \Delta, \af{\phi}{e} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
+			\LeftLabel{$[\,\llwn{}\,]$}
+			\UI$\vdash \Delta, \af{\llwn{\phi}}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
+			\DP}
+			\\
+			{ \footnotesize
+			\AX$\vdash \Delta \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
+			\LeftLabel{$[W?R]$}
+			\UI$\vdash \llwn{\af{\phi}{e}}, \Delta \fCenter \separator \constr{\Lambda}{\mathV}$
+			\DP}
+			&
+			{ \footnotesize
+			\AX$\vdash \af{\llwn{\phi}}{e}, \af{\llwn{\phi}}{e}, \Delta \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
+			\LeftLabel{$[C?R]$}
+			\UI$\vdash \llwn{\af{\phi}{e}}, \Delta \fCenter \separator \constr{\Lambda}{\mathV}$
+			\DP}
+			\\
+			\SetCell[c=2]{c} {\footnotesize
+			\AXC{$ \isNegLit{\alpha} $}
+			\AXC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\mathV}$}
+			\LeftLabel{$[A]$}
+			\BIC{$\vdash \af{\alpha}{e_1}, \af{\llnot{\alpha}}{e_2}, \Delta \separator \constr{\Lambda}{\mathV}$}
+			\DP}
+		\end{tblr}
+		\caption{Identity and decide rules}
+	\end{subfigure}
+	\caption{Focused constraint calculus for Linear Logic}
+\end{figure}
 
 We are now ready to present the full calculus.
 \begin{figure}[H]
@@ -300,9 +387,9 @@ We are now ready to present the full calculus.
 			\DP} 
 			&
 			{\footnotesize
-			\AX$\focus{\Psi}{\Delta}{\af{\phi}{e_1}} \fCenter \separator \constr{\Lambda, \used{e_1}, \avail{\Delta}}{\mathV}$
+			\AX$\focus{\Psi}{\Delta}{\af{\phi}{e}} \fCenter \separator \constr{\Lambda, \used{e}, \avail{\Delta}}{\mathV}$
 			\LeftLabel{$[\,!\,]$}
-			\UI$\focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e_1}} \fCenter \separator \constr{\Lambda}{\mathV}$
+			\UI$\focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP
 			}
 			\\
@@ -733,24 +820,57 @@ What is described in Figure \ref{fig:calculus} is roughly the ``lazy'' strategy 
 			\DP
 		\end{tblr}
 	\end{center}
-		%	\item[$\lltop$:]
-		%		$$
-		%		\AXC{}
-		%		\LeftLabel{$[\lltop]$}
-		%		\UIC{$\async{\Psi}{\Delta}{\af{\lltop}{-}, \Phi} \separator \constr{\Lambda}{\mathV}$}
-		%		\DP
-		%		$$
 \end{proof}
 
-\begin{figure}[h!]
+\begin{sidewaysfigure}
 	\centering
-	\begin{subfigure}{\textwidth}
-		\centering
-		\includegraphics{./images/tensor_de_morgan_constr}
-	\end{subfigure}
-	\begin{subfigure}{\textwidth}
-		\centering
-		\includegraphics{./images/tensor_de_morgan_classic}
-	\end{subfigure}
-\end{figure}
+	\tiny
+$$
+	\AXC{$\sat{\used{x_1}, \used{x_2} \used{x_2x_3}, \avail{x_2x_4}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\LeftLabel{$[I_1]$}
+	\UIC{$\focus{.}{\af{a}{x_1}, \cancel{\af{\llnot{b}}{x_2x_4}}}{\af{\llnot{a}}{x_2x_3}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\LeftLabel{$[D_1]$}
+	\UIC{$\focus{.}{\af{a}{x_1}, \af{\llnot{a}}{x_2x_3}, \cancel{\af{\llnot{b}}{x_2x_4}}}{.} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\LeftLabel{$[R\!\Uparrow]$}
+	\UIC{$\focus{.}{\af{\llnot{a}}{x_2x_3}, \cancel{\af{\llnot{b}}{x_2x_4}}}{\af{a}{x_1}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\LeftLabel{$[R\!\Downarrow]$}
+	\UIC{$\focus{.}{\af{\llnot{a}}{x_2x_3}, \cancel{\af{\llnot{b}}{x_2x_4}}}{\af{a}{x_1}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\AXC{$\sat{\used{x_1}, \used{x_2}, \used{x_2\varNot{x_4}}, \avail{x_2\varNot{x_3}}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\LeftLabel{$[I_1]$}
+	\UIC{$\focus{.}{\af{b}{x_1}, \cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}}{\af{\llnot{b}}{x_2\varNot{x_4}}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\LeftLabel{$[D_1]$}
+	\UIC{$\focus{.}{\af{b}{x_1}, \cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}, \af{\llnot{b}}{x_2\varNot{x_4}}}{.} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\LeftLabel{$[R\!\Uparrow]$}
+	\UIC{$\focus{.}{\cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}, \af{\llnot{b}}{x_2\varNot{x_4}}}{\af{b}{x_1}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\LeftLabel{$[R\!\Downarrow]$}
+	\UIC{$\focus{.}{\cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}, \af{\llnot{b}}{x_2\varNot{x_4}}}{\af{b}{x_1}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\LeftLabel{$[\llten]$}
+	\BIC{$\focus{.}{\af{\llnot{a}}{x_2}, \af{\llnot{b}}{x_2}}{\af{a \llten b}{x_1}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\LeftLabel{$[D_1]$}
+	\UIC{$\focus{.}{\af{\llnot{a}}{x_2}, \af{\llnot{b}}{x_2}, \af{a \llten b}{x_1}}{.} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\LeftLabel{$[R\!\Uparrow]$}
+	\UIC{$\focus{.}{ \af{\llnot{b}}{x_2}, \af{a \llten b}{x_1}}{\af{\llnot{a}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\LeftLabel{$[R\!\Uparrow]$}
+	\UIC{$\focus{.}{\af{a \llten b}{x_1}}{\af{\llnot{b}}{x_2}, \af{\llnot{a}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\LeftLabel{$[\llpar]$}
+	\UIC{$\focus{.}{\af{a \llten b}{x_1}}{\af{a \llpar b}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\LeftLabel{$[R\!\Uparrow]$}
+	\UIC{$\focus{.}{.}{\af{a \llten b}{x_1}, \af{a \llpar b}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\DP
+$$
+\vspace{1cm}
+$$
+	\AXC{}
+	\LeftLabel{$[A]$}
+	\UIC{$\vdash a, \llnot{a}$}
+	\AXC{}
+	\LeftLabel{$[A]$}
+	\UIC{$\vdash b, \llnot{b}$}
+	\LeftLabel{$[\llten]$}
+	\BIC{$\vdash \llnot{a}, \llnot{b}, (a \llten b)$}
+	\LeftLabel{$[\!\llpar\!]$}
+	\UIC{$\vdash (a \llten b), (\llnot{a} \llpar \llnot{b})$}
+	\DP
+$$
+\end{sidewaysfigure}
 
