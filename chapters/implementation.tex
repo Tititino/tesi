@@ -27,7 +27,7 @@ In fact the number of rules one needs to implement, and thus the number of diffe
 
 As a second transformation, to each formula we assign its why-not height, a measure borrowed from APLL's implementation.
 \begin{define}[Why-not height]
-	\label{def:why-not-height}
+	\label{def:why-not height}
 	Why-not height is the maximum number of nested ``why-not''s in a formula, or
 	$$ \mathrm{wnh}(\phi) = 
 	\begin{cases}	
@@ -39,7 +39,16 @@ As a second transformation, to each formula we assign its why-not height, a meas
 	$$
 \end{define}
 The purpose of this attribute is to guide the prover to the reasonably simpler choice -- the one with the least nested exponentials -- at different times during proof search.
-This will be seen in Section \ref{sec:focusing-impl}.
+This happens in three ways: 
+\begin{itemize}
+	\item When a rule generates two branches ($\llten$, $\llwith$), the branch associated to the formula with the least why-not height is tried first.
+		This will presumably make the prover choose the simpler branch of the two, making it so we can fail early if the branch turns out to be false.
+		An example of this is Section \ref{sec:asy phase}.
+	\item In the case of plus ($\llplus$), the branch branch associated to the least why-not height is tried first; this makes it so we can continue if the branch turns out to be true, ignoring the other harder branch.
+	\item During the $D_2$ rule, the exponentials are tried in order of ascending why-not height.
+		This process is further explained in Section \ref{sec:decide}.
+\end{itemize}
+
 After this transformation formulae are attribute trees with at each node the why-not.
 For example the formula \texttt{*(a, ?(b))} becomes \texttt{*(a-0, ?(b-0)-1)-1}, or
 \begin{figure}[H]
@@ -103,22 +112,22 @@ Compare this to the original definition of Definition \ref{def:split}, one can s
 In the implementation the concept of variable is split in two: the name of the variable -- represented by a Prolog atom, and the value of the variable -- represented by a Prolog variable.
 This is needed since, after checking the constraints, the SAT-solver unifies the variable to its value if it finds a satisfiable solution; the purpose of the atom is to associate the variable value to its name if the final proof.
 
-\section{Focusing}\label{sec:focusing-impl}
-\subsection{Asynchronous and focusing phase}
+\section{Focusing}\label{sec:focusing impl}
+\subsection{Asynchronous and focusing phase}\label{sec:asy phase}
 During the asynchronous phase we have a list of formulae which are being worked on and a list of formulae which are put to the side; with the former being called \texttt{Fs} and the latter \texttt{D}.
 At each step we analyze the first element of the list \texttt{Fs}, and we keep decomposing the members of the list until we cannot anymore.
 This process can be seen for example in the predicate for with ($\llwith$)
 \begin{minted}{prolog}
-async(A, U, D, [F|Fs], S, M, In, _) :-
+async(A, U, D, [F|Fs], S, M, In) :-
   F = af(((F1-H1) & (F2-H2))-_), N, E), !,
   ( H2 > H1	
-  -> async(A, U, D, [af((F1-H1), N, E)|Fs], S, M, [v(E) =:= 1|In], _), 
-     async(A, U, D, [af((F2-H2), N, E)|Fs], S, M, [v(E) =:= 1|In], _) 
-  ;  async(A, U, D, [af((F2-H2), N, E)|Fs], S, M, [v(E) =:= 1|In], _),
-     async(A, U, D, [af((F1-H1), N, E)|Fs], S, M, [v(E) =:= 1|In], _)
+  -> async(A, U, D, [af((F1-H1), N, E)|Fs], S, M, [v(E) =:= 1|In]), 
+     async(A, U, D, [af((F2-H2), N, E)|Fs], S, M, [v(E) =:= 1|In]) 
+  ;  async(A, U, D, [af((F2-H2), N, E)|Fs], S, M, [v(E) =:= 1|In]),
+     async(A, U, D, [af((F1-H1), N, E)|Fs], S, M, [v(E) =:= 1|In])
   ).
 \end{minted}
-Here we can see both the choice being made based on the why-not height of the two sub-formulae, and how the with is broken down.
+Here we can see both the choice being made based on the why-not height of the two sub-formulae (Definition \ref{def:why-not height}), and how the with is broken down.
 Compare this with the $\llwith$ rule in Figure \ref{fig:calculus}.
 The cut at line 2 is essential: it signifies that when an asynchronous connective is encountered the only thing to do is to break it apart.
 
