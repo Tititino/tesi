@@ -732,7 +732,31 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			$$
 			since  $\Lambda \subseteq \used{e}, \Lambda$ and Lemma \ref{lemma:subsume}.
 	\end{itemize}
-	The rest of the translations are just a matter of canceling out the members of the sequent using the assignment function.
+	% The rest of the translations are just a matter of canceling out the members of the sequent using the assignment function.
+
+	%%% 
+	\begin{itemize}
+		\item[$(\llpar)$]: Assuming
+			$$ \async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \separator \constr{\used{e}, \Lambda}{\mathV} $$
+			maps to 
+			$$ \async[A]{\Psi}{\Delta[\mathV]}{\phi_1, \phi_2, \Phi[\mathV]} $$
+			under $\mathV$.
+			Then 
+			$$ \async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV} $$
+			maps to 
+			$$ \async[A]{\Psi}{\Delta[\mathV]}{\phi_1 \llpar \phi_2, \Phi[\mathV]} $$
+			Since the assignment $\mathV$ is the same, then $\Delta[\mathV]$ and $\Phi[\mathV]$ stay the same, and since the assignment respects the constraint $\used{e}$, then $\phi_1 \llpar \phi_2$ must be present.
+		\item[$(R\!\Downarrow)$]: Assuming
+			$$ \async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} $$
+			maps to
+			$$ \async[A]{\Psi}{\Delta[\mathV]}{\phi} $$
+			under $\mathV$.
+			Then
+			$$ \focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} $$
+			maps to
+			$$ \focus[A]{\Psi}{\Delta[\mathV]}{\phi} $$
+			since the sequents do not change, only the phase shifts.
+	\end{itemize}
 	\begin{center}
 		\begin{tblr}{ colspec = { ccc }
 			    , cells = { mode = dmath } 
@@ -809,20 +833,6 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi}$}
 	 		\UIC{$\async{\phi, \Psi}{\Delta[\mathV]}{.}$}
  			\DP
-			\\
-			I_1
-			& \mapsto
-			& 
-			\AXC{$\isNegLit{\alpha}$}
-			\UIC{$\focus{\Psi}{\alpha}{\llnot{\alpha}}$}
-			\DP
-			\\
-			I_2
-			& \mapsto
-			& 
-			\AXC{$\isNegLit{\alpha}$}
-			\UIC{$\focus{\alpha, \Psi}{.}{\llnot{\alpha}}$}
-			\DP
 		\end{tblr}
 	\end{center}
 \end{proof}
