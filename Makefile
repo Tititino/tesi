@@ -18,8 +18,9 @@ all:
 	mv out.pdf thesis.pdf
 
 clean:
-	rm out.*
+	rm -f out.*
 	latexmk -c
+	cd chapters/ && latexmk -c
 
 draft:
 	$(LCC) -shell-escape thesis.tex
