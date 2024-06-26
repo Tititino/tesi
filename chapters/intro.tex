@@ -139,7 +139,7 @@ A constraint may be checked using the predicate \texttt{sat/1}, which succeeds i
 Since we only deal with conjunctions we define the helper predicate \texttt{check/1}
 \begin{minted}{prolog}
 check(L) :-
-	sat(*(L)).
+  sat(*(L)).
 \end{minted}
 The predicate \texttt{sat/1} may work a bit unexpectedly, to clarify its possible outcomes we give a little example:
 \begin{minted}{prolog}

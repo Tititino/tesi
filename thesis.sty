@@ -21,7 +21,7 @@
 \RequirePackage{siunitx}
 \RequirePackage{subcaption}
 \RequirePackage{tabularray}
-\RequirePackage{todonotes}
+\RequirePackage[colorinlistoftodos]{todonotes}
 % \RequirePackage{listings}
 \RequirePackage{url}
 \RequirePackage{xcolor}
@@ -73,8 +73,8 @@
 \newcommand{\llwn}[1]{? #1}
 \newcommand{\llbang}[1]{! #1}
 \newcommand{\lolli}{\multimap}
-\newcommand{\focus}[4][]{\vdash_{\text{#1}} #2 : #3 \Downarrow #4}
-\newcommand{\async}[4][]{\vdash_{\text{#1}} #2 : #3 \Uparrow   #4} 
+\newcommand{\focus}[4][]{\; \vdash_{\text{#1}} #2 : #3 \Downarrow #4}
+\newcommand{\async}[4][]{\; \vdash_{\text{#1}} #2 : #3 \Uparrow   #4} 
 \newcommand{\used}[1]{#1 \; \mathrm{used}}
 \newcommand{\separator}{\; \Vert \;}
 \newcommand{\constr}[2]{#1 : #2}

@@ -29,40 +29,41 @@ This choice has some implementation-wise advantages, but for now we will only ca
 		\phi & ::=  & 1              &\mid& \phi \llten \phi  &\mid& \bot &\mid& \phi \llpar \phi  & \text{(Multiplicatives and their constants)} \\
 		     & \mid & 0              &\mid& \phi \llplus \phi &\mid& \top &\mid& \phi \llwith \phi & \text{(Additives and their constants)} \\
 		     & \mid & \llbang{\phi}  &\mid& \llwn{\phi}       &    &      &    &                   & \text{(Exponentials)} \\
-		     & \mid & \llnot{\alpha} &\mid& \alpha	      &    &      &    &                   & \text{(Where $\alpha$ is a term)}
+		     & \mid & \llnot{\alpha} &\mid& \alpha	      &    &      &    &                   & \text{(Where $\alpha$ is an atom)}
 	\end{tblr}
 	\caption{Normalized linear logic formulae}
 	\label{fig:ll-connectives}
 \end{figure}
-As seen in Figure \ref{fig:ll-connectives} we will use $\phi$ for formulae and $\alpha$ for terms.
+As seen in Figure \ref{fig:ll-connectives} we will use $\phi$ for formulae and $\alpha$ for atoms.
 
 \section{Focusing}
 Focusing is a technique described by Andreoli in his seminal paper \cite{Focusing}.
 There he recognizes two alternating phases in a proof: a deterministic phase, where the order of rule application to the sequent does not matter; and a non deterministic phase, where several choices may be tried.
 These two phases are respectively called asynchronous and synchronous phase.
-\begin{define}
-	Given a formula $\phi$ we define the following predicates:
-	``$\isAsy{\phi}$'' indicates that the rule for the top-level connective of the formula $\phi$ is asynchronous on the right, these connectives are 
-	$$ \llpar\!, \llwith\!, \llwn{}, \lltop, \llbot $$
-	conversely we define ``$\isSync{\phi}$'' to indicate that the rule for the top-level connective of $\phi$ is synchronous on the right, these are
-	$$ \llten, \llplus, \llbang{}, \llone $$
-\end{define}
-Furthermore in focusing everything is assigned a negative or positive polarity.
-Synchronous connectives are defined to have a positive polarity, whereas asynchronous connectives are define to have a negative polarity.
-Terms also have a polarity, which may be assigned with some arbitrarily complex mechanisms.
+All terms are assigned a polarity: connectives with a synchronous right rule are defined to have a positive polarity, whereas connectives with a asynchronous right rule have a negative one.
+Atoms also have polarities, which may be assigned with some arbitrarily complex mechanisms.
 We will follow \cite{LiangMiller} and simply assign atoms with a negative polarity and negated atoms with a positive one.
+Since we work in one sided linear and connectives have only right rules, positive connectives are also called synchronous, and negative connectives asynchronous.
+This way we distinguish asynchronous connectives
+	$$ \llpar\!, \llwith\!, \llwn{}, \lltop, \llbot $$
+and synchronous connectives
+	$$ \llten, \llplus, \llbang{}, \llone $$
 \begin{define}
-	``$\isNegLit{\alpha}$'' is a predicate that is true only when $\alpha$ is a negative literal (i.e. an atom).
-	Conversely ``$\isPosLit{\alpha}$'' is a predicate that is only when $\alpha$ is a positive literal (i.e. a negated atom).
+	Based on the definitions above we define the following predicates:
+	\begin{itemize}
+		\item ``$\phi \; \mathrm{atom}$'' is true whenever $\phi$ is an atom;
+		\item ``$\phi \; \mathrm{asy}$'' is true whenever $\phi$ is an asynchronous connective;
+		\item ``$\phi \; \mathrm{negative}$'' is true whenever $\phi$ is either an atom or an asynchronous connective, so
+			$$ \phi \; \mathrm{negative} = \phi \; \mathrm{atom} \vee \phi \; \mathrm{asy} $$
+	\end{itemize}
 \end{define}
 
 \section{Constraints}
-
-Our calculus uses constraints to manage the resources.
+The calculus uses constraints to manage the resources.
 \begin{define}[Variables, expressions]
 	\label{def:bool-expr}
 	A boolean variable is simply a symbol to which one can associate a value of true or false.
-	A boolean expression, in our case, is just a conjunction of possibly negated boolean variables.
+	A boolean expression, in our case, is just a conjunction of possibly negated boolean variables as in Figure \ref{fig:var name}.
 \end{define}
 \begin{define}[New variables]
 	\label{def:new}
@@ -75,7 +76,7 @@ Our calculus uses constraints to manage the resources.
 			$$ \forall i, j \mid i \neq j \Rightarrow x_i \neq x_j $$
 	\end{itemize}
 \end{define}
-As seen in Figure \ref{fig:var-name} we will call $e$ such a conjunction and $x$ the single boolean variables.
+As seen in Figure \ref{fig:var name} we will call $e$ such a conjunction and $x$ the single boolean variables.
 \begin{figure}[h!]
 	\centering
 	\begin{tblr}{ colspec = {cccccr}, cells = { mode = math } }
@@ -83,7 +84,7 @@ As seen in Figure \ref{fig:var-name} we will call $e$ such a conjunction and $x$
 		e & ::=  & x \wedge e    &\mid& x & \text{(Expression)} \\
 	\end{tblr}
 	\caption{Definition of a boolean variable and expression}
-	\label{fig:var-name}
+	\label{fig:var name}
 \end{figure}
 
 \begin{define}[Annotated formula]
@@ -113,10 +114,10 @@ These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
 	\begin{itemize}
 		\item ``$\used{e}$'' states that the formula $\phi$ gets consumed in this branch of the proof.
 			This corresponds to saying the expression $e$ is true or
-			$$ x_i \wedge \dots \wedge x_j = \top $$
+			$$ x_i \wedge \dots \wedge x_j \leftrightarrow \top $$
 		\item ``$\avail{e}$'' states that the formula $\phi$ does not get consumed in this branch of the proof, and thus is available to be used in another branch.
 			This corresponds to saying the expression $e$ is not true or
-			$$ x_i \wedge \dots \wedge x_j = \bot $$
+			$$ x_i \wedge \dots \wedge x_j \leftrightarrow \bot $$
 	\end{itemize}
 	We then extend these predicates to sequents
 	\begin{align*}
@@ -162,8 +163,7 @@ Otherwise the branch of the proof fails.
 	\label{fact:ass-trans}
 	We can translate an assignment function to a set of constraints using simple reversible transformations:
 	\begin{align*}
-		\mathV &= \{ \dots, (x_i, \top), (x_j, \bot), \dots \} \\
-		       &= \{ \dots, x_i = \top, x_j = \bot, \dots \} \\
+		\mathV &= \{ \dots, x_i \mapsto \top, x_j \mapsto \bot, \dots \} \\
 		       &= \{ \dots, \used{x_i}, \avail{x_j}, \dots \}
 	\end{align*}
 \end{fact}
@@ -217,9 +217,9 @@ this is split into
 % One simple but important detail that will be useful later when explaining the Prolog implementation is noting that the variables in common between two branches with the same root are always introduced before the two branches diverge.
 % Or -- put differently -- all new variables introduced in any point of a path from the root of the proof to a leaf may appear only in the subtrees.	% sistemo
 Figure \ref{fig:hp calculus} shows the calculus \cite{HarlandPym} using our notation of explicit contraints.
-What is actually show is roughly what they define as the ``lazy'' strategy.
+What it actually represents is roughly what they define as the ``lazy'' strategy.
 Figure \ref{fig:calculus} instead presents our focused constraint calculus.
-\begin{figure}[H]
+\begin{figure}[h!]
 	\begin{tblr}{ colspec = { cc }
 		, rows = {abovesep=7pt, belowsep=7pt}
 		}
@@ -304,7 +304,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 	\label{fig:hp calculus}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[h!]
 	\begin{subfigure}{\textwidth}
 		\centering
 			\begin{tblr}{ colspec = { cc }
@@ -352,7 +352,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 		\caption{Asynchronous rules}
 	\end{subfigure}
 \end{figure}
-\begin{figure}[H]
+\begin{figure}[h!]
 	\ContinuedFloat
 	\begin{subfigure}{\textwidth}
 		\centering
@@ -403,7 +403,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 		\caption{Synchronous rules}
 	\end{subfigure}
 \end{figure}
-\begin{figure}[H]
+\begin{figure}[h!]
 	\ContinuedFloat
 	\begin{subfigure}{\textwidth}
 		\centering
@@ -445,13 +445,6 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 	\caption{Focused constraint calculus for Linear Logic}
 	\label{fig:calculus}
 \end{figure}
-\begin{lemma}
-	If there exists $\mathV$ such that 
-	$$\vdash_{\text{PH}} \Delta \separator \constr{\used{\Delta}}{\mathV}$$
-	then there is $\mathV'$ such that 
-	$$\async{.}{.}{\Delta} \separator \constr{\used{\Delta}}{\mathV'}$$
-\end{lemma}
-
 
 \begin{lemma}
 	\label{lemma:cap}
@@ -521,114 +514,118 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 \end{proof}
 
 \begin{teor}[Soundness]\label{thm:soundness}
-	% Let $\vdash \Psi$ The calculus of Figure \ref{fig:calculus} is sound % ...
+	For some assignment $\mathV$:
+	\begin{align*}
+		\async{\Psi}{\Delta}{\Phi} \separator \constr{\Lambda}{\mathV} &\Rightarrow \async[A]{\Psi}{\Delta[\mathV]}{\Phi[\mathV]} \\
+		\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} &\Rightarrow \focus[A]{\Psi}{\Delta[\mathV]}{\phi}
+	\end{align*}
+	where $A$ is the triadic calculus of \cite{Focusing} defined in Figure \ref{fig:triadic}.
 \end{teor}
+\begin{figure}[h!]
+	\centering
+	\begin{tblr}{ colspec = {c c c}
+		, cells = { mode = dmath } 
+		, rows = {abovesep=7pt, belowsep=7pt}
+		, vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
+		}
+		\AXC{$\async[A]{\Psi}{\Delta}{\Phi}$}
+		\LeftLabel{$[\llbot]$}
+		\UIC{$\async[A]{\Psi}{\Delta}{\llbot, \Phi}$}
+		\DP
+		&
+		\AXC{$\async[A]{\Psi}{\Delta}{\phi_1, \phi_2, \Phi}$}
+		\LeftLabel{$[\llpar]$}
+		\UIC{$\async[A]{\Psi}{\Delta}{\phi_1 \llpar \phi_2, \Phi}$}
+		\DP
+		&
+		\AXC{$\async[A]{\phi, \Psi}{\Delta}{\Phi}$}
+		\LeftLabel{$[\llwn{}]$}
+		\UIC{$\async[A]{\Psi}{\Delta}{\llwn{\phi}, \Phi}$}
+		\DP
+		\\
+		\AXC{}
+		\LeftLabel{$[\lltop]$}
+		\UIC{$\async[A]{\Psi}{\Delta}{\lltop, \Phi}$}
+		\DP
+		&
+		\SetCell[c=2]{c} 
+		\AXC{$\async[A]{\Psi}{\Delta}{\phi_1, \Phi}$}
+		\AXC{$\async[A]{\Psi}{\Delta}{\phi_2, \Phi}$}
+		\LeftLabel{$[\llwith]$}
+		\BIC{$\async[A]{\Psi}{\Delta}{\phi_1 \llwith \phi_2, \Phi}$}
+		\DP
+		\\
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_1}$}
+		\LeftLabel{$[\llplus_L]$}
+		\UIC{$\focus[A]{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
+		\DP
+		&
+		\AXC{}
+		\LeftLabel{$[\llone]$}
+		\UIC{$\focus[A]{\Psi}{.}{\llone}$}
+		\DP
+		& 
+		\AXC{$\async[A]{\Psi}{.}{\phi}$}
+		\LeftLabel{$[\llbang{}]$}
+		\UIC{$\focus[A]{\Psi}{.}{\llbang{\phi}}$}
+		\DP
+		\\
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_2}$}
+		\LeftLabel{$[\llplus_R]$}
+		\UIC{$\focus[A]{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
+		\DP
+		&
+		\SetCell[c=2]{c} 
+		\AXC{$\focus[A]{\Psi}{\Gamma}{\phi_1}$}
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_2}$}
+		\LeftLabel{$[\llten]$}
+		\BIC{$\focus[A]{\Psi}{\Gamma, \Delta}{\phi_1 \llten \phi_2}$}
+		\DP
+		\\
+		\AXC{$\neg \isAsy{\phi}$}
+		\AXC{$\async[A]{\Psi}{\phi, \Delta}{\Phi}$}
+		\LeftLabel{$[R\!\Uparrow]$}
+		\BIC{$\async[A]{\Psi}{\Delta}{\phi, \Phi}$}
+		\DP
+		&
+		\AXC{$\isNegLit{\alpha}$}
+		\LeftLabel{$[I_1]$}
+		\UIC{$\focus[A]{\Psi}{\alpha}{\llnot{\alpha}}$}
+		\DP
+		&
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
+		\LeftLabel{$[D_1]$}
+		\UIC{$\async[A]{\Psi}{\phi, \Delta}{.}$}
+		\DP
+		\\
+		\AXC{$\phi \; \mathrm{negative}$}
+		\AXC{$\async[A]{\Psi}{\Delta}{\phi}$}
+		\LeftLabel{$[R\!\Downarrow]$}
+		\BIC{$\focus[A]{\Psi}{\Delta}{\phi}$}
+		\DP
+		&
+		\AXC{$\isNegLit{\alpha}$}
+		\LeftLabel{$[I_2]$}
+		\UIC{$\focus[A]{\alpha, \Psi}{.}{\llnot{\alpha}}$}
+		\DP
+		&
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
+		\LeftLabel{$[D_2]$}
+		\UIC{$\async[A]{\phi, \Psi}{\Delta}{.}$}
+		\DP
+	\end{tblr}
+	\caption{J.-M. Andreoli's triadic calculus.}
+	\label{fig:triadic}
+\end{figure}
 \begin{proof}
-	As a soundness proof we give a translation to the triadic system defined by Andreoli in \cite{Focusing}:
-	\begin{figure}[H]
-		\centering
-		\begin{tblr}{ colspec = {c c c}
-			, cells = { mode = dmath } 
-			, rows = {abovesep=7pt, belowsep=7pt}
-			, vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
-			}
-			\AXC{$\async[A]{\Psi}{\Delta}{\Phi}$}
-			\LeftLabel{$[\llbot]$}
-			\UIC{$\async[A]{\Psi}{\Delta}{\llbot, \Phi}$}
-			\DP
-			&
-			\AXC{$\async[A]{\Psi}{\Delta}{\phi_1, \phi_2, \Phi}$}
-			\LeftLabel{$[\llpar]$}
-			\UIC{$\async[A]{\Psi}{\Delta}{\phi_1 \llpar \phi_2, \Phi}$}
-			\DP
-			&
-			\AXC{$\async[A]{\phi, \Psi}{\Delta}{\Phi}$}
-			\LeftLabel{$[\llwn{}]$}
-			\UIC{$\async[A]{\Psi}{\Delta}{\llwn{\phi}, \Phi}$}
-			\DP
-			\\
-			\AXC{}
-			\LeftLabel{$[\lltop]$}
-			\UIC{$\async[A]{\Psi}{\Delta}{\lltop, \Phi}$}
-			\DP
-			&
-			\SetCell[c=2]{c} 
-			\AXC{$\async[A]{\Psi}{\Delta}{\phi_1, \Phi}$}
-			\AXC{$\async[A]{\Psi}{\Delta}{\phi_2, \Phi}$}
-			\LeftLabel{$[\llwith]$}
-			\BIC{$\async[A]{\Psi}{\Delta}{\phi_1 \llwith \phi_2, \Phi}$}
-			\DP
-			\\
-			\AXC{$\focus[A]{\Psi}{\Delta}{\phi_1}$}
-			\LeftLabel{$[\llplus_L]$}
-			\UIC{$\focus[A]{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
-			\DP
-			&
-			\AXC{}
-			\LeftLabel{$[\llone]$}
-			\UIC{$\focus[A]{\Psi}{.}{\llone}$}
-			\DP
-			& 
-			\AXC{$\async[A]{\Psi}{.}{\phi}$}
-			\LeftLabel{$[\llbang{}]$}
-			\UIC{$\focus[A]{\Psi}{.}{\llbang{\phi}}$}
-			\DP
-			\\
-			\AXC{$\focus[A]{\Psi}{\Delta}{\phi_2}$}
-			\LeftLabel{$[\llplus_R]$}
-			\UIC{$\focus[A]{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
-			\DP
-			&
-			\SetCell[c=2]{c} 
-			\AXC{$\focus[A]{\Psi}{\Gamma}{\phi_1}$}
-			\AXC{$\focus[A]{\Psi}{\Delta}{\phi_2}$}
-			\LeftLabel{$[\llten]$}
-			\BIC{$\focus[A]{\Psi}{\Gamma, \Delta}{\phi_1 \llten \phi_2}$}
-			\DP
-			\\
-			\AXC{$\neg \isAsy{\phi}$}
-			\AXC{$\async[A]{\Psi}{\phi, \Delta}{\Phi}$}
-			\LeftLabel{$[R\!\Uparrow]$}
-			\BIC{$\async[A]{\Psi}{\Delta}{\phi, \Phi}$}
-			\DP
-			&
-			\AXC{$\isNegLit{\alpha}$}
-			\LeftLabel{$[I_1]$}
-			\UIC{$\focus[A]{\Psi}{\alpha}{\llnot{\alpha}}$}
-			\DP
-			&
-			\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
-			\LeftLabel{$[D_1]$}
-			\UIC{$\async[A]{\Psi}{\phi, \Delta}{.}$}
-			\DP
-			\\
-			\AXC{$\phi \; \mathrm{negative}$}
-			\AXC{$\async[A]{\Psi}{\Delta}{\phi}$}
-			\LeftLabel{$[R\!\Downarrow]$}
-			\BIC{$\focus[A]{\Psi}{\Delta}{\phi}$}
-			\DP
-			&
-			\AXC{$\isNegLit{\alpha}$}
-			\LeftLabel{$[I_2]$}
-			\UIC{$\focus[A]{\alpha, \Psi}{.}{\llnot{\alpha}}$}
-			\DP
-			&
-			\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
-			\LeftLabel{$[D_2]$}
-			\UIC{$\async[A]{\phi, \Psi}{\Delta}{.}$}
-			\DP
-		\end{tblr}
-		\caption{J.-M. Andreoli's triadic calculus.}
-		\label{fig:triadic}
-	\end{figure}
 	The three base cases are proved essentially in the same way:
 	\begin{itemize}
-		\item[$I_1$:] Given the judgment
+		\item[($I_1$):] Given the judgment
 			$$
 			\AXC{$\isNegLit{\alpha}$}
-			\AXC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\mathV}$}
+			\AXC{$ \sat{\used{e_1}, \used{e_2}, \avail{\Delta}, \Lambda}{\mathV}$}
 			\LeftLabel{$[I_1]$}
-			\BIC{$\focus{\Psi}{\Delta, \af{\alpha}{e_1}}{\af{\llnot{\alpha}}{e_2}} \separator \constr{\Lambda}{\mathV}$}
+			\BIC{$\focus{\Psi}{\af{\alpha}{e_1}}{\af{\llnot{\alpha}}{e_2}, \Delta} \separator \constr{\Lambda}{\mathV}$}
 			\DP
 			$$
 			looking at the constraints we trivially get that
@@ -641,10 +638,10 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			$$
 			\AXC{$\isNegLit{\alpha}$}
 			\LeftLabel{$[I_1]$}
-			\UIC{$\focus{\Psi}{\alpha}{\llnot{\alpha}}$}
+			\UIC{$\focus[A]{\Psi}{\alpha}{\llnot{\alpha}}$}
 			\DP
 			$$
-		\item[$I_2$:] Given the judgment
+		\item[($I_2$):] Given the judgment
 			$$
 			\AXC{$\isNegLit{\alpha}$}
 			\AXC{$ \sat{\Lambda, \used{e}, \avail{\Delta}}{\mathV}$}
@@ -661,10 +658,10 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			$$
 			\AXC{$\isNegLit{\alpha}$}
 			\LeftLabel{$[I_2]$}
-			\UIC{$\focus{\alpha, \Psi}{.}{\llnot{\alpha}}$}
+			\UIC{$\focus[A]{\alpha, \Psi}{.}{\llnot{\alpha}}$}
 			\DP
 			$$
-		\item[$\llone$:] Given the judgment
+		\item[($\llone$):] Given the judgment
 			$$
 			\AXC{$\sat{ \Lambda, \used{e}, \avail{\Delta}}{\mathV}$}
 			\LeftLabel{$[1]$}
@@ -680,82 +677,71 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			$$
 			\AXC{}
 			\LeftLabel{$[\llone]$}
-			\UIC{$\focus{\Psi}{.}{\llone}$}
+			\UIC{$\focus[A]{\Psi}{.}{\llone}$}
 			\DP
 			$$
 	\end{itemize}
-	The induction step is rather mechanic, with the exception of 
+	The induction then follows like this:
 	\begin{itemize}
-		\item the tensor rule ($\llten$):
-			$$
-			\AXC{$ \new{X} \hspace{.3cm} 
-			\focus{\Psi}{\Delta_L^X}{\af{\phi_1}{e}} \separator \constr{\Lambda, \used{e}}{\mathV'} \hspace{.3cm} 
-			\focus{\Psi}{\Delta_R^X}{\af{\phi_2}{e}} \separator \constr{\mathV'}{\mathV''}$}
-			\LeftLabel{$[\llten]$}
-			\UIC{$\focus{\Psi}{\Delta}{\af{\phi_1 \llten \phi_2}{e}} \separator \constr{\Lambda}{\mathV''}$}	% capisco il movimento dei constraint
-			\DP
-			$$
+		\item[$(\llten)$]: Assuming for some set $\new{X}$
+			$$\focus{\Psi}{\Delta_L^X}{\af{\phi_1}{e}} \separator \constr{\Lambda, \used{e}}{\mathV'} \Rightarrow \focus[A]{\Psi}{\Delta_L^X[\mathV']}{\phi_1} $$
+			and that
+			$$\focus{\Psi}{\Delta_R^X}{\af{\phi_2}{e}} \separator \constr{\mathV'}{\mathV''} \Rightarrow \focus[A]{\Psi}{\Delta_R^X[\mathV'']}{\phi_2} $$
+			under assignment $\mathV$.
 			By the Lemma \ref{lemma:constr} we can say that $\Delta_L^X[\mathV'] = \Delta_L^X[\mathV'']$, since $\mathV''$ subsumes $\mathV'$.
 			This being said, using Lemma \ref{lemma:cap} we have that $\Delta_L^X[\mathV'']$ and $\Delta_R^X[\mathV'']$ are disjoint, so the contexts of the two branches are separated.
 			Finally Lemma \ref{lemma:cup} guarantees that the union of the two contexts returns the whole original context.
-			Given this we get that this equals to 
-			$$
-			\AXC{$\focus{\Psi}{\Delta_L^X[\mathV'']}{\phi_1}$}
-			\AXC{$\focus{\Psi}{\Delta_R^X[\mathV'']}{\phi_2}$}
-			\LeftLabel{$[\llten]$}
-			\BIC{$\focus{\Psi}{\Delta_L^X[\mathV''], \Delta_R^X[\mathV'']}{\phi_1 \llten \phi_2}$}
-			\DP
-			$$
-		\item the with rule ($\llwith$):
-			$$
-			\AXC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV'}$}
-			\AXC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV''}$}
-			\LeftLabel{$[\llwith]$}
-			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV''}$}
-			\DP
-			$$
-			which after erasing the unused formulae using the assignment becomes
-			$$
-			\AXC{$\async{\Psi}{\Delta[\mathV']}{\phi_2, \Phi[\mathV']}$}
-			\AXC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Phi[\mathV'']}$}
-			\LeftLabel{$[\llwith]$}
-			\BIC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1 \llwith \phi_2, \Phi[\mathV'']}$}
-			\DP
-			$$
-			or equivalently 
-			$$
-			\AXC{$\async{\Psi}{\Delta[\mathV']}{\phi_2, \Phi[\mathV']}$}
-			\AXC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Phi[\mathV'']}$}
-			\LeftLabel{$[\llwith]$}
-			\BIC{$\async{\Psi}{\Delta[\mathV']}{\phi_1 \llwith \phi_2, \Phi[\mathV']}$}
-			\DP
-			$$
-			since  $\Lambda \subseteq \used{e}, \Lambda$ and Lemma \ref{lemma:subsume}.
-	\end{itemize}
-	% The rest of the translations are just a matter of canceling out the members of the sequent using the assignment function.
-
-	%%% 
-	\begin{itemize}
-		\item[$(\llpar)$]: Assuming
-			$$ \async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \separator \constr{\used{e}, \Lambda}{\mathV} $$
-			maps to 
-			$$ \async[A]{\Psi}{\Delta[\mathV]}{\phi_1, \phi_2, \Phi[\mathV]} $$
-			under $\mathV$.
+			Then
+			$$ \focus{\Psi}{\Delta}{\af{\phi_1 \llten \phi_2}{e}} \separator \constr{\Lambda}{\mathV''} \Rightarrow \focus[A]{\Psi}{\Delta_L^X[\mathV''], \Delta_R^X[\mathV'']}{\phi_1 \llten \phi_2} $$
+%		\item[$(\!\llwith\!)$]:
+%			$$
+%			\AXC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV'}$}
+%			\AXC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV''}$}
+%			\LeftLabel{$[\llwith]$}
+%			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV''}$}
+%			\DP
+%			$$
+%			which after erasing the unused formulae using the assignment becomes
+%			$$
+%			\AXC{$\async{\Psi}{\Delta[\mathV']}{\phi_2, \Phi[\mathV']}$}
+%			\AXC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Phi[\mathV'']}$}
+%			\LeftLabel{$[\llwith]$}
+%			\BIC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1 \llwith \phi_2, \Phi[\mathV'']}$}
+%			\DP
+%			$$
+%			or equivalently 
+%			$$
+%			\AXC{$\async{\Psi}{\Delta[\mathV']}{\phi_2, \Phi[\mathV']}$}
+%			\AXC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Phi[\mathV'']}$}
+%			\LeftLabel{$[\llwith]$}
+%			\BIC{$\async{\Psi}{\Delta[\mathV']}{\phi_1 \llwith \phi_2, \Phi[\mathV']}$}
+%			\DP
+%			$$
+%			since  $\Lambda \subseteq \used{e}, \Lambda$ and Lemma \ref{lemma:subsume}.
+		\item[$(\!\llpar\!)$]: Assuming
+			$$ \async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \separator \constr{\used{e}, \Lambda}{\mathV} \Rightarrow \async[A]{\Psi}{\Delta[\mathV]}{\phi_1, \phi_2, \Phi[\mathV]} $$
+			under assignment $\mathV$.
 			Then 
-			$$ \async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV} $$
-			maps to 
-			$$ \async[A]{\Psi}{\Delta[\mathV]}{\phi_1 \llpar \phi_2, \Phi[\mathV]} $$
+			$$ \async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV} \Rightarrow \async[A]{\Psi}{\Delta[\mathV]}{\phi_1 \llpar \phi_2, \Phi[\mathV]} $$
 			Since the assignment $\mathV$ is the same, then $\Delta[\mathV]$ and $\Phi[\mathV]$ stay the same, and since the assignment respects the constraint $\used{e}$, then $\phi_1 \llpar \phi_2$ must be present.
+		\item[$(\;\llbang{}\;)$]: Assuming
+			$$ \async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\used{e}, \avail{\Delta}, \Lambda}{\mathV} \Rightarrow \async[A]{\Psi}{\Delta[\mathV]}{\phi} $$
+			with $\Delta[\mathV] = .$ under assignment $\mathV$.
+			Then
+			$$ \focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e}} \separator \constr{\Lambda}{\mathV} \Rightarrow \focus[A]{\Psi}{.}{\llbang{\phi}} $$
+			since $\phi$ must be present and $\Delta$ must be empty because $\mathV$ satisfies $\used{e}$ and $\avail{\Delta}$.
 		\item[$(R\!\Downarrow)$]: Assuming
-			$$ \async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} $$
-			maps to
-			$$ \async[A]{\Psi}{\Delta[\mathV]}{\phi} $$
+			$$ \async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} \Rightarrow \async[A]{\Psi}{\Delta[\mathV]}{\phi} $$
+			under assignment $\mathV$.
+			Then
+			$$ \focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} \Rightarrow \focus[A]{\Psi}{\Delta[\mathV]}{\phi} $$
+			since the sequents do not change and only the phase shifts.
+		\item[$(R\!\Uparrow)$]: Assuming
+			$$ \async{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\mathV} \Rightarrow \async[A]{\Psi}{\Delta[\mathV]}{\phi, \Phi[\mathV]} $$
 			under $\mathV$.
 			Then
-			$$ \focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} $$
-			maps to
-			$$ \focus[A]{\Psi}{\Delta[\mathV]}{\phi} $$
-			since the sequents do not change, only the phase shifts.
+			$$ \focus{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\mathV} \Rightarrow \focus[A]{\Psi}{\Delta[\mathV]}{\phi, \Phi} $$
+			since the sequents do not change and only the phase shifts.
 	\end{itemize}
 	\begin{center}
 		\begin{tblr}{ colspec = { ccc }
