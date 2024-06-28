@@ -1,0 +1,56 @@
+\documentclass[a4paper, 12pt, italian]{extarticle}
+
+\usepackage{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{parskip}
+
+\usepackage[shortlabels]{enumitem}
+
+\usepackage[a-1b]{pdfx}
+
+% \usepackage{hyperref}
+% \hypersetup{
+%     colorlinks=true,
+%     urlcolor=blue,
+%     linkcolor=blue,
+% }
+
+\usepackage{biblatex}
+\addbibresource{refs.bib}
+
+\begin{document}
+
+Questo documento deve descrivere per brevi capitoletti il lavoro svolto dallo studente durante lo stage.
+Seguendo il presente formato si raccomanda di contenere la descrizione in al massimo quattro pagine (ma
+non meno di una).
+
+\section{Ente presso cui è stato svolto il lavoro di stage}
+Descrizione dell’azienda/ente/Laboratorio e dell’ambiente di lavoro in cui si \`e andati ad operare.
+
+\section{Contesto iniziale}
+Inquadramento dello stage, situazione esistente.
+
+\section{Obiettivi del lavoro}
+Cosa si voleva raggiungere inizialmente.
+
+\section{Descrizione del lavoro svolto}
+Cosa \`e stato effettivamente fatto.
+
+\section{Tecnologie coinvolte}
+Quali tecnologie sono state utilizzate e apprese.
+
+\section{Competenze e risultati raggiunti}
+\begin{itemize}
+	\item Quali risultati sono stati raggiunti rispetto agli obiettivi iniziali?
+	\item Quali insegnamenti si possono trarre dall’esperienza effettuata?
+	\item Quali i problemi incontrati? Quali risolti e quali no? Perch\'e?
+\end{itemize}
+
+\newpage
+
+\section{\bibname}
+
+\nocite{*}
+\printbibliography[heading=none]
+
+\end{document}

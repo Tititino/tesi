@@ -1,4 +1,4 @@
-\chapter{The focused calculus}
+\chapter{The focused calculus}\label{chapter:calculus}
 % Before describing the calculus we must give some preliminary definitions
 
 % Explaination on constraints why we use them ecc ecc ecc
@@ -180,7 +180,7 @@ We now expand the concept of triadic sequent of \cite{Focusing} by adding constr
 	Where 
 	\begin{itemize}
 		\item $\Psi$ is a set of unrestricted non annotated formulae, or all formulae that can be freely discarded or duplicated.
-		\item $\Delta$ and $\Phi$ are multisets of linear (annotated) formulae, these are respectively the formulas ``put to the side'' and the formulae which are being ``worked on'' during a certain moment of the asynchronous phase;
+		\item $\Delta$ and $\Phi$ are multi-sets of linear (annotated) formulae, these are respectively the formulas ``put to the side'' and the formulae which are being ``worked on'' during a certain moment of the asynchronous phase;
 		\item $\Lambda$ and V are the constraints and the solution as defined in Definition \ref{def:sat}.
 			By adding these members we make the flow of constraints through the proof tree explicit, leaving no ambiguity to where the constraints should be checked.
 			This approach to constraints differs from the one in \cite{HarlandPym}, which prioritizes generality.
@@ -216,7 +216,7 @@ this is split into
 
 % One simple but important detail that will be useful later when explaining the Prolog implementation is noting that the variables in common between two branches with the same root are always introduced before the two branches diverge.
 % Or -- put differently -- all new variables introduced in any point of a path from the root of the proof to a leaf may appear only in the subtrees.	% sistemo
-Figure \ref{fig:hp calculus} shows the calculus \cite{HarlandPym} using our notation of explicit contraints.
+Figure \ref{fig:hp calculus} shows the calculus \cite{HarlandPym} using our notation of explicit constraints.
 What it actually represents is roughly what they define as the ``lazy'' strategy.
 Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 \begin{figure}[h!]
@@ -225,18 +225,18 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 		}
 		\SetCell[c=2]{c} {\footnotesize
 		\AX$\vdash_\text{PH} \Delta, \af{\phi_1}{e}, \af{\phi_2}{e}\fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
-		\LeftLabel{$[\llpar]$}
+		\LeftLabel{\derRule[PH]{\displaypar}}
 		\UI$\vdash_\text{PH} \Delta, \af{\phi_1 \llpar \phi_2}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
 		\DP} \\
 		{\footnotesize
 		\AX$\vdash_\text{PH} \Delta \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
-		\LeftLabel{$[\llbot]$}
+		\LeftLabel{\derRule[PH]{\displaybot}}
 		\UI$\vdash_\text{PH} \Delta, \af{\llbot}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
 		\DP}
 		&
 		{\footnotesize
 		\AXC{}
-		\LeftLabel{$[\lltop]$}
+		\LeftLabel{\derRule[PH]{\displaytop}}
 		\UIC{$\vdash_\text{PH} \Delta, \af{\lltop}{-} \separator \constr{\Lambda}{\mathV}$}
 		\DP
 		}
@@ -244,40 +244,40 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 		\SetCell[c=2]{c} {\footnotesize
 		\AXC{$\vdash_\text{PH} \Delta, \af{\phi_2}{e} \separator \constr{\Lambda, \used{e}}{\mathV'}$}
 		\AXC{$\vdash_\text{PH} \Delta, \af{\phi_1}{e} \separator \constr{\Lambda, \used{e}}{\mathV''}$}
-		\LeftLabel{$[\llwith]$}
+		\LeftLabel{\derRule[PH]{\displaywith}}
 		\BIC{$\vdash_\text{PH} \Delta, \af{\phi_1 \llwith \phi_2}{e} \separator \constr{\Lambda}{\mathV''}$}	
 		\DP}
 		\\
 		\SetCell[c=2]{c} {\footnotesize
 		\AXC{$\vdash_\text{PH} \Delta_L^X, \af{\phi_1}{e} \separator \constr{\Lambda, \used{e}}{\mathV'}$}
 		\AXC{$\vdash_\text{PH} \Delta_R^X, \af{\phi_2}{e} \separator \constr{\mathV'}{\mathV''}$}
-		\LeftLabel{$[\llten]$}
+		\LeftLabel{\derRule[PH]{\displayten}}
 		\BIC{$\vdash_\text{PH} \Delta, \af{\phi_1 \llten \phi_2}{e} \separator \constr{\Lambda}{\mathV''}$}	% capisco il movimento dei constraint
 		\DP}
 		\\ 
 		\SetCell[c=2]{c} {\footnotesize
 		\AXC{$\new{x}$}
 		\AXC{$\vdash_\text{PH} \Delta, \af{\phi_1}{x}, \af{\phi_2}{\varNot{x}} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$}
-		\LeftLabel{$[\llplus]$}
+		\LeftLabel{\derRule[PH]{\displayplus}}
 		\BIC{$\vdash_\text{PH} \Delta, \af{\phi_1 \llplus \phi_2}{e} \fCenter \separator \constr{\Lambda}{\mathV}$}
 		\DP}
 		\\
 		{\footnotesize
 		\AXC{$\sat{ \Lambda, \used{e}, \avail{\Delta}}{\mathV}$}
-		\LeftLabel{$[1]$}
+		\LeftLabel{\derRule[PH]{\displayone}}
 		\UIC{$\vdash_\text{PH} \Delta, \af{\llone}{e} \separator \constr{\Lambda}{\mathV}$}
 		\DP} 
 		&
 		{\footnotesize
 		\AX$\vdash_\text{PH} \llwn{\Delta}, \af{\phi}{e} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
-		\LeftLabel{$[\,\llbang{}\,]$}
+		\LeftLabel{\derRule[PH]{\displaybang}}
 		\UI$\vdash_\text{PH} \llwn{\Delta}, \af{\llbang{\phi}}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
 		\DP
 		}
 		\\
 		\SetCell[c=2]{c} {\footnotesize
 		\AX$\vdash_\text{PH} \Delta, \af{\phi}{e} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
-		\LeftLabel{$[\,\llwn{}\,]$}
+		\LeftLabel{\derRule[PH]{\displaywn}}
 		\UI$\vdash_\text{PH} \Delta, \af{\llwn{\phi}}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
 		\DP}
 		\\
@@ -312,18 +312,18 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 				    }
 			\SetCell[c=2]{c} {\footnotesize
 			\AX$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
-			\LeftLabel{$[\llpar]$}
+			\LeftLabel{\derRule{\displaypar}}
 			\UI$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP} \\
 			{\footnotesize
 			\AX$\async{\Psi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda, \used{e}}{\mathV}$
-			\LeftLabel{$[\llbot]$}
+			\LeftLabel{\derRule{\displaybot}}
 			\UI$\async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP}
 			&
 			{\footnotesize
 			\AXC{}
-			\LeftLabel{$[\lltop]$}
+			\LeftLabel{\derRule{\displaytop}}
 			\UIC{$\async{\Psi}{\Delta}{\af{\lltop}{-}, \Phi} \separator \constr{\Lambda}{\mathV}$}
 			\DP
 			}
@@ -331,13 +331,13 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			\SetCell[c=2]{c} {\footnotesize
 			\AXC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV'}$}
 			\AXC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV''}$}
-			\LeftLabel{$[\llwith]$}
+			\LeftLabel{\derRule{\displaywith}}
 			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV''}$}	
 			\DP}
 			\\
 			\SetCell[c=2]{c} {\footnotesize
-			\AX$\async{\phi, \Psi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
-			\LeftLabel{$[\,?\,]$}
+			\AX$\async{\phi, \Psi}{\Delta}{\Phi} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+			\LeftLabel{\derRule{\displaywn}}
 			\UI$\async{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
 			\DP} 
 			\\
@@ -448,7 +448,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 
 \begin{lemma}
 	\label{lemma:cap}
-	Forall assignments $\mathV$ and sequents $\Delta$,
+	For all assignments $\mathV$ and sequents $\Delta$,
 	$$ \Delta_L^X[\mathV] \cap \Delta_R^X[\mathV] = \varnothing $$
 \end{lemma}
 \begin{proof}
@@ -461,7 +461,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 \end{proof}
 \begin{lemma}
 	\label{lemma:cup}
-	Forall assignments $\mathV$ and sequents $\Delta$,
+	For all assignments $\mathV$ and sequents $\Delta$,
 	$$ \Delta[\mathV] = \Delta_L^X[\mathV] \cup \Delta_R^X[\mathV] $$
 \end{lemma}
 \begin{proof}
@@ -484,7 +484,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 
 \begin{lemma}
 	\label{lemma:constr}
-	Forall assignments $\mathV$ and set of constraints $\Lambda$, if (using the translation of Fact \ref{fact:ass-trans})
+	For all assignments $\mathV$ and set of constraints $\Lambda$, if (using the translation of Fact \ref{fact:ass-trans})
 	$$ \sat{\mathV, \Lambda}{\mathV'} $$
 	then $\mathrm{Dom}(\mathV) \subseteq \mathrm{Dom}(\mathV')$ and
 	$$ \forall x_i \in \mathrm{Dom}(\mathV) \mid \mathV(x_i) = \mathV'(x_i) $$
@@ -503,7 +503,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 \end{proof}
 \begin{lemma}
 	\label{lemma:subsume}
-	Forall sets of constraints $\Lambda$ and forall assignments $\mathV$, if
+	For all sets of constraints $\Lambda$ and for all assignments $\mathV$, if
 	$$ \sat{\Lambda}{\mathV} $$
 	then for any $\Lambda' \subseteq \Lambda$
 	$$ \sat{\Lambda'}{\mathV} $$
@@ -683,31 +683,39 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 	\end{itemize}
 	The induction then follows like this:
 	\begin{itemize}
-		\item[$(\llten)$]: Given the rule $\ruleten{}$, we apply the inductive hypotesis, and from the premises we obain
+		\indCase{\displayten} Given the rule \derRule{\displayten}, we apply the inductive hypothesis, and from the premises 
 			\begin{align*}
-				\focus{\Psi}{\Delta_L^X}{\af{\phi_1}{e}} \separator \constr{\Lambda, \used{e}}{\mathV'} &\Rightarrow \focus[A]{\Psi}{\Delta_L^X[\mathV']}{\phi_1} \\
-				\focus{\Psi}{\Delta_R^X}{\af{\phi_2}{e}} \separator \constr{\mathV'}{\mathV''} &\Rightarrow \focus[A]{\Psi}{\Delta_R^X[\mathV'']}{\phi_2} 
+				&\focus{\Psi}{\Delta_L^X}{\af{\phi_1}{e}} \separator \constr{\Lambda, \used{e}}{\mathV'} \\
+				&\focus{\Psi}{\Delta_R^X}{\af{\phi_2}{e}} \separator \constr{\mathV'}{\mathV''} 
 			\end{align*}
-			The we apply $\ruleten[A]$, and obtain
-			$$ \focus[A]{\Psi}{\Delta_L^X[\mathV'], \Delta_R^X[\mathV'']}{\phi_1 \llten \phi_2} $$
-			By the Lemma \ref{lemma:constr} we can say that $\Delta_L^X[\mathV'] = \Delta_L^X[\mathV'']$, since $\mathV''$ subsumes $\mathV'$, so we can write
+			we extract the triadic proofs
+			\begin{align*}
+				&\focus[A]{\Psi}{\Delta_L^X[\mathV']}{\phi_1} \\
+				&\focus[A]{\Psi}{\Delta_R^X[\mathV'']}{\phi_2} 
+			\end{align*}
+			By the Lemma \ref{lemma:constr} we can say that $\Delta_L^X[\mathV'] = \Delta_L^X[\mathV'']$, since $\mathV''$ subsumes $\mathV'$.
+			Furthermore because of Lemma \ref{lemma:cap} we have that $\Delta_L^X[\mathV'']$ and $\Delta_R^X[\mathV'']$ are disjoint, so the contexts of the two branches are separated.
+			Hence we can apply \derRule[A]{\displayten}, and obtain
 			$$ \focus[A]{\Psi}{\Delta_L^X[\mathV''], \Delta_R^X[\mathV'']}{\phi_1 \llten \phi_2} $$
-			Because of Lemma \ref{lemma:cap} we have that $\Delta_L^X[\mathV'']$ and $\Delta_R^X[\mathV'']$ are disjoint, so the contexts of the two branches are separated.
-			And Lemma \ref{lemma:cup} guarantees that the union of the two contexts returns the whole original context.
-			So the mapping in correct 
+			which, because of Lemma \ref{lemma:cup}, correctly corresponds to what the conclusion
 			$$ \focus{\Psi}{\Delta}{\af{\phi_1 \llten \phi_2}{e}} \separator \constr{\Lambda}{\mathV''} $$
-%		\item[$(\!\llwith\!)$]:
-%			$$
-%			\AXC{$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV'}$}
-%			\AXC{$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV''}$}
+			should be mapped to.
+		\indCase{\displaywith} Given the rule \derRule{\displaywith}, we apply the inductive hypothesis, and from the premises 
+			\begin{align*}
+				&\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV'} \\
+				&\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\Lambda, \used{e}}{\mathV''} 
+			\end{align*}
+			we extract the triadic proofs
+			\begin{align*}
+				&\async{\Psi}{\Delta[\mathV']}{\phi_2, \Phi[\mathV']} \\
+				&\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Phi[\mathV'']}
+			\end{align*}
 %			\LeftLabel{$[\llwith]$}
 %			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV''}$}
 %			\DP
 %			$$
 %			which after erasing the unused formulae using the assignment becomes
 %			$$
-%			\AXC{$\async{\Psi}{\Delta[\mathV']}{\phi_2, \Phi[\mathV']}$}
-%			\AXC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Phi[\mathV'']}$}
 %			\LeftLabel{$[\llwith]$}
 %			\BIC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1 \llwith \phi_2, \Phi[\mathV'']}$}
 %			\DP
@@ -721,114 +729,96 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 %			\DP
 %			$$
 %			since  $\Lambda \subseteq \used{e}, \Lambda$ and Lemma \ref{lemma:subsume}.
-		\item[$(\!\llpar\!)$]: Given the rule $[\!\llpar\!]$, we apply the inductive hypothesis, and from the premise
+		\indCase{\displaypar} Given the rule \derRule{\displaypar}, we apply the inductive hypothesis, and from the premise
 			$$ \async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \separator \constr{\used{e}, \Lambda}{\mathV}$$
 			we extract the triadic proof 
 			$$\async[A]{\Psi}{\Delta[\mathV]}{\phi_1, \phi_2, \Phi[\mathV]} $$
-			Then we apply $[\!\llpar\!]_A$, and obtain
+			Then we apply \derRule[A]{\displaypar}, and obtain
 			$$\async[A]{\Psi}{\Delta[\mathV]}{\phi_1 \llpar \phi_2, \Phi[\mathV]} $$
-			which correctly corresponds to what the conclusion should be mapped to
+			By Lemma \ref{lemma:subsume} 
 			$$ \async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV} $$
+			should be mapped to.
 			% Furthermore, since the assignment $\mathV$ is the same between premise and conclusion, then $\Delta[\mathV]$ and $\Phi[\mathV]$ stay the same, and since the assignment respects the constraint $\used{e}$, then $\phi_1 \llpar \phi_2$ must be present.
-		\item[$(\;\llbang{}\;)$]: Given the rule $[\; \llbang{} \;]$, we apply the inductive hypothesis, and from the premise
+		\indCase{\displayplus[L]} Given the rule \derRule{\displayplus[L]}, we apply the inductive hypothesis, and from the premise
+			$$ \focus{\Psi}{\Delta}{\af{\phi_1}{e}} \separator \constr{\used{e}, \Lambda}{\mathV}$$
+			we extract the triadic proof
+			$$ \focus[A]{\Psi}{\Delta[\mathV]}{\phi_1} $$
+			Then we apply \derRule[A]{\displayplus[L]}, and obtain
+			$$ \focus[A]{\Psi}{\Delta[\mathV]}{\phi_1 \llplus \phi_2} $$
+			which correctly corresponds to what the conclusion
+			$$ \focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \separator \constr{\Lambda}{\mathV} $$
+			should be.
+		\indCase{\displayplus[R]} Given the rule \derRule{\displayplus[R]}, we apply the inductive hypothesis, and from the premise
+			$$ \focus{\Psi}{\Delta}{\af{\phi_2}{e}} \separator \constr{\used{e}, \Lambda}{\mathV}$$
+			we extract the triadic proof
+			$$ \focus[A]{\Psi}{\Delta[\mathV]}{\phi_2} $$
+			Then we apply \derRule[A]{\displayplus[R]}, and obtain
+			$$ \focus[A]{\Psi}{\Delta[\mathV]}{\phi_1 \llplus \phi_2} $$
+			which correctly corresponds to what the conclusion
+			$$ \focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \separator \constr{\Lambda}{\mathV} $$
+			should be.
+		\indCase{\displaybang} Given the rule \derRule{\displaybang}, we apply the inductive hypothesis, and from the premise
 			$$ \async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\used{e}, \avail{\Delta}, \Lambda}{\mathV} $$
 			we extract the triadic proof
 			$$ \async[A]{\Psi}{.}{\phi} $$
 			since $\Delta[\mathV] = \varnothing$ under assignment $\mathV$ by Lemma \ref{lemma:empty}.
-			Then we apply $[\;\llbang{}\;]_A$ and obtain
+			Then we apply \derRule[A]{\displaybang} and obtain
 			$$ \focus[A]{\Psi}{.}{\llbang{\phi}} $$
-			which correctly corresponds to what the conclusion should be mapped to
+			which correctly corresponds to what the conclusion 
 			$$ \focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e}} \separator \constr{\Lambda}{\mathV} $$
-			since, beacause the constraint $\avail{\Delta}$ must hold, under $\mathV$ $\Delta$ will be all marked available.
-			% since $\phi$ must be present and $\Delta$ must be empty because $\mathV$ satisfies $\used{e}$ and $\avail{\Delta}$.
-		\item[$(R\!\Downarrow)$]: Given the rule $\ruletoasync{}$, we apply the inductive hypothesis, and from the premise
+			should be mapped to
+		\indCase{\displaywn} Given the rule \derRule{\displaywn}, we apply the inductive hypothesis, and from the premise
+			$$ \async{\phi, \Psi}{\Delta}{\Phi} \separator \constr{\used{e}, \Lambda}{\mathV} $$
+			we extract the triadic proof
+			$$ \async[A]{\phi, \Psi}{\Delta[\mathV]}{\Phi[\mathV]}$$
+			Then we apply \derRule[A]{\displaywn} and obtain
+			$$ \async[A]{\Psi}{\Delta[\mathV]}{\,\llwn{\phi}, \Phi[\mathV]} $$
+			which correctly corresponds to what the conclusion
+			$$ \async{\Psi}{\Delta}{\af{\llwn{\phi}}{e}, \Phi} \separator \constr{\Lambda}{\mathV} $$
+			should be mapped to.
+		\indCase{\displaybot} Given the rule \derRule{\displaybot}, we apply the inductive hypothesis, and from the premise
+			$$ \async{\Psi}{\Delta}{\Phi} \separator \constr{\used{e}, \Lambda}{\mathV} $$
+			we extract the triadic proof
+			$$ \async[A]{\Psi}{\Delta[\mathV]}{\Phi[\mathV]} $$
+			Then we apply \derRule[A]{\displaybot} and obtain
+			$$ \async[A]{\Psi}{\Delta[\mathV]}{\llbot, \Phi[\mathV]} $$
+			which correctly corresponds to what the conclusion
+			$$ \async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \separator \constr{\Lambda}{\mathV} $$
+			should be mapped to.
+		\indCase{\displaydecide[1]} Given the rule \derRule{\displaydecide[1]}, we apply the inductive hypothesis, and from the premise
+			$$ \focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} $$
+			we extract the triadic proof
+			$$ \focus[A]{\Psi}{\Delta[\mathV]}{\phi} $$
+			Then we apply \derRule[A]{\displaydecide[1]} and obtain
+			$$ \async[A]{\Psi}{\phi, \Delta[\mathV]}{.} $$
+			which correctly corresponds to what the conclusion
+			$$ \async{\Psi}{\af{\phi}{e}, \Delta}{.} \separator \constr{\Lambda}{\mathV} $$
+		\indCase{\displaydecide[2]} Given the rule \derRule{\displaydecide[2]}, we apply the inductive hypothesis, and from the premise
+			$$ \focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\Lambda}{\mathV} $$
+			where $\new{x}$, we extract the triadic proof
+			$$ \focus[A]{\Psi}{\Delta[\mathV]}{\phi} $$
+			Then we apply \derRule[A]{\displaydecide[2]} and obtain
+			$$ \async[A]{\phi, \Psi}{ \Delta[\mathV]}{.} $$
+			which correctly corresponds to what the conclusion
+			$$ \async{\phi, \Psi}{\Delta}{.} \separator \constr{\Lambda}{\mathV} $$
+		\indCase{\displaytodelta} Given the rule \derRule{\displaytodelta}, we apply the inductive hypothesis, and from the premise
+			$$ \async{\Psi}{\af{\phi}{e}, \Delta}{\Phi} \separator \constr{\Lambda}{\mathV} $$
+			we extract the triadic proof
+			$$ \async[A]{\Psi}{\phi, \Delta[\mathV]}{\Phi[\mathV]} $$
+			Then we apply \derRule[A]{\displaytodelta} and obtain
+			$$ \async[A]{\Psi}{\Delta[\mathV]}{\phi, \Phi} $$
+			which correctly corresponds to what the conclusion
+			$$ \async{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\mathV} $$
+		\indCase{\displaytoasy} Given the rule \derRule{\displaytoasy}, we apply the inductive hypothesis, and from the premise
 			$$ \async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} $$
 			we extract the triadic proof
 			$$ \async[A]{\Psi}{\Delta[\mathV]}{\phi} $$
-			Then we apply $\ruletoasync[A]$, and obtain
+			Then we apply \derRule[A]{\displaytoasy}, and obtain
 			$$ \focus[A]{\Psi}{\Delta[\mathV]}{\phi} $$
 			which correctly corresponds to what the conclusion should be mapped to
 			$$ \focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} $$
 			since the sequents do not change and only the phase shifts.
 	\end{itemize}
-	\begin{center}
-		\begin{tblr}{ colspec = { ccc }
-			    , cells = { mode = dmath } 
-			    , rows = {abovesep=5pt, belowsep=5pt}
-			    }
-			\llbot
-			& \mapsto
-			& 
-			\AXC{$\async{\Psi}{\Delta[\mathV]}{\Phi[\mathV]}$}
-			\UIC{$\async{\Psi}{\Delta[\mathV]}{\llbot, \Phi[\mathV]}$}
-			\DP
-			\\
-			\llpar
-			& \mapsto
-			& 
- 			\AXC{$\async{\Psi}{\Delta[\mathV]}{\phi_1, \phi_2, \Phi[\mathV]}$}
- 			\UIC{$\async{\Psi}{\Delta[\mathV]}{\phi_1 \llpar \phi_2, \Phi[\mathV]}$}
- 			\DP
-			\\
-			\llplus_L
-			& \mapsto
-			& 
- 			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi_1}$}
- 			\UIC{$\focus{\Psi}{\Delta[\mathV]}{\phi_1 \llplus \phi_2}$}
- 			\DP
-			\\
-			\llplus_R
-			& \mapsto
-			& 
- 			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi_2}$}
- 			\UIC{$\focus{\Psi}{\Delta[\mathV]}{\phi_1 \llplus \phi_2}$}
- 			\DP
-			\\
-			\llbang{}
-			& \mapsto
-			& 
- 			\AXC{$\async{\Psi}{.}{\phi}$}
- 			\UIC{$\focus{\Psi}{.}{\llbang{\phi}}$}
- 			\DP
-			\\
-			\llwn{}
-			& \mapsto
-			&
- 			\AXC{$\async{\phi, \Psi}{\Delta[\mathV]}{\Phi[\mathV]}$}
- 			\UIC{$\async{\Psi}{\Delta[\mathV]}{\llwn{\phi}, \Phi[\mathV]}$}
- 			\DP
-			\\
-			R \!\Downarrow 
-			& \mapsto
-			& 
- 			\AXC{$\isAsy{\phi} \vee \isNegLit{\phi}$}
- 			\AXC{$\async{\Psi}{\Delta[\mathV]}{\phi}$}
- 			\BIC{$\focus{\Psi}{\Delta[\mathV]}{\phi}$}
- 			\DP
-			\\
-			R\!\Uparrow 
-			& \mapsto
-			& 
- 			\AXC{$\neg \isAsy{\phi}$}
- 			\AXC{$\async{\Psi}{\phi, \Delta[\mathV]}{\Phi[\mathV]}$}
- 			\BIC{$\async{\Psi}{\Delta[\mathV]}{\phi, \Phi[\mathV]}$}
- 			\DP
-			\\
-			D_1
-			& \mapsto
-			& 
- 			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi}$}
- 			\UIC{$\async{\Psi}{\phi, \Delta[\mathV]}{.}$}
- 			\DP
-			\\
-			D_2
-			& \mapsto
-			& 
-			\AXC{$\focus{\Psi}{\Delta[\mathV]}{\phi}$}
-	 		\UIC{$\async{\phi, \Psi}{\Delta[\mathV]}{.}$}
- 			\DP
-		\end{tblr}
-	\end{center}
 \end{proof}
 
 

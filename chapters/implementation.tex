@@ -1,4 +1,4 @@
-\chapter{Implementation}
+\chapter{Implementation}\label{chapter:implementation}
 We now describe the main implementation details of the prover.
 When explaining the code we will use some common names for variables, these are
 \begin{itemize}
@@ -8,6 +8,49 @@ When explaining the code we will use some common names for variables, these are
 	\item \texttt{S} is the queue of currently usable unrestricted formulae, which purpose will be explained in Section \ref{sec:decide};
 	\item \texttt{In} is a list of constraints.
 \end{itemize}
+
+\section{Why Prolog}
+Prolog as a language and as an environment has been historically tied to automated theorem proving for its ability to express its algorithms naturally.
+% In particular we chose SWI-Prolog because it offers a comprehensive and mature free Prolog environment.
+One particularly convenient characteristic of Prolog is its automatic management of backtracking, in most other languages we would have had to use exceptions to walk down the stack, or a queue of unfinished computations, which would have made the code much less readable.
+
+Most Prolog implementations also support CLP or constraint logic programming.
+This is implemented through a series of libraries, these libraries allow to express constraint in the body of the clauses referencing some attribute of the variables;
+in our case we will use \CLPB \cite{clpb}, which provides tools to deal with boolean constraints.
+By boolean constraint in this context we mean an expression made of Prolog variables and the constants 1 and 0, respectively true and false.
+The allowed operators in these expressions are the usual ones one would expect; in our case we will use exclusively conjunction, negation and equality, respectively
+\begin{minted}{prolog}
+X * Y.
+~ X.
+X =:= Y.
+\end{minted}
+
+Usually constraints will be accumulated in a list, for this reason \CLPB{} provides the functor \texttt{*(L)} to express the conjunction of its members.
+A constraint may be checked using the predicate \texttt{sat/1}, which succeeds iff it is satisfiable.
+Since we only deal with conjunctions we define the helper predicate \texttt{check/1}
+\begin{minted}{prolog}
+check(L) :-
+  sat(*(L)).
+\end{minted}
+The predicate \texttt{sat/1} may work a bit unexpectedly, to clarify its possible outcomes we give a little example:
+\begin{minted}{prolog}
+?- L = [X * Y =:= 1, X =:= 0], sat(*(L)).
+false.
+?- L = [X * Y =:= 0], sat(*(L)).
+sat(1#X*Y).
+?- L = [X * Y =:= 0, X =:= 1], sat(*(L)).
+X = 1,
+Y = 0.
+\end{minted}
+Here we can see three different cases:
+\begin{itemize}
+	\item the first case is unsatisfiable, so the predicate fails;
+	\item the second case is not instantiated enough and so the constraint just gets rewritten;
+	\item the third case shows how one constraint (\texttt{X =:= 1}) can force a variable to be unified to a value.
+\end{itemize}
+We use the library with the flag \texttt{clpb\_monotonic} set to \texttt{true}.
+This makes the algorithm many orders of magnitude faster but mandates that all variables be wrapped by the functor \texttt{v/1}.
+This small explanation sums up the extent of the library we use in our prover.
 
 \section{Formula transformations}
 Before beginning the proof a sequent passes through a number of transformations.
@@ -136,7 +179,7 @@ This can be seen in the rule \texttt{to\_delta} which implements the rule $R\!\U
 \begin{minted}{prolog}
 async(A, U, D, [F|Fs], S, M, In, _) :-
   F = af((F1-_), _, _),
-  not(is_asy(F1)), !,
+  \+ (is_asy(F1)), !,
   async(A, U, [F|D], Fs, S, M, In, _).
 \end{minted}
 This process goes as long as \texttt{Fs} has still formulae inside.

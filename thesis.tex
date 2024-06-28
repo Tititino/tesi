@@ -16,18 +16,29 @@
 
 \def\myYY{2023-2024}
 
+\includeonly{ 
+        chapters/intro,
+        chapters/calculus,
+	chapters/implementation,
+	chapters/state-of-the-art,
+	chapters/testing,
+	chapters/conclusion,
+}
+
 \begin{document}
 \frontespizio
 
+\blankpage
+
 \beforepreface
 \afterpreface
-
 
 \include{chapters/intro}
 \include{chapters/calculus}
 \include{chapters/implementation}
 \include{chapters/state-of-the-art}
 \include{chapters/testing}
+\include{chapters/conclusion}
 
 \appendix
 \chapter{Example derivation}
@@ -42,15 +53,15 @@ $$
 	\LeftLabel{$[\llten]$}
 	\UIC{$\focus{.}{\af{\llnot{a}}{x_2}, \af{\llnot{b}}{x_2}}{\af{a \llten b}{x_1}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
 	\LeftLabel{$[D_1]$}
-	\UIC{$\focus{.}{\af{\llnot{a}}{x_2}, \af{\llnot{b}}{x_2}, \af{a \llten b}{x_1}}{.} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\UIC{$\async{.}{\af{\llnot{a}}{x_2}, \af{\llnot{b}}{x_2}, \af{a \llten b}{x_1}}{.} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
 	\LeftLabel{$[R\!\Uparrow]$}
-	\UIC{$\focus{.}{ \af{\llnot{b}}{x_2}, \af{a \llten b}{x_1}}{\af{\llnot{a}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\UIC{$\async{.}{ \af{\llnot{b}}{x_2}, \af{a \llten b}{x_1}}{\af{\llnot{a}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
 	\LeftLabel{$[R\!\Uparrow]$}
-	\UIC{$\focus{.}{\af{a \llten b}{x_1}}{\af{\llnot{b}}{x_2}, \af{\llnot{a}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\UIC{$\async{.}{\af{a \llten b}{x_1}}{\af{\llnot{b}}{x_2}, \af{\llnot{a}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
 	\LeftLabel{$[\llpar]$}
-	\UIC{$\focus{.}{\af{a \llten b}{x_1}}{\af{\llnot{a} \llpar \llnot{b}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\UIC{$\async{.}{\af{a \llten b}{x_1}}{\af{\llnot{a} \llpar \llnot{b}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
 	\LeftLabel{$[R\!\Uparrow]$}
-	\UIC{$\focus{.}{.}{\af{a \llten b}{x_1}, \af{\llnot{a} \llpar \llnot{b}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\UIC{$\async{.}{.}{\af{a \llten b}{x_1}, \af{\llnot{a} \llpar \llnot{b}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
 	\DP
 $$
 with
@@ -60,9 +71,9 @@ with
 	\LeftLabel{$[I_1]$}
 	\UIC{$\focus{.}{\af{a}{x_1}, \cancel{\af{\llnot{b}}{x_2x_4}}}{\af{\llnot{a}}{x_2x_3}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
 	\LeftLabel{$[D_1]$}
-	\UIC{$\focus{.}{\af{a}{x_1}, \af{\llnot{a}}{x_2x_3}, \cancel{\af{\llnot{b}}{x_2x_4}}}{.} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\UIC{$\async{.}{\af{a}{x_1}, \af{\llnot{a}}{x_2x_3}, \cancel{\af{\llnot{b}}{x_2x_4}}}{.} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
 	\LeftLabel{$[R\!\Uparrow]$}
-	\UIC{$\focus{.}{\af{\llnot{a}}{x_2x_3}, \cancel{\af{\llnot{b}}{x_2x_4}}}{\af{a}{x_1}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\UIC{$\async{.}{\af{\llnot{a}}{x_2x_3}, \cancel{\af{\llnot{b}}{x_2x_4}}}{\af{a}{x_1}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
 	\LeftLabel{$[R\!\Downarrow]$}
 	\UIC{$\focus{.}{\af{\llnot{a}}{x_2x_3}, \cancel{\af{\llnot{b}}{x_2x_4}}}{\af{a}{x_1}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
 	\DP} 
@@ -73,9 +84,9 @@ with
 	\LeftLabel{$[I_1]$}
 	\UIC{$\focus{.}{\af{b}{x_1}, \cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}}{\af{\llnot{b}}{x_2\varNot{x_4}}} \separator \constr{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
 	\LeftLabel{$[D_1]$}
-	\UIC{$\focus{.}{\af{b}{x_1}, \cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}, \af{\llnot{b}}{x_2\varNot{x_4}}}{.} \separator \constr{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\UIC{$\async{.}{\af{b}{x_1}, \cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}, \af{\llnot{b}}{x_2\varNot{x_4}}}{.} \separator \constr{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
 	\LeftLabel{$[R\!\Uparrow]$}
-	\UIC{$\focus{.}{\cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}, \af{\llnot{b}}{x_2\varNot{x_4}}}{\af{b}{x_1}} \separator \constr{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
+	\UIC{$\async{.}{\cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}, \af{\llnot{b}}{x_2\varNot{x_4}}}{\af{b}{x_1}} \separator \constr{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
 	\LeftLabel{$[R\!\Downarrow]$}
 	\UIC{$\focus{.}{\cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}, \af{\llnot{b}}{x_2\varNot{x_4}}}{\af{b}{x_1}} \separator \constr{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
 	\DP}

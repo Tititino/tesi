@@ -1,4 +1,4 @@
-\chapter{Testing}
+\chapter{Testing}\label{chapter:testing}
 \section{Infrastructure}
 The infrastructure for the project is divided in two parts:
 \begin{itemize}
@@ -34,7 +34,7 @@ def call_sat_prover(premises, conclusions):
     ]
 \end{minted}
 The function \texttt{call\_sat\_prover} takes as input the premises and the conclusions and returns the call to the prover as a list.
-The innermost decorator (line 3) then accepts a dictionary, and returns a funciton which automatically calls the prover above with a test entry (as in Section \ref{sec:file format}), times it, and eventually terminates the process if it takes too much.
+The innermost decorator (line 3) then accepts a dictionary, and returns a function which automatically calls the prover above with a test entry (as in Section \ref{sec:file format}), times it, and eventually terminates the process if it takes too much.
 Lastly, the outermost decorator (line 4) simply adds an entry \texttt{'sat-ll'} associated with the prover call to the register \texttt{pc}.
 This register is just an association name to function, and it is what is actually passed to the benchmarking functions which will use the names in the output tables.
 
@@ -51,7 +51,7 @@ out['outcome'].map(lambda x: x == Outcome.SUCCESS).all()
 len(out[(out['outcome'] == Outcome.FAILURE) 
        | (out['outcome'] == Outcome.TIMEOUT)])
 \end{minted}
-test respectively whether all the tests succeded and the number of failed tests.
+test respectively whether all the tests succeeded and the number of failed tests.
 
 \subsection{Prefix format}
 Since for benchmarking we will interface with a lot of different provers -- each with its own syntax for expressions -- the need arose for a common format which was easy to parse and translate.

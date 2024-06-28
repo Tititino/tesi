@@ -89,7 +89,12 @@
 		tex
 		gnumake
 		gnused
+		(aspellWithDicts (p: [p.en p.en-computers p.en-science p.it]))
               ];
+
+	      shellHook = ''
+	        alias spellcheck="aspell --mode=tex -c"
+	      '';
             };
 
         };

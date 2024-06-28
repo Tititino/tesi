@@ -12,7 +12,7 @@ endif
 .PHONY: all draft clean
 all:
 	sed 's/OPTIONS/$(OPTIONS)/' thesis.tex > out.tex
-	latexmk -interaction=nonstopmode -pdf -$(LCC) -latexoption="-shell-escape" 	\
+	latexmk -pdf -$(LCC) -latexoption="-shell-escape" 	\
 		-pretex=$(PRETEX)							\
 		-usepretex out.tex
 	mv out.pdf thesis.pdf
@@ -20,6 +20,8 @@ all:
 clean:
 	rm -f out.*
 	latexmk -c
+	rm -f *.tex.bak
+	rm -f chapters/*.tex.bak
 	cd chapters/ && latexmk -c
 
 draft:
