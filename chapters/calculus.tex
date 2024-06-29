@@ -364,6 +364,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 		\centering
 		\begin{tblr}{ colspec = { cc } 
 			    , rows = {abovesep=7pt, belowsep=7pt}
+			    , vborder{1-2} = { leftspace = 0pt, rightspace = 0pt } 
 			    }
 			\SetCell[c=2]{c} {\footnotesize
 			\AXC{$ \new{X} \hspace{.3cm} 
@@ -400,7 +401,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			\\
 			\SetCell[c=2]{c} {\footnotesize
 			\AXC{$\phi \; \mathrm{negative}$}
-			\AXC{$\async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV}$}
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\used{e}, \Lambda}{\mathV}$}
 			\LeftLabel{\derRule{\displaytoasy}}
 			\BIC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV}$}
 			\DP
@@ -415,7 +416,6 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 		\centering
 		\begin{tblr}{ colspec = { c }
 			    , rows = {abovesep=7pt, belowsep=7pt}
-			    , vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
 			    }
 			{\footnotesize
 			\AXC{$ \isNegLit{\alpha} $}
@@ -433,7 +433,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			\\
 			{\footnotesize
 			\AXC{$\neg \isNegLit{\phi}$}
-			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV}$}
+			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\used{e}, \Lambda}{\mathV}$}
 			\LeftLabel{\derRule{\displaydecide[1]}}
 			\BIC{$\async{\Psi}{\af{\phi}{e}, \Delta}{.} \separator \constr{\Lambda}{\mathV}$}
 			\DP}
@@ -529,7 +529,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 \end{teor}
 \begin{figure}[h!]
 	\centering
-	\begin{tblr}{ colspec = {c c c}
+	\begin{tblr}{ colspec = {c c}
 		, cells = { mode = dmath } 
 		, rows = {abovesep=7pt, belowsep=7pt}
 		, vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
@@ -539,22 +539,16 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 		\UIC{$\async[A]{\Psi}{\Delta}{\llbot, \Phi}$}
 		\DP
 		&
+		\AXC{}
+		\LeftLabel{\derRule[A]{\displaytop}}
+		\UIC{$\async[A]{\Psi}{\Delta}{\lltop, \Phi}$}
+		\DP
+		\\
 		\AXC{$\async[A]{\Psi}{\Delta}{\phi_1, \phi_2, \Phi}$}
 		\LeftLabel{\derRule[A]{\displaypar}}
 		\UIC{$\async[A]{\Psi}{\Delta}{\phi_1 \llpar \phi_2, \Phi}$}
 		\DP
 		&
-		\AXC{$\async[A]{\phi, \Psi}{\Delta}{\Phi}$}
-		\LeftLabel{\derRule[A]{\displaywn}}
-		\UIC{$\async[A]{\Psi}{\Delta}{\llwn{\phi}, \Phi}$}
-		\DP
-		\\
-		\AXC{}
-		\LeftLabel{\derRule[A]{\displaytop}}
-		\UIC{$\async[A]{\Psi}{\Delta}{\lltop, \Phi}$}
-		\DP
-		&
-		\SetCell[c=2]{c} 
 		\AXC{$\async[A]{\Psi}{\Delta}{\phi_1, \Phi}$}
 		\AXC{$\async[A]{\Psi}{\Delta}{\phi_2, \Phi}$}
 		\LeftLabel{\derRule[A]{\displaywith}}
@@ -566,26 +560,50 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 		\UIC{$\focus[A]{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
 		\DP
 		&
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_2}$}
+		\LeftLabel{\derRule[A]{\displayplus[R]}}
+		\UIC{$\focus[A]{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
+		\DP
+		\\
+		\AXC{$\focus[A]{\Psi}{\Gamma}{\phi_1}$}
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_2}$}
+		\LeftLabel{\derRule[A]{\displayten}}
+		\BIC{$\focus[A]{\Psi}{\Gamma, \Delta}{\phi_1 \llten \phi_2}$}
+		\DP
+		&
 		\AXC{}
 		\LeftLabel{\derRule[A]{\displayone}}
 		\UIC{$\focus[A]{\Psi}{.}{\llone}$}
 		\DP
-		& 
+		\\
+		\AXC{$\async[A]{\phi, \Psi}{\Delta}{\Phi}$}
+		\LeftLabel{\derRule[A]{\displaywn}}
+		\UIC{$\async[A]{\Psi}{\Delta}{\llwn{\phi}, \Phi}$}
+		\DP
+		&
 		\AXC{$\async[A]{\Psi}{.}{\phi}$}
 		\LeftLabel{\derRule[A]{\displaybang}}
 		\UIC{$\focus[A]{\Psi}{.}{\llbang{\phi}}$}
 		\DP
 		\\
-		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_2}$}
-		\LeftLabel{\derRule[A]{\displayplus[R]}}
-		\UIC{$\focus[A]{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
+		\AXC{$\isNegLit{\alpha}$}
+		\LeftLabel{\derRule[A]{\displayid[1]}}
+		\UIC{$\focus[A]{\Psi}{\alpha}{\llnot{\alpha}}$}
 		\DP
 		&
-		\SetCell[c=2]{c} 
-		\AXC{$\focus[A]{\Psi}{\Gamma}{\phi_1}$}
-		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_2}$}
-		\LeftLabel{\derRule[A]{\displayten}}
-		\BIC{$\focus[A]{\Psi}{\Gamma, \Delta}{\phi_1 \llten \phi_2}$}
+		\AXC{$\isNegLit{\alpha}$}
+		\LeftLabel{\derRule[A]{\displayid[2]}}
+		\UIC{$\focus[A]{\alpha, \Psi}{.}{\llnot{\alpha}}$}
+		\DP
+		\\
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
+		\LeftLabel{\derRule[A]{\displaydecide[1]}}
+		\UIC{$\async[A]{\Psi}{\phi, \Delta}{.}$}
+		\DP
+		&
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
+		\LeftLabel{\derRule[A]{\displaydecide[2]}}
+		\UIC{$\async[A]{\phi, \Psi}{\Delta}{.}$}
 		\DP
 		\\
 		\AXC{$\neg \isAsy{\phi}$}
@@ -594,30 +612,10 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 		\BIC{$\async[A]{\Psi}{\Delta}{\phi, \Phi}$}
 		\DP
 		&
-		\AXC{$\isNegLit{\alpha}$}
-		\LeftLabel{\derRule[A]{\displayid[1]}}
-		\UIC{$\focus[A]{\Psi}{\alpha}{\llnot{\alpha}}$}
-		\DP
-		&
-		\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
-		\LeftLabel{\derRule[A]{\displaydecide[1]}}
-		\UIC{$\async[A]{\Psi}{\phi, \Delta}{.}$}
-		\DP
-		\\
 		\AXC{$\phi \; \mathrm{negative}$}
 		\AXC{$\async[A]{\Psi}{\Delta}{\phi}$}
 		\LeftLabel{\derRule[A]{\displaytoasy}}
 		\BIC{$\focus[A]{\Psi}{\Delta}{\phi}$}
-		\DP
-		&
-		\AXC{$\isNegLit{\alpha}$}
-		\LeftLabel{\derRule[A]{\displayid[2]}}
-		\UIC{$\focus[A]{\alpha, \Psi}{.}{\llnot{\alpha}}$}
-		\DP
-		&
-		\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
-		\LeftLabel{\derRule[A]{\displaydecide[2]}}
-		\UIC{$\async[A]{\phi, \Psi}{\Delta}{.}$}
 		\DP
 	\end{tblr}
 	\caption{J.-M. Andreoli's triadic calculus.}
@@ -626,7 +624,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 \begin{proof}
 	The three base cases are proved essentially in the same way:
 	\begin{itemize}
-		\item[($I_1$):] Given the judgment
+		\item[($I_1$):] Given the rule \derRule{\displayid[1]}
 			$$
 			\AXC{$\isNegLit{\alpha}$}
 			\AXC{$ \sat{\used{e_1}, \used{e_2}, \avail{\Delta}, \Lambda}{\mathV}$}
@@ -634,9 +632,9 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			\BIC{$\focus{\Psi}{\af{\alpha}{e_1}}{\af{\llnot{\alpha}}{e_2}, \Delta} \separator \constr{\Lambda}{\mathV}$}
 			\DP
 			$$
-			looking at the constraints we trivially get that
+			looking at the constraints we get that
 			\begin{align*}
-				\Delta[\mathV] &= . \tag{Because of $\avail{\Delta}$} \\
+				\Delta[\mathV] &= \varnothing \tag{Because of $\avail{\Delta}$} \\
 				\af{\alpha}{e_1}[\mathV] &= \alpha \tag{Because of $\used{e_1}$} \\
 				\af{\llnot{\alpha}}{e_2}[\mathV] &= \llnot{\alpha} \tag{Because of $\used{e_2}$}
 			\end{align*}
@@ -647,7 +645,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			\UIC{$\focus[A]{\Psi}{\alpha}{\llnot{\alpha}}$}
 			\DP
 			$$
-		\item[($I_2$):] Given the judgment
+		\item[($I_2$):] Given the rule \derRule{\displayid[2]}
 			$$
 			\AXC{$\isNegLit{\alpha}$}
 			\AXC{$ \sat{\used{e}, \avail{\Delta}, \Lambda}{\mathV}$}
@@ -657,7 +655,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			$$
 			proceeding as above we get
 			\begin{align*}
-				\Delta[\mathV] &= . \\
+				\Delta[\mathV] &= \varnothing \\
 				\af{\llnot{\alpha}}{e}[\mathV] &= \llnot{\alpha}
 			\end{align*}
 			thus
@@ -667,7 +665,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			\UIC{$\focus[A]{\alpha, \Psi}{.}{\llnot{\alpha}}$}
 			\DP
 			$$
-		\item[($\llone$):] Given the judgment
+		\item[($\llone$):] Given the rule \derRule{\displayone}
 			$$
 			\AXC{$\sat{ \used{e}, \avail{\Delta}, \Lambda}{\mathV}$}
 			\LeftLabel{$[1]$}
@@ -676,7 +674,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			$$
 			proceeding as above we get
 			\begin{align*}
-				\Delta[\mathV] &= . \\
+				\Delta[\mathV] &= \varnothing \\
 				\af{\llone}{e}[\mathV] &= \llone
 			\end{align*}
 			thus
@@ -706,34 +704,35 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			which, because of Lemma \ref{lemma:cup}, correctly corresponds to what the conclusion
 			$$ \focus{\Psi}{\Delta}{\af{\phi_1 \llten \phi_2}{e}} \separator \constr{\Lambda}{\mathV''} $$
 			should be mapped to.
-		\indCase{\displaywith} Given the rule \derRule{\displaywith}, we apply the inductive hypothesis, and from the premises 
-			\begin{align*}
-				&\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\used{e}, \Lambda}{\mathV'} \\
-				&\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\used{e}, \Lambda}{\mathV''} 
-			\end{align*}
-			we extract the triadic proofs
-			\begin{align*}
-				&\async{\Psi}{\Delta[\mathV']}{\phi_2, \Phi[\mathV']} \\
-				&\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Phi[\mathV'']}
-			\end{align*}
-%			\LeftLabel{$[\llwith]$}
-%			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV''}$}
-%			\DP
-%			$$
+		\indCase{\displaywith} missing % Given the rule \derRule{\displaywith}, we apply the inductive hypothesis, and from the premises 
+			% \begin{align*}
+			% 	&\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\used{e}, \Lambda}{\mathV'} \\
+			% 	&\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\used{e}, \Lambda}{\mathV''} 
+			% \end{align*}
+			% we extract the triadic proofs
+			% \begin{align*}
+			% 	&\async{\Psi}{\Delta[\mathV']}{\phi_2, \Phi[\mathV']} \\
+			% 	&\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Phi[\mathV'']}
+			% \end{align*}
+			% now if $ \Delta[\mathV'] = \Delta[\mathV'']$ (the same for $\Phi$), we can write
+			% \begin{align*}
+			% 	&\async{\Psi}{\Delta[\mathV'']}{\phi_2, \Phi[\mathV'']} \\
+			% 	&\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Phi[\mathV'']}
+			% \end{align*}
+			% this way we can apply \derRule[A]{\displaywith}, to obtain
+			% $$ \async[A]{\Psi}{\Delta[\mathV'']}{\phi_1 \llwith \phi_2, \Phi[\mathV'']} $$
+			% which correctly corresponds to what the conclusion
+			% $$ \async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV''} $$
+			% should be mapped to.
 %			which after erasing the unused formulae using the assignment becomes
-%			$$
 %			\LeftLabel{$[\llwith]$}
 %			\BIC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1 \llwith \phi_2, \Phi[\mathV'']}$}
-%			\DP
-%			$$
 %			or equivalently 
-%			$$
 %			\AXC{$\async{\Psi}{\Delta[\mathV']}{\phi_2, \Phi[\mathV']}$}
 %			\AXC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Phi[\mathV'']}$}
 %			\LeftLabel{$[\llwith]$}
 %			\BIC{$\async{\Psi}{\Delta[\mathV']}{\phi_1 \llwith \phi_2, \Phi[\mathV']}$}
 %			\DP
-%			$$
 %			since  $\Lambda \subseteq \used{e}, \Lambda$ and Lemma \ref{lemma:subsume}.
 		\indCase{\displaypar} Given the rule \derRule{\displaypar}, we apply the inductive hypothesis, and from the premise
 			$$ \async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \separator \constr{\used{e}, \Lambda}{\mathV}$$
@@ -741,7 +740,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			$$\async[A]{\Psi}{\Delta[\mathV]}{\phi_1, \phi_2, \Phi[\mathV]} $$
 			Then we apply \derRule[A]{\displaypar}, and obtain
 			$$\async[A]{\Psi}{\Delta[\mathV]}{\phi_1 \llpar \phi_2, \Phi[\mathV]} $$
-			By Lemma \ref{lemma:subsume} 
+			which correctly corresponds to what the conclusion
 			$$ \async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV} $$
 			should be mapped to.
 			% Furthermore, since the assignment $\mathV$ is the same between premise and conclusion, then $\Delta[\mathV]$ and $\Phi[\mathV]$ stay the same, and since the assignment respects the constraint $\used{e}$, then $\phi_1 \llpar \phi_2$ must be present.
@@ -792,7 +791,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			$$ \async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \separator \constr{\Lambda}{\mathV} $$
 			should be mapped to.
 		\indCase{\displaydecide[1]} Given the rule \derRule{\displaydecide[1]}, we apply the inductive hypothesis, and from the premise
-			$$ \focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} $$
+			$$ \focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\used{e}, \Lambda}{\mathV} $$
 			we extract the triadic proof
 			$$ \focus[A]{\Psi}{\Delta[\mathV]}{\phi} $$
 			Then we apply \derRule[A]{\displaydecide[1]} and obtain
@@ -800,7 +799,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			which correctly corresponds to what the conclusion
 			$$ \async{\Psi}{\af{\phi}{e}, \Delta}{.} \separator \constr{\Lambda}{\mathV} $$
 		\indCase{\displaydecide[2]} Given the rule \derRule{\displaydecide[2]}, we apply the inductive hypothesis, and from the premise
-			$$ \focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\Lambda}{\mathV} $$
+			$$ \focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\used{e}, \Lambda}{\mathV} $$
 			where $\new{x}$, we extract the triadic proof
 			$$ \focus[A]{\Psi}{\Delta[\mathV]}{\phi} $$
 			Then we apply \derRule[A]{\displaydecide[2]} and obtain
@@ -825,14 +824,14 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 					should be mapped to.
 			\end{itemize}
 		\indCase{\displaytoasy} Given the rule \derRule{\displaytoasy}, we apply the inductive hypothesis, and from the premise
-			$$ \async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} $$
+			$$ \async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\used{e}, \Lambda}{\mathV} $$
 			we extract the triadic proof
 			$$ \async[A]{\Psi}{\Delta[\mathV]}{\phi} $$
 			Then we apply \derRule[A]{\displaytoasy}, and obtain
 			$$ \focus[A]{\Psi}{\Delta[\mathV]}{\phi} $$
-			which correctly corresponds to what the conclusion should be mapped to
+			which correctly corresponds to what the conclusion 
 			$$ \focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} $$
-			since the sequents do not change and only the phase shifts.
+			should be mapped to.
 	\end{itemize}
 \end{proof}
 
