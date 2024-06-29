@@ -1,0 +1,95 @@
+\chapter{Triadic calculus}
+\begin{figure}[h!]
+	\centering
+	\begin{tblr}{ colspec = {c c}
+		, cells = { mode = dmath } 
+		, rows = {abovesep=7pt, belowsep=7pt}
+		, vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
+		}
+		\AXC{$\async[A]{\Psi}{\Delta}{\Phi}$}
+		\LeftLabel{\derRule[A]{\displaybot}}
+		\UIC{$\async[A]{\Psi}{\Delta}{\llbot, \Phi}$}
+		\DP
+		&
+		\AXC{}
+		\LeftLabel{\derRule[A]{\displaytop}}
+		\UIC{$\async[A]{\Psi}{\Delta}{\lltop, \Phi}$}
+		\DP
+		\\
+		\AXC{$\async[A]{\Psi}{\Delta}{\phi_1, \phi_2, \Phi}$}
+		\LeftLabel{\derRule[A]{\displaypar}}
+		\UIC{$\async[A]{\Psi}{\Delta}{\phi_1 \llpar \phi_2, \Phi}$}
+		\DP
+		&
+		\AXC{$\async[A]{\Psi}{\Delta}{\phi_1, \Phi}$}
+		\AXC{$\async[A]{\Psi}{\Delta}{\phi_2, \Phi}$}
+		\LeftLabel{\derRule[A]{\displaywith}}
+		\BIC{$\async[A]{\Psi}{\Delta}{\phi_1 \llwith \phi_2, \Phi}$}
+		\DP
+		\\
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_1}$}
+		\LeftLabel{\derRule[A]{\displayplus[L]}}
+		\UIC{$\focus[A]{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
+		\DP
+		&
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_2}$}
+		\LeftLabel{\derRule[A]{\displayplus[R]}}
+		\UIC{$\focus[A]{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
+		\DP
+		\\
+		\AXC{$\focus[A]{\Psi}{\Gamma}{\phi_1}$}
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_2}$}
+		\LeftLabel{\derRule[A]{\displayten}}
+		\BIC{$\focus[A]{\Psi}{\Gamma, \Delta}{\phi_1 \llten \phi_2}$}
+		\DP
+		&
+		\AXC{}
+		\LeftLabel{\derRule[A]{\displayone}}
+		\UIC{$\focus[A]{\Psi}{.}{\llone}$}
+		\DP
+		\\
+		\AXC{$\async[A]{\phi, \Psi}{\Delta}{\Phi}$}
+		\LeftLabel{\derRule[A]{\displaywn}}
+		\UIC{$\async[A]{\Psi}{\Delta}{\llwn{\phi}, \Phi}$}
+		\DP
+		&
+		\AXC{$\async[A]{\Psi}{.}{\phi}$}
+		\LeftLabel{\derRule[A]{\displaybang}}
+		\UIC{$\focus[A]{\Psi}{.}{\llbang{\phi}}$}
+		\DP
+		\\
+		\AXC{$\isNegLit{\alpha}$}
+		\LeftLabel{\derRule[A]{\displayid[1]}}
+		\UIC{$\focus[A]{\Psi}{\alpha}{\llnot{\alpha}}$}
+		\DP
+		&
+		\AXC{$\isNegLit{\alpha}$}
+		\LeftLabel{\derRule[A]{\displayid[2]}}
+		\UIC{$\focus[A]{\alpha, \Psi}{.}{\llnot{\alpha}}$}
+		\DP
+		\\
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
+		\LeftLabel{\derRule[A]{\displaydecide[1]}}
+		\UIC{$\async[A]{\Psi}{\phi, \Delta}{.}$}
+		\DP
+		&
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
+		\LeftLabel{\derRule[A]{\displaydecide[2]}}
+		\UIC{$\async[A]{\phi, \Psi}{\Delta}{.}$}
+		\DP
+		\\
+		\AXC{$\neg \isAsy{\phi}$}
+		\AXC{$\async[A]{\Psi}{\phi, \Delta}{\Phi}$}
+		\LeftLabel{\derRule[A]{\displaytodelta}}
+		\BIC{$\async[A]{\Psi}{\Delta}{\phi, \Phi}$}
+		\DP
+		&
+		\AXC{$\phi \; \mathrm{negative}$}
+		\AXC{$\async[A]{\Psi}{\Delta}{\phi}$}
+		\LeftLabel{\derRule[A]{\displaytoasy}}
+		\BIC{$\focus[A]{\Psi}{\Delta}{\phi}$}
+		\DP
+	\end{tblr}
+	\caption{J.-M. Andreoli's triadic calculus.}
+	\label{fig:triadic}
+\end{figure}

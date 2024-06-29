@@ -23,6 +23,10 @@
 	chapters/state-of-the-art,
 	chapters/testing,
 	chapters/conclusion,
+        appendix/constr-calculus,
+        appendix/hp-calculus,
+        appendix/triadic-calculus,
+	appendix/example,
 }
 
 \begin{document}
@@ -41,70 +45,10 @@
 \include{chapters/conclusion}
 
 \appendix
-\chapter{Example derivation}
-The proof to the judgment
-$$ \llnot{(a \llten b)} \vdash \llnot{a} \llpar \llnot{b} $$
-which is normalized to
-$$ \vdash (a \llten b), \llnot{a} \llpar \llnot{b} $$
-corresponds in our calculus to 
-$$
-	\tiny
-	\AXC{${\normalsize \nabla'} \hspace{5cm} {\normalsize \nabla''}$}
-	\LeftLabel{$[\llten]$}
-	\UIC{$\focus{.}{\af{\llnot{a}}{x_2}, \af{\llnot{b}}{x_2}}{\af{a \llten b}{x_1}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\LeftLabel{$[D_1]$}
-	\UIC{$\async{.}{\af{\llnot{a}}{x_2}, \af{\llnot{b}}{x_2}, \af{a \llten b}{x_1}}{.} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\LeftLabel{$[R\!\Uparrow]$}
-	\UIC{$\async{.}{ \af{\llnot{b}}{x_2}, \af{a \llten b}{x_1}}{\af{\llnot{a}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\LeftLabel{$[R\!\Uparrow]$}
-	\UIC{$\async{.}{\af{a \llten b}{x_1}}{\af{\llnot{b}}{x_2}, \af{\llnot{a}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\LeftLabel{$[\llpar]$}
-	\UIC{$\async{.}{\af{a \llten b}{x_1}}{\af{\llnot{a} \llpar \llnot{b}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\LeftLabel{$[R\!\Uparrow]$}
-	\UIC{$\async{.}{.}{\af{a \llten b}{x_1}, \af{\llnot{a} \llpar \llnot{b}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\DP
-$$
-with
-\begin{align*}
-	\nabla' =\;\;& {\tiny
-	\AXC{$\sat{\used{x_1}, \used{x_2}, \used{x_2x_3}, \avail{x_2x_4}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\LeftLabel{$[I_1]$}
-	\UIC{$\focus{.}{\af{a}{x_1}, \cancel{\af{\llnot{b}}{x_2x_4}}}{\af{\llnot{a}}{x_2x_3}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\LeftLabel{$[D_1]$}
-	\UIC{$\async{.}{\af{a}{x_1}, \af{\llnot{a}}{x_2x_3}, \cancel{\af{\llnot{b}}{x_2x_4}}}{.} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\LeftLabel{$[R\!\Uparrow]$}
-	\UIC{$\async{.}{\af{\llnot{a}}{x_2x_3}, \cancel{\af{\llnot{b}}{x_2x_4}}}{\af{a}{x_1}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\LeftLabel{$[R\!\Downarrow]$}
-	\UIC{$\focus{.}{\af{\llnot{a}}{x_2x_3}, \cancel{\af{\llnot{b}}{x_2x_4}}}{\af{a}{x_1}} \separator \constr{\used{x_1}, \used{x_2}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\DP} 
-\end{align*}
-\begin{align*}
-	\nabla'' =\;\;& {\tiny 
-	\AXC{$\sat{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}, \used{x_2\varNot{x_4}}, \avail{x_2\varNot{x_3}}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\LeftLabel{$[I_1]$}
-	\UIC{$\focus{.}{\af{b}{x_1}, \cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}}{\af{\llnot{b}}{x_2\varNot{x_4}}} \separator \constr{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\LeftLabel{$[D_1]$}
-	\UIC{$\async{.}{\af{b}{x_1}, \cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}, \af{\llnot{b}}{x_2\varNot{x_4}}}{.} \separator \constr{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\LeftLabel{$[R\!\Uparrow]$}
-	\UIC{$\async{.}{\cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}, \af{\llnot{b}}{x_2\varNot{x_4}}}{\af{b}{x_1}} \separator \constr{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\LeftLabel{$[R\!\Downarrow]$}
-	\UIC{$\focus{.}{\cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}, \af{\llnot{b}}{x_2\varNot{x_4}}}{\af{b}{x_1}} \separator \constr{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}}{x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot}$}
-	\DP}
-\end{align*}
-For reference we show the classic proof (non focused, without constraints) for the same judgment:
-$$
-	\AXC{}
-	\LeftLabel{$[A]$}
-	\UIC{$\vdash a, \llnot{a}$}
-	\AXC{}
-	\LeftLabel{$[A]$}
-	\UIC{$\vdash b, \llnot{b}$}
-	\LeftLabel{$[\llten]$}
-	\BIC{$\vdash \llnot{a}, \llnot{b}, (a \llten b)$}
-	\LeftLabel{$[\!\llpar\!]$}
-	\UIC{$\vdash (a \llten b), (\llnot{a} \llpar \llnot{b})$}
-	\DP
-$$
+\include{appendix/constr-calculus}
+\include{appendix/hp-calculus}
+\include{appendix/triadic-calculus}
+\include{appendix/example}
 
 
 \bibliographystyle{plain}
