@@ -34,11 +34,11 @@ check(L) :-
 \end{minted}
 The predicate \texttt{sat/1} may work a bit unexpectedly, to clarify its possible outcomes we give a little example:
 \begin{minted}{prolog}
-?- L = [X * Y =:= 1, X =:= 0], sat(*(L)).
+?- check([X * Y =:= 1, X =:= 0]).
 false.
-?- L = [X * Y =:= 0], sat(*(L)).
+?- check([X * Y =:= 0]).
 sat(1#X*Y).
-?- L = [X * Y =:= 0, X =:= 1], sat(*(L)).
+?- check([X * Y =:= 0, X =:= 1]).
 X = 1,
 Y = 0.
 \end{minted}
@@ -160,7 +160,7 @@ This is needed since, after checking the constraints, the SAT-solver unifies the
 During the asynchronous phase we have a list of formulae which are being worked on and a list of formulae which are put to the side; with the former being called \texttt{Fs} and the latter \texttt{D}.
 At each step we analyze the first element of the list \texttt{Fs}, and we keep decomposing the members of the list until we cannot anymore.
 This process can be seen for example in the predicate for with ($\llwith$)
-\begin{minted}{prolog}
+\begin{minted}[linenos]{prolog}
 async(A, U, D, [F|Fs], S, M, In) :-
   F = af(((F1-H1) & (F2-H2))-_), N, E), !,
   ( H2 > H1	

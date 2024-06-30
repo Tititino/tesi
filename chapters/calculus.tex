@@ -94,7 +94,7 @@ The calculus uses constraints to manage the resources.
 
 \begin{define}[Annotated formula]
 	\label{def:annotated}
-	Given a formula $\phi$ defined as in Figure \ref{ctives} and a boolean expression $e$ defined as in Definition \ref{def:bool-expr}, an \textit{annotated formula} is simply a term 
+	Given a formula $\phi$ defined as in Figure \ref{def:ll formula} and a boolean expression $e$ defined as in Definition \ref{def:bool-expr}, an \textit{annotated formula} is simply a term 
 	$$ \af{\phi}{e} $$
 	that associates the formula to the expression.
 	We denote 
@@ -169,8 +169,105 @@ Otherwise the branch of the proof fails.
 	$$ \sat{\Lambda}{\mathV} \Leftrightarrow \bigwedge_{\lambda \in \Lambda} \lambda[\mathV] = \top $$
 \end{define}
 
-We now expand the concept of triadic sequent of \cite{Focusing} by adding constraints.
-% TODO: expand
+\begin{figure}[h!]
+	\centering
+	\begin{tblr}{ colspec = {c c}
+		, cells = { mode = dmath } 
+		, rows = {abovesep=10pt, belowsep=10pt}
+		, vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
+		, cells = { preto = {\footnotesize} }
+		}
+		\AXC{$\async[A]{\Psi}{\Delta}{\Phi}$}
+		\LeftLabel{\derRule[A]{\displaybot}}
+		\UIC{$\async[A]{\Psi}{\Delta}{\llbot, \Phi}$}
+		\DP
+		&
+		\AXC{}
+		\LeftLabel{\derRule[A]{\displaytop}}
+		\UIC{$\async[A]{\Psi}{\Delta}{\lltop, \Phi}$}
+		\DP
+		\\
+		\AXC{$\async[A]{\Psi}{\Delta}{\phi_1, \phi_2, \Phi}$}
+		\LeftLabel{\derRule[A]{\displaypar}}
+		\UIC{$\async[A]{\Psi}{\Delta}{\phi_1 \llpar \phi_2, \Phi}$}
+		\DP
+		&
+		\AXC{$\async[A]{\Psi}{\Delta}{\phi_1, \Phi}$}
+		\AXC{$\async[A]{\Psi}{\Delta}{\phi_2, \Phi}$}
+		\LeftLabel{\derRule[A]{\displaywith}}
+		\BIC{$\async[A]{\Psi}{\Delta}{\phi_1 \llwith \phi_2, \Phi}$}
+		\DP
+		\\
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_1}$}
+		\LeftLabel{\derRule[A]{\displayplus[L]}}
+		\UIC{$\focus[A]{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
+		\DP
+		&
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_2}$}
+		\LeftLabel{\derRule[A]{\displayplus[R]}}
+		\UIC{$\focus[A]{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
+		\DP
+		\\
+		\AXC{$\focus[A]{\Psi}{\Gamma}{\phi_1}$}
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_2}$}
+		\LeftLabel{\derRule[A]{\displayten}}
+		\BIC{$\focus[A]{\Psi}{\Gamma, \Delta}{\phi_1 \llten \phi_2}$}
+		\DP
+		&
+		\AXC{}
+		\LeftLabel{\derRule[A]{\displayone}}
+		\UIC{$\focus[A]{\Psi}{.}{\llone}$}
+		\DP
+		\\
+		\AXC{$\async[A]{\phi, \Psi}{\Delta}{\Phi}$}
+		\LeftLabel{\derRule[A]{\displaywn}}
+		\UIC{$\async[A]{\Psi}{\Delta}{\llwn{\phi}, \Phi}$}
+		\DP
+		&
+		\AXC{$\async[A]{\Psi}{.}{\phi}$}
+		\LeftLabel{\derRule[A]{\displaybang}}
+		\UIC{$\focus[A]{\Psi}{.}{\llbang{\phi}}$}
+		\DP
+		\\
+		\AXC{$\isNegLit{\alpha}$}
+		\LeftLabel{\derRule[A]{\displayid[1]}}
+		\UIC{$\focus[A]{\Psi}{\alpha}{\llnot{\alpha}}$}
+		\DP
+		&
+		\AXC{$\isNegLit{\alpha}$}
+		\LeftLabel{\derRule[A]{\displayid[2]}}
+		\UIC{$\focus[A]{\alpha, \Psi}{.}{\llnot{\alpha}}$}
+		\DP
+		\\
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
+		\LeftLabel{\derRule[A]{\displaydecide[1]}}
+		\UIC{$\async[A]{\Psi}{\phi, \Delta}{.}$}
+		\DP
+		&
+		\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
+		\LeftLabel{\derRule[A]{\displaydecide[2]}}
+		\UIC{$\async[A]{\phi, \Psi}{\Delta}{.}$}
+		\DP
+		\\
+		\AXC{$\neg \isAsy{\phi}$}
+		\AXC{$\async[A]{\Psi}{\phi, \Delta}{\Phi}$}
+		\LeftLabel{\derRule[A]{\displaytodelta}}
+		\BIC{$\async[A]{\Psi}{\Delta}{\phi, \Phi}$}
+		\DP
+		&
+		\AXC{$\phi \; \mathrm{negative}$}
+		\AXC{$\async[A]{\Psi}{\Delta}{\phi}$}
+		\LeftLabel{\derRule[A]{\displaytoasy}}
+		\BIC{$\focus[A]{\Psi}{\Delta}{\phi}$}
+		\DP
+	\end{tblr}
+	\caption{J.-M. Andreoli's triadic calculus.\label{fig:triadic}}
+\end{figure}
+Figure \ref{fig:triadic} shows the triadic calculus of \cite{Focusing}.
+This calculus has sequents with three members: a set of unrestricted formulae, a multiset of linear formulae put to the side, and either a single formula or another multiset of linear formulae.
+An arrow pointing up symbolizes the asynchronous phase, and an arrow pointing down the focusing phase.
+Phase switching happens using the decide rules (\derRule[A]{\displaydecide[1]}, \derRule[A]{\displaydecide[2]}), which non-deterministically choose a formula to focus on.
+We now expand the concept of this triadic judgment by adding explicit constraints.
 \begin{define}[Members of the sequent]
 	Given any sequent it can be in either two forms:
 	\begin{itemize}
@@ -216,16 +313,227 @@ this is split into
 \end{align*}
 
 \begin{define}
-	Given two assignments $\mathV'$ and $\mathV''$ and a set of variables $X$, we say that $\mathV'$ and $\mathV''$ coincide for $X$, written
+	Given two assignments $\mathV'$ and $\mathV''$ and a set of variables $X$, we say that $\mathV'$ and $\mathV''$ coincide for $X$ -- written $\mathV' \sim_X \mathV''$ -- when they both map all the variables in $X$ to the same values, or
 	$$ \mathV' \sim_X \mathV'' \Leftrightarrow \forall x \in X \mid \mathV'(x) = \mathV''(x) $$
 \end{define}
-% example of splitting and variables
 
-% One simple but important detail that will be useful later when explaining the Prolog implementation is noting that the variables in common between two branches with the same root are always introduced before the two branches diverge.
-% Or -- put differently -- all new variables introduced in any point of a path from the root of the proof to a leaf may appear only in the subtrees.	% sistemo
+% TODO: expand
 Figure \ref{fig:hp calculus} shows the calculus of \cite{HarlandPym} using our notation of explicit constraints.
 What is actually represented is roughly what they define as the ``lazy'' strategy.
 Figure \ref{fig:calculus} instead presents our focused constraint calculus.
+\begin{figure}[h!]
+	\centering
+	\begin{tblr}{ colspec = { cc }
+		, rows = {abovesep=7pt, belowsep=7pt}
+		, cells = { preto = {\footnotesize} }
+		}
+		\SetCell[c=2]{c}
+		\AX$\vdash_\text{PH} \Delta, \af{\phi_1}{e}, \af{\phi_2}{e}\fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+		\LeftLabel{\derRule[PH]{\displaypar}}
+		\UI$\vdash_\text{PH} \Delta, \af{\phi_1 \llpar \phi_2}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
+		\DP
+		\\
+		\AX$\vdash_\text{PH} \Delta \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+		\LeftLabel{\derRule[PH]{\displaybot}}
+		\UI$\vdash_\text{PH} \Delta, \af{\llbot}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
+		\DP
+		&
+		\AXC{}
+		\LeftLabel{\derRule[PH]{\displaytop}}
+		\UIC{$\vdash_\text{PH} \Delta, \af{\lltop}{-} \separator \constr{\Lambda}{\mathV}$}
+		\DP
+		\\
+		\SetCell[c=2]{c} 
+		\AXC{$\vdash_\text{PH} \Delta, \af{\phi_2}{e} \separator \constr{\used{e}, \Lambda}{\mathV'}$}
+		\AXC{$\vdash_\text{PH} \Delta, \af{\phi_1}{e} \separator \constr{\used{e}, \Lambda}{\mathV''}$}
+		\LeftLabel{\derRule[PH]{\displaywith}}
+		\BIC{$\vdash_\text{PH} \Delta, \af{\phi_1 \llwith \phi_2}{e} \separator \constr{\Lambda}{\mathV''}$}	
+		\DP
+		\\
+		\SetCell[c=2]{c} 
+		\AXC{$\vdash_\text{PH} \Delta_L^X, \af{\phi_1}{e} \separator \constr{\used{e}, \Lambda}{\mathV'}$}
+		\AXC{$\vdash_\text{PH} \Delta_R^X, \af{\phi_2}{e} \separator \constr{\mathV'}{\mathV''}$}
+		\LeftLabel{\derRule[PH]{\displayten}}
+		\BIC{$\vdash_\text{PH} \Delta, \af{\phi_1 \llten \phi_2}{e} \separator \constr{\Lambda}{\mathV''}$}	% capisco il movimento dei constraint
+		\DP
+		\\ 
+		\SetCell[c=2]{c} 
+		\AXC{$\new{x}$}
+		\AXC{$\vdash_\text{PH} \Delta, \af{\phi_1}{x}, \af{\phi_2}{\varNot{x}} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$}
+		\LeftLabel{\derRule[PH]{\displayplus}}
+		\BIC{$\vdash_\text{PH} \Delta, \af{\phi_1 \llplus \phi_2}{e} \fCenter \separator \constr{\Lambda}{\mathV}$}
+		\DP
+		\\
+		\AXC{$\sat{ \used{e}, \Lambda, \avail{\Delta}}{\mathV}$}
+		\LeftLabel{\derRule[PH]{\displayone}}
+		\UIC{$\vdash_\text{PH} \Delta, \af{\llone}{e} \separator \constr{\Lambda}{\mathV}$}
+		\DP
+		&
+		\AX$\vdash_\text{PH} \llwn{\Delta}, \af{\phi}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+		\LeftLabel{\derRule[PH]{\displaybang}}
+		\UI$\vdash_\text{PH} \llwn{\Delta}, \af{\llbang{\phi}}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
+		\DP
+		\\
+		\SetCell[c=2]{c} 
+		\AX$\vdash_\text{PH} \Delta, \af{\phi}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+		\LeftLabel{\derRule[PH]{\displaywn}}
+		\UI$\vdash_\text{PH} \Delta, \af{\llwn{\phi}}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
+		\DP
+		\\
+		\AX$\vdash_\text{PH} \Delta \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+		\LeftLabel{\derRule[PH]{W?}}
+		\UI$\vdash_\text{PH} \llwn{\af{\phi}{e}}, \Delta \fCenter \separator \constr{\Lambda}{\mathV}$
+		\DP
+		&
+		\AX$\vdash_\text{PH} \af{\llwn{\phi}}{e}, \af{\llwn{\phi}}{e}, \Delta \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+		\LeftLabel{\derRule[PH]{C?}}
+		\UI$\vdash_\text{PH} \llwn{\af{\phi}{e}}, \Delta \fCenter \separator \constr{\Lambda}{\mathV}$
+		\DP
+		\\
+		\SetCell[c=2]{c} 
+		\AXC{$ \isNegLit{\alpha} $}
+		\AXC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\mathV}$}
+		\LeftLabel{\derRule[PH]{A}}
+		\BIC{$\vdash_\text{PH} \af{\alpha}{e_1}, \af{\llnot{\alpha}}{e_2}, \Delta \separator \constr{\Lambda}{\mathV}$}
+		\DP
+	\end{tblr}
+	\caption{The one sided version of the calculus from \cite{HarlandPym} with explicit constraint propagation.}
+	\label{fig:hp calculus}
+\end{figure}
+\begin{figure}[h!]
+	\begin{subfigure}{\textwidth}
+		\centering
+			\begin{tblr}{ colspec = { cc }
+				    , rows = {abovesep=10pt, belowsep=10pt}
+				    , cells = { preto = {\footnotesize} }
+				    }
+			\SetCell[c=2]{c} 
+			\AX$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+			\LeftLabel{\derRule{\displaypar}}
+			\UI$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
+			\DP 
+			\\
+			\AX$\async{\Psi}{\Delta}{\Phi} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+			\LeftLabel{\derRule{\displaybot}}
+			\UI$\async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
+			\DP
+			&
+			\AXC{}
+			\LeftLabel{\derRule{\displaytop}}
+			\UIC{$\async{\Psi}{\Delta}{\af{\lltop}{-}, \Phi} \separator \constr{-}{-}$}
+			\DP
+			\\
+			\SetCell[c=2]{c} 
+			\AX$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV'},$
+			\noLine
+			\UI$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV''}$
+			\AXC{$\mathV' \sim_{\mathrm{vars}(\Delta, \Phi)} \mathV''$}
+			\LeftLabel{\derRule{\displaywith}}
+			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV''}$}	
+			\DP
+			\\
+			\SetCell[c=2]{c} 
+			\AX$\async{\phi, \Psi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
+			\LeftLabel{\derRule{\displaywn}}
+			\UI$\async{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
+			\DP
+			\\
+			\SetCell[c=2]{c} 
+			\AXC{$\neg\isAsy{\phi}$}
+			\AXC{$\async{\Psi}{\af{\phi}{e}, \Delta}{\Phi} \separator \constr{\Lambda}{\mathV}$}
+			\LeftLabel{\derRule{\displaytodelta}}
+			\BIC{$\async{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\mathV}$}
+			\DP
+		\end{tblr}
+		\caption{Asynchronous rules.}
+	\end{subfigure}
+\end{figure}
+\begin{figure}[h!]
+	\ContinuedFloat
+	\begin{subfigure}{\textwidth}
+		\centering
+		\begin{tblr}{ colspec = { cc } 
+			    , rows = {abovesep=10pt, belowsep=10pt}
+			    , vborder{1-2} = { leftspace = 2pt, rightspace = 2pt } 
+			    , cells = { preto = {\footnotesize} }
+			    }
+			\SetCell[c=2]{c}
+			\AXC{$ \new{X} $}
+			\AX$\focus{\Psi}{\Delta_L^X}{\af{\phi_1}{e}} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV'},$
+			\noLine
+			\UI$\focus{\Psi}{\Delta_R^X}{\af{\phi_2}{e}} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV''}$
+			\AXC{$\mathV' \sim_{\mathrm{vars}(\Delta), X} \mathV''$}
+			\LeftLabel{\derRule{\displayten}}
+			\TIC{$\focus{\Psi}{\Delta}{\af{\phi_1 \llten \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\mathV''}$} % capisco il movimento dei constraint
+			\DP
+			\\ 
+			\AX$\focus{\Psi}{\Delta}{\af{\phi_1}{e}} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+			\LeftLabel{\derRule{\displayplus[L]}}
+			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
+			\DP
+			&
+			\AX$\focus{\Psi}{\Delta}{\af{\phi_2}{e}} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+			\LeftLabel{\derRule{\displayplus[R]}}
+			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
+			\DP
+			\\
+			\AXC{$\sat{ \used{e}, \avail{\Delta}, \Lambda}{\mathV}$}
+			\LeftLabel{\derRule{\displayone}}
+			\UIC{$\focus{\Psi}{\Delta}{\af{\llone}{e}} \separator \constr{\Lambda}{\mathV}$}
+			\DP
+			&
+			\AX$\focus{\Psi}{\Delta}{\af{\phi}{e}} \fCenter \separator \constr{\used{e}, \avail{\Delta}, \Lambda }{\mathV}$
+			\LeftLabel{\derRule{\displaybang}}
+			\UI$\focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
+			\DP
+			\\
+			\SetCell[c=2]{c}
+			\AXC{$\phi \; \mathrm{negative}$}
+			\AXC{$\async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\used{e}, \Lambda}{\mathV}$}
+			\LeftLabel{\derRule{\displaytoasy}}
+			\BIC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV}$}
+			\DP
+		\end{tblr}
+		\caption{Synchronous rules.}
+	\end{subfigure}
+\end{figure}
+\begin{figure}[h!]
+	\ContinuedFloat
+	\begin{subfigure}{\textwidth}
+		\centering
+		\begin{tblr}{ colspec = { c }
+			    , rows = {abovesep=10pt, belowsep=10pt}
+			    , cells = { preto = {\footnotesize} }
+			    }
+			\AXC{$ \isNegLit{\alpha} $}
+			\AXC{$ \sat{\used{e_1}, \used{e_2}, \avail{\Delta}, \Lambda}{\mathV}$}
+			\LeftLabel{\derRule{\displayid[1]}}
+			\BIC{$\focus{\Psi}{\af{\alpha}{e_1}, \Delta}{\af{\llnot{\alpha}}{e_2}} \separator \constr{\Lambda}{\mathV}$}
+			\DP
+			\\
+			\AXC{$ \isNegLit{\alpha} $}
+			\AXC{$ \sat{\used{e}, \avail{\Delta}, \Lambda }{\mathV}$}
+			\LeftLabel{\derRule{\displayid[2]}}
+			\BIC{$\focus{\alpha, \Psi}{\Delta}{\af{\llnot{\alpha}}{e}} \separator \constr{\Lambda}{\mathV}$}
+			\DP
+			\\
+			\AXC{$\neg \isNegLit{\phi}$}
+			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\used{e}, \Lambda}{\mathV}$}
+			\LeftLabel{\derRule{\displaydecide[1]}}
+			\BIC{$\async{\Psi}{\af{\phi}{e}, \Delta}{.} \separator \constr{\Lambda}{\mathV}$}
+			\DP
+			\\
+			\AXC{$\neg \isNegLit{\phi}$}
+			\AXC{$\new{x}$}
+			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\used{e}, \Lambda}{\mathV}$}
+			\LeftLabel{\derRule{\displaydecide[2]}}
+			\TrinaryInfC{$\async{\phi, \Psi}{\Delta}{.} \separator \constr{\Lambda}{\mathV}$}
+			\DP
+		\end{tblr}
+		\caption{Identity and decide rules.}
+	\end{subfigure}
+	\caption{Focused constraint calculus for Linear Logic. \label{fig:calculus}}
+\end{figure}
 
 \begin{lemma}
 	\label{lemma:cap}
@@ -334,6 +642,10 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			\UIC{$\focus[A]{\Psi}{.}{\llone}$}
 			\DP
 			$$
+		\indCase{\displaytop} Given the rule \derRule{\displaytop} we have that
+			$$ \async{\Psi}{\Delta}{\af{\top}{-}, \Phi} \separator \constr{-}{-} $$
+			we can choose any assignment $\mathV$ which covers $\vars{\Delta, \Phi}$ and obtain
+			$$ \async[A]{\Psi}{\Delta[\mathV]}{\top, \Phi[\mathV]} $$
 	\end{itemize}
 	The induction then follows like this:
 	\begin{itemize}
@@ -358,7 +670,6 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			which, because of Lemma \ref{lemma:cup}, correctly corresponds to what the conclusion
 			$$ \focus{\Psi}{\Delta}{\af{\phi_1 \llten \phi_2}{e}} \separator \constr{\Lambda}{\mathV''} $$
 			should be mapped to.
-		\indCase{\displaytop} Missing
 		\indCase{\displaywith} Given the rule \derRule{\displaywith}, we apply the inductive hypothesis, and from the premises
 			\begin{align*}
 				&\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\used{e}, \Lambda}{\mathV'} \\
@@ -421,8 +732,8 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			$$ \async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\used{e}, \avail{\Delta}, \Lambda}{\mathV} $$
 			we extract the triadic proof
 			$$ \async[A]{\Psi}{.}{\phi} $$
-			since $\Delta[\mathV] = \varnothing$ under assignment $\mathV$ by Lemma \ref{lemma:empty}.
-			Then we apply \derRule[A]{\displaybang} and obtain
+			since $\Delta[\mathV] = \varnothing$ under assignment $\mathV$.
+			We then apply \derRule[A]{\displaybang} and obtain
 			$$ \focus[A]{\Psi}{.}{\llbang{\phi}} $$
 			which correctly corresponds to what the conclusion 
 			$$ \focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e}} \separator \constr{\Lambda}{\mathV} $$
