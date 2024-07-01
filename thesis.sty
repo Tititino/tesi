@@ -31,7 +31,7 @@
 \DeclareOption{dbg}{\overfullrule=5pt}
 \ProcessOptions\relax
 
-\graphicspath{ {./images/} }
+\graphicspath{ {./figures/} }
 
 \theoremstyle{plain}
 \newtheorem{teor}{Theorem}[section]
@@ -93,6 +93,9 @@
 \newcommand{\mathV}{\mathrm{V}}
 \newcommand{\subst}{:=}
 \newcommand{\vars}[1]{\mathrm{vars}(#1)}
+\newcommand{\expr}[1]{\mathrm{expr}(#1)}
+\newcommand{\Dom}[1]{\mathrm{Dom}(#1)}
+\newcommand{\spliton}[2]{\mathrm{split}_{#2}(#1)}
 
 \newcommand{\displayten}{\llten}
 \newcommand{\displaypar}{\!\llpar\!}
@@ -102,6 +105,7 @@
 \newcommand{\displaywn}{\;\llwn{}\;}
 \newcommand{\displaytop}{\lltop}
 \newcommand{\displaybot}{\llbot}
+\newcommand{\displaylolli}{\lolli}
 \newcommand{\displayone}{\llone}
 \newcommand{\displayzero}{\llzero}
 \newcommand{\displaytoasy}{R\!\Downarrow}

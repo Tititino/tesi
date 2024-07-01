@@ -1,0 +1,29 @@
+\begin{tblr}{ colspec = { c }
+	    , rows = {abovesep=10pt, belowsep=10pt}
+	    , cells = { preto = {\footnotesize} }
+	    }
+	\AXC{$ \isNegLit{\alpha} $}
+	\AXC{$ \sat{\used{e_1}, \used{e_2}, \avail{\Delta}, \Lambda}{\mathV}$}
+	\LeftLabel{\derRule{\displayid[1]}}
+	\BIC{$\focus{\Psi}{\af{\alpha}{e_1}, \Delta}{\af{\llnot{\alpha}}{e_2}} \separator \constr{\Lambda}{\mathV}$}
+	\DP
+	\\
+	\AXC{$ \isNegLit{\alpha} $}
+	\AXC{$ \sat{\used{e}, \avail{\Delta}, \Lambda }{\mathV}$}
+	\LeftLabel{\derRule{\displayid[2]}}
+	\BIC{$\focus{\alpha, \Psi}{\Delta}{\af{\llnot{\alpha}}{e}} \separator \constr{\Lambda}{\mathV}$}
+	\DP
+	\\
+	\AXC{$\neg \isNegLit{\phi}$}
+	\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\used{e}, \Lambda}{\mathV}$}
+	\LeftLabel{\derRule{\displaydecide[1]}}
+	\BIC{$\async{\Psi}{\af{\phi}{e}, \Delta}{.} \separator \constr{\Lambda}{\mathV}$}
+	\DP
+	\\
+	\AXC{$\neg \isNegLit{\phi}$}
+	\AXC{$\new{x}$}
+	\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\used{e}, \Lambda}{\mathV}$}
+	\LeftLabel{\derRule{\displaydecide[2]}}
+	\TrinaryInfC{$\async{\phi, \Psi}{\Delta}{.} \separator \constr{\Lambda}{\mathV}$}
+	\DP
+\end{tblr}

@@ -1,11 +1,11 @@
 \chapter{Intro}\label{chapter:intro}
-In 2001 Pym and Harland publish a paper \cite{HarlandPym} where they propose a new way to tackle the problem of splitting sequents during linear logic proof search using boolean expressions.
-These are associated to each formula, and constraints on the expressions are used to enforce linearity.
+In 2001 D. Pym and J. Harland publish a paper \cite{HarlandPym} where they propose a new way to tackle the problem of splitting sequents during linear logic proof search using boolean expressions associated to each formula.
+During proof search these expressions are then used to generate constraint that enforce linearity, and a proof is valid if its constraints are satisfiable.
 This way the complexity shifts from choosing the right set of formulas to prove a certain branch, to solving for boolean assignment -- a problem for which there are much more sophisticated algorithms.
 
 In \S\ref{chapter:calculus} we define a focused and one-sided version to the calculus described in \cite{HarlandPym}, and we give a proof of its soundness consisting of a forgetful functor to the triadic calculus of \cite{Focusing}.
 In \S\ref{chapter:implementation} we discuss a Prolog implementation of the calculus of the previous chapter.
-In \S\ref{chapter:state of the art} we quickly describe the main implementation details of two other backwards provers for full linear logic: llprover and APLL.
+In \S\ref{chapter:state of the art} we quickly describe the main implementation details of two other top-down provers for full linear logic: llprover and APLL.
 Finally in \S\ref{chapter:testing} we describe the framework built to test and compare our prover with the others from the previous section, and then we show the results of these benchmarks.
 
 % \section{Sequent calculus}
@@ -58,12 +58,11 @@ Finally in \S\ref{chapter:testing} we describe the framework built to test and c
 \section{Linear logic}
 Linear logic is a logic proposed by Jean-Yves Girard in his seminal paper of 1987 \cite{LinearLogic}.
 The distinctive trait of this logic is that its formulae cannot be copied (weakening) or discarded (contraction), but instead they are consumed.
-Under these rules a certain sequent it true if and only if all of its formulae get consumed exactly once.
-For this reason this logic is sometimes called a logic of resources, in the same way classical logic is a logic of truths and intuitionistic logic is a logic of proofs.
+Under these rules a certain judgment it true if and only if all of its formulae get used exactly once; for this reason this logic is sometimes called a logic of resources, in the same way classical logic is a logic of truths and intuitionistic logic is a logic of proofs.
 % Questo particolare utilizzo delle formule permette di avere una logica che mantiene la simmetria delle logica classica, e il costruttivismo delle logica intuizionista.
 
-In linear logic each connective of classical logic is doubled.
-To better see this let's analyze classic conjunction, this can be defined as 
+In linear logic each connective of classical logic has two versions: an additive one -- where the two branches keep the same context, and a multiplicative one -- where the context gets portioned between the two branches.
+To better understand why let's analyze classic conjunction, this can be defined as 
 $$
 \begin{array}{cc}
 \AXC{$\Delta \vdash \phi_2, \Gamma$}
@@ -77,8 +76,7 @@ $$
 \DP
 \end{array}
 $$
-These two rule are equivalent only if the use of weakening and contraction is permitted.
-For this is the reason in linear logic all connectives have two versions: an additive one -- where the two branches keep the same context, and a multiplicative one -- where the context gets portioned between the two branches.
+These two rules are equivalent only if the use of weakening and contraction is permitted, so linear logic distinguishes the two interpretations: the left one is the additive one, and the right one the multiplicative one.
 Obviously the constants $\top$ and $\bot$ also have two versions.
 We have that
 \begin{center}
@@ -93,16 +91,17 @@ We have that
 		$\bot$ & $0$ & $\bot$ \\
 	\end{tblr}
 \end{center}
-It is the multiplicative side which brings the most complexity.
-In top-down proof search, the action of partitioning the context -- called splitting -- implies an exponential number of attempts to find which subset of the multi-set is right for a certain branch.
+It is the multiplicative side which brings the most complexity: in top-down proof search, the action of searching the correct partition of the sequents -- called splitting -- may imply an exponential number of attempts.
 
 Linear logic defined as of right now, albeit having the added complexity of splitting, is nonetheless decidable: since formulae are finite and they cannot be copied, it is possible to explore all the possibilities.
-To make linear logic as strong as classical logic two new connectives are added: $\llbang{\phi}$ and $\llwn{\phi}$ -- called respectively of-course and why-not.
+To make linear logic as strong as classical logic two new connectives are added: $\llbang{\phi}$ and $\llwn{\phi}$ -- called respectively ``of-course'' and ``why-not''.
 % Linear logic defined as of right now is decidable, since formulas cannot grow in size we can explore each possibility.
 % To be as strong as classical logic, there are two so called exponentials: bang or $!\phi$ and why not or $?\phi$.
 % These have the purpose of localizing the uses of weakening and contraction:
 These are called exponentials and their purpose is to localize uses of contraction and weakening.
 For example, formulas marked with $!$ can be used any number of times. %, so the intuistic implication $a \rightarrow b$ is translated as $!(a \lolli b)$, and transitions in a petri net are represented by $!(resources_1 \lolli resources_2)$.
+Since undecidability may lead to non-termination during proof search, usally some kind of bound is put (e.g. on the number of contractions per branch).
+This has the side effect of making the proover sometimes reject judgments which may be true, but would need too many contractions.
 
 % Linear logic can be used to ensure that objects are used exactly once, thus allowing the system to safely deallocate an object after its use.
 % The Haskell's compiler GHC has an experimental extensions to permit signatures with linear types.

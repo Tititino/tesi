@@ -1,0 +1,42 @@
+\begin{tblr}{ colspec = { cc }
+	    , rows = {abovesep=10pt, belowsep=10pt}
+	    , cells = { preto = {\footnotesize} }
+	    }
+	\SetCell[c=2]{c} 
+	\AX$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Gamma} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+	\LeftLabel{\derRule{\displaypar}}
+	\UI$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Gamma} \fCenter \separator \constr{\Lambda}{\mathV}$
+	\DP 
+	\\
+	\AX$\async{\Psi}{\Delta}{\Gamma} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+	\LeftLabel{\derRule{\displaybot}}
+	\UI$\async{\Psi}{\Delta}{\af{\llbot}{e}, \Gamma} \fCenter \separator \constr{\Lambda}{\mathV}$
+	\DP
+	&
+	\AXC{}
+	\LeftLabel{\derRule{\displaytop}}
+	\UIC{$\async{\Psi}{\Delta}{\af{\lltop}{-}, \Gamma} \separator \constr{-}{-}$}
+	\DP
+	\\
+	\SetCell[c=2]{c} 
+	\AX$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Gamma} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV'},$
+	\noLine
+	\UI$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Gamma} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV''}$
+	\AXC{$\mathV' \sim_{\mathrm{vars}(\Delta, \Gamma)} \mathV''$}
+	\LeftLabel{\derRule{\displaywith}}
+	\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Gamma} \separator \constr{\Lambda}{\mathV''}$}	
+	\DP
+	\\
+	\SetCell[c=2]{c} 
+	\AX$\async{\phi, \Psi}{\Delta}{\Gamma} \fCenter \separator \constr{\Lambda}{\mathV}$
+	\LeftLabel{\derRule{\displaywn}}
+	\UI$\async{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Gamma} \fCenter \separator \constr{\Lambda}{\mathV}$
+	\DP
+	\\
+	\SetCell[c=2]{c} 
+	\AXC{$\neg\isAsy{\phi}$}
+	\AXC{$\async{\Psi}{\af{\phi}{e}, \Delta}{\Gamma} \separator \constr{\Lambda}{\mathV}$}
+	\LeftLabel{\derRule{\displaytodelta}}
+	\BIC{$\async{\Psi}{\Delta}{\af{\phi}{e}, \Gamma} \separator \constr{\Lambda}{\mathV}$}
+	\DP
+\end{tblr}

@@ -3,57 +3,92 @@
 
 % Explaination on constraints why we use them ecc ecc ecc
 In this chapter we will define the focused one sided constraint calculus for full linear logic.
-Before all though, we give we definition of a linear logic formula.
+This calculus is a hybrid between the one defined in \cite{HarlandPym} and the triadic calculus in \cite{Focusing}: it uses focusing for its performance wise advantages; and constraints to manage splitting efficiently.
+
+Before all, we give we definition of a linear logic formula.
 \begin{define}[Linear logic formula]
 	\label{def:ll formula}
-	A linear logic formula is a formula having the ???
+	A linear logic formula is a term defined as follows 
 	\begin{center}
-		\begin{tblr}{ colspec = {cccccccccr}
+		\begin{tblr}{ colspec = {Q[l,t]}
 			, cells = { mode = math } 
 			% , vborder{1-4} = { leftspace = 0pt, rightspace = 0pt } 
+	    		, rows = {abovesep=0pt, belowsep=0pt}
 			}
-			\phi & ::=  & 1              &\mid& \phi \llten \phi  &\mid& \bot &\mid& \phi \llpar \phi  & \text{(Multiplicatives and their constants)} \\
-			& \mid & 0              &\mid& \phi \llplus \phi &\mid& \top &\mid& \phi \llwith \phi & \text{(Additives and their constants)} \\
-			& \mid & \llbang{\phi}  &\mid& \llwn{\phi}       &    &      &    &                   & \text{(Exponentials)} \\
-			& \mid & \llnot{\alpha} &\mid& \alpha	      &    &      &    &                   & \text{(Where $\alpha$ is an atom)}
+			\left. 
+				\begin{tblr}{ colspec = {ccccc}, column{1,5} = {.5cm}, column{3} = {1.5cm}, column{2,4} = {0.2cm}}
+					\phi & ::=  & \phi \llten \phi & \mid & 1 \\
+					     & \mid & \phi \llpar \phi & \mid & \bot \\
+					     & \mid & \phi \lolli \phi &      &
+				\end{tblr} \; \right \} \text{(Multiplicatives and their identities)} \\
+			\left.
+				\begin{tblr}{ colspec = {ccccc}, column{1,5} = {.5cm}, column{3} = {1.5cm}, column{2,4} = {0.2cm}}
+					& \mid & \phi \llplus \phi & \mid & 0 \\
+					& \mid & \phi \llwith \phi & \mid & \bot 
+				\end{tblr} \; \right \} \text{(Additives and their identities)} \\
+			\left.
+				\begin{tblr}{ colspec = {ccccc}, column{1,5} = {.5cm}, column{3} = {1.5cm}, column{2,4} = {0.2cm}}
+				     	& \mid & \llbang{\phi}    & \mid & \llwn{\phi} 
+			     	\end{tblr} \right. \text{(Exponentials)} \\
+			\left.
+				\begin{tblr}{ colspec = {ccccc}, column{1,5} = {.5cm}, column{3} = {1.5cm}, column{2,4} = {0.2cm}}
+					& \mid & \llnot{\phi} & & 
+			     	\end{tblr} \right. \text{(Negation)} \\
+			\left.
+				\begin{tblr}{ colspec = {ccccc}, column{1,5} = {.5cm}, column{3} = {1.5cm}, column{2,4} = {0.2cm}}
+					& \mid & \alpha & & 
+			     	\end{tblr} \right. \text{(Atom)} \\
 		\end{tblr}
 	\end{center}
-	We will use $\phi$ for formulae and $\alpha$ for atoms.
-	A sequent, written $\Delta$ or $\Phi$, is a multiset of formulae.
+	We will use $\phi$ to denote formulae and $\alpha$ to denote atoms.
+	A sequent, written $\Delta$ or $\Gamma$, is a multiset of formulae.
 \end{define}
 
 \section{Normalization}\label{sec:normalization}
 Since in linear logic negation is symmetric and an involution, it is usual to work only with formulae in negated normal form.
 \begin{define}[Negated Normal Form -- NNF]
 	\label{def:nnf}
-	A formula is in NNF if all its linear implications ($\lolli$) are expanded to pars ($\llpar$) using the tautology
+	A formula is in NNF if all its linear implications ($\displaylolli$) are expanded to pars ($\displaypar$) using the tautology
 	$$ a \lolli b \Leftrightarrow \llnot{a} \llpar b$$
 	and negation is pushed down to atoms.	% terms?
 	Intuitively, a sequent is in NNF if all its formulae are in NNF.
+	Formulae in NNF are terms defined as follows
+	\begin{center}
+		\begin{tblr}{ colspec = {cccccccccr}
+			, cells = { mode = math } 
+			% , vborder{1-4} = { leftspace = 0pt, rightspace = 0pt } 
+			}
+			\phi & ::=  & 1              &\mid& \phi \llten \phi  &\mid& \bot &\mid& \phi \llpar \phi  & \text{(Multiplicatives and their constants)} \\
+			     & \mid & 0              &\mid& \phi \llplus \phi &\mid& \top &\mid& \phi \llwith \phi & \text{(Additives and their constants)} \\
+			     & \mid & \llbang{\phi}  &\mid& \llwn{\phi}       &    &      &    &                   & \text{(Exponentials)} \\
+			     & \mid & \llnot{\alpha} &\mid& \alpha            &    &      &    &                   & \text{(Where $\alpha$ is an atom)}
+		\end{tblr}
+	\end{center}
 \end{define}
-A generic formula is then normalized applying recursively the DeMorgan rules for linear logic, until NNF is reached.
-The process of normalization takes a two-sided judgment, of the form
+A generic formula is normalized by applying recursively the DeMorgan rules for linear logic, until NNF is reached.
+Normalization of judgments instead takes a two-sided judgment of the form
 $$ \Delta \vdash \Gamma $$
 and transforms it into a one-sided judgment
 $$ \vdash \Delta' $$
 where the right side is composed of the normalization of $\Gamma$ and $\llnot{\Delta}$.
 
-This choice has some implementation-wise advantages, but for now we will only care about the fact that it shrinks the size of the complete calculus by roughly half, since we only have to deal with the right rules of the connectives.
+Normalization has some implementation-wise advantages, but for now it is only important because it shrinks the size of the complete calculus by roughly half, since we only have to deal with the right rules of the connectives.
 
 \section{Focusing}
 Focusing is a technique described by Andreoli in his seminal paper \cite{Focusing}.
-There he recognizes two alternating phases in a proof: a deterministic phase, where the order of rule application does not matter; and a non deterministic phase, where several choices may be available.
+In it he recognizes two alternating phases in a proof: a deterministic phase, where the order of rule application does not matter; and a non deterministic phase, where several choices may be available.
 These two phases are respectively called asynchronous and synchronous phase.
 All terms are assigned a polarity: 
 \begin{itemize}
-	\item connectives with a synchronous right rule are defined to have a positive polarity
+	\item connectives with a synchronous right rule are defined to have a positive polarity, these are:
 		$$ \displayten, \displayplus, \displaybang, \displayone$$
-	\item whereas connectives with a asynchronous right rule have a negative one
+	\item whereas connectives with a asynchronous right rule have a negative one, these are:
 		$$ \displaypar, \displaywith, \displaywn, \displaytop, \displaybot$$
 \end{itemize}
-Atoms also have polarities, which may be assigned with some arbitrarily complex mechanisms.
+and thus the polarity of a formula depends on its top-level connective.
+For atoms instead polarities may be assigned with some arbitrarily complex mechanisms.
 We will follow \cite{LiangMiller} and simply assign atoms with a negative polarity and negated atoms with a positive one.
-Since we will work in one sided linear logic and connectives have only right rules, positive connectives are also called synchronous, and negative connectives asynchronous.
+Since we work in one sided linear logic and connectives have only right rules, positive connectives may also be called synchronous, and negative connectives asynchronous.
 \begin{define}
 	Based on the definitions above we define the following predicates:
 	\begin{itemize}
@@ -65,7 +100,10 @@ Since we will work in one sided linear logic and connectives have only right rul
 \end{define}
 
 \section{Constraints}
-The calculus uses constraints to manage the resources.
+During proof search the calculus generates constraints as the formulae get broken up.
+The purpose of these is to ensure that if the constraints generated are satisfiable, then the formulae have been used linearly.
+There are a number of ways in which solutions to these sets of constraints may be propagated during proof search.
+What we will use is the strategy called ``lazy'' by \cite{HarlandPym}, which consists of checking for satisfiability on the leaves, and propagating the assignments to the next branch.
 \begin{define}[Variables, expressions]
 	\label{def:bool-expr}
 	A boolean variable is simply a symbol to which one can associate a value of true or false.
@@ -86,9 +124,10 @@ The calculus uses constraints to manage the resources.
 	$$ \new{x}, \new{X} $$
 	These respectively mean that:
 	\begin{itemize}
-		\item the variable name $x$ has not yet occurred in any expression of the proof tree, i.e. does not appear in any constraint of the father, or of its (the father) siblings and their sub-trees;
+		\item the variable name $x$ has not yet occurred in any expression of the proof tree.
+			One can think of a global counter which is incremented for each new variable.
 		\item each variable name $x_i, x_j \in X$ has not yet occurred in the proof and each variable in $X$ is distinct:
-			$$ \forall i \mid \new{x_i} \wedge \forall i, j \mid i \neq j \Rightarrow x_i \neq x_j $$
+			$$ \left (\forall x_i \in X \mid \new{x_i}\right ) \wedge \left (\forall x_i, x_j \in X \mid i \neq j \Rightarrow x_i \neq x_j \right ) $$
 	\end{itemize}
 \end{define}
 
@@ -99,28 +138,32 @@ The calculus uses constraints to manage the resources.
 	that associates the formula to the expression.
 	We denote 
 	\begin{itemize}
-		\item $ \mathrm{exp}(\af{\phi}{e}) = e $
-			as the operation of extracting the boolean expression associated to a given formula; and then extend this notation to sequents such that $ \mathrm{exp}(\Delta) $ is the set of all boolean expressions of $\Delta$.
-		\item $\mathrm{vars}(\af{\phi}{e}) = \mathrm{vars}(e) $
-			as the operation of extracting the set of variables appearing in the expression $e$; and then extend this notation to sequents such that $ \mathrm{vars}(\Delta)$ is the set of all the variables appearing in the boolean expressions of the annotated formulae of $\Delta$.
+		\item the operation of extracting the boolean expression associated do a given formula as
+			$$ \expr{\af{\phi}{e}} = e $$
+			and then extend this notation to sequents such that $ \expr{\Delta} $ is the set of all boolean expressions of $\Delta$
+			$$ \expr{\Delta} = \{ \expr{\phi} \mid \phi \in \Delta \} $$
+		\item the operation of extracting the set of variables appearing in the expression $e$ as
+			$$\vars{\af{\phi}{e}} = \vars{e} $$
+			and then extend this notation to sequents such that $\vars{\Delta}$ is the set of all the variables appearing in the boolean expressions of the annotated formulae of $\Delta$
+			$$ \vars{\Delta} = \{ \vars{\expr{\phi}} \mid \phi \in \Delta \} $$
 	\end{itemize}
 \end{define}
 It is important to note that only the topmost connective gets annotated, and not the sub-formulae.
 
 The purpose of putting formulae and expressions together in the annotated formula is twofold:
 \begin{itemize}
-	\item the actions taken on the formula determine the constraints that will be generated, and these depend on the variables associated to said formula;
-	\item after the constraints are solved we can query the assignment of the variables and find out if the associated formula is used or not in a certain branch of a proof.
+	\item the actions taken on the formula determine the constraints that will be generated, and these refer to the expressions associated to said formula;
+	\item after the constraints are solved we can query the assignment of the variables and find out if the associated formula is used or not in a certain branch of a proof (see Definition \ref{def:evaluation}).
 \end{itemize}
 These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
 \begin{define}[Constraints]
 	\label{def:constraints}
-	Given an annotated formula $\af{\phi}{e}$ as in Definition \ref{def:annotated}, a constraint $\lambda$ may be of two kinds
+	Given an annotated formula $\af{\phi}{e}$ as in Definition \ref{def:annotated}, a constraint $\lambda$ is either
 	\begin{itemize}
-		\item ``$\used{e}$'' states that the formula $\phi$ gets consumed in this branch of the proof.
+		\item ``$\used{e}$'', which states that the formula $\phi$ gets consumed in this branch of the proof.
 			This corresponds to saying the expression $e$ is true or
 			$$ x_i \wedge \dots \wedge x_j \leftrightarrow \top $$
-		\item ``$\avail{e}$'' states that the formula $\phi$ does not get consumed in this branch of the proof, and thus is available to be used in another branch.
+		\item ``$\avail{e}$'', which states that the formula $\phi$ does not get consumed in this branch of the proof, and thus is available to be used in another branch.
 			This corresponds to saying the expression $e$ is not true or
 			$$ x_i \wedge \dots \wedge x_j \leftrightarrow \bot $$
 	\end{itemize}
@@ -136,15 +179,22 @@ These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
 			$$ \mathrm{vars}(\Lambda) = \bigcup_{\lambda \in \Lambda} \mathrm{vars}(\lambda) $$
 	\end{itemize}
 \end{define}
+\begin{define}[Assignment]
+	\label{def:assignment}
+	An assignment is a function
+	$$ \mathV : \{ \dots, x_i, x_j, \dots \} \rightarrow \{ \top, \bot \} $$
+	that associates a set of variables to either true or false.
+	Given a set of variables $X$, we say that the assignment $\mathV$ \textit{covers} $X$ if no variable in $X$ is left undefined under $\mathV$, or
+	$$ X \subseteq \Dom{\mathV} $$
+\end{define}
 \begin{define}[Evaluation]
-	Given a boolean expression $e$ and a function V mapping variables to their values 
-	$$ \mathV : \{ x_1, x_2, \dots, x_n \} \rightarrow \{ \top, \bot \} $$
-	with $\mathrm{vars}(e) \subseteq \mathrm{Dom}(\mathV)$; we write
+	\label{def:evaluation}
+	Given a boolean expression $e$ and an assignment $\mathV$, such that $\mathV$ covers $\vars{e}$, we write
 		$$ e[\mathV] = e[\dots, x_i \subst \mathV(x_i), x_j \subst \mathV(x_j), \dots] $$
-	as the value of the expression $e$ substituting with the assignment V.
+	as the value of the expression $e$ substituting with the assignment $\mathV$.
 	We extend this notation, such that
 	\begin{itemize}
-		\item given a constraint $\lambda$ and an assignment V, such that $\mathrm{vars}(\lambda) \subseteq \mathrm{Dom}(\mathV)$
+		\item given a constraint $\lambda$ and an assignment $\mathV$ that covers $\vars{\lambda}$
 			$$ 
 			\begin{cases} 
 				\used{e}[\mathV] = \top & \text{if } e[\mathV] = \top \\
@@ -153,16 +203,12 @@ These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
 				\avail{e}[\mathV] = \bot & \text{if } e[\mathV] = \top \\
 			\end{cases}
 			$$
-		\item given an annotated sequent $\Delta$ and an assignment V, such that $\mathrm{vars}(\Delta) \subseteq \mathrm{Dom}(\mathV)$
+		\item given an annotated sequent $\Delta$ and an assignment $\mathV$ that covers $\vars{\Delta}$
 			$$ \Delta[\mathV] = \{ \phi \mid \af{\phi}{e} \in \Delta , e[\mathV] = \top \} $$
 	\end{itemize}
 \end{define}
 A branch is considered correct if its constraints are satisfiable.
 Otherwise the branch of the proof fails.
-\begin{define}[Covering]
-	Given an assignment $\mathV$ and a set of variables $X$, we say that $\mathV$ \textit{covers} $X$ iff
-	$$ \forall x \in X \mid x \in \mathrm{Dom}(\mathV) $$
-\end{define}
 \begin{define}[Satisfaiability of constraints]
 	\label{def:sat}
 	Given a set of constraints $\Lambda$ and an assignment function V that covers $\mathrm{vars}(\Lambda)$, we say that $\mathV$ satisfies $\Lambda$ iff every constraint in $\Lambda$ is true under $\mathV$, or
@@ -171,115 +217,26 @@ Otherwise the branch of the proof fails.
 
 \begin{figure}[h!]
 	\centering
-	\begin{tblr}{ colspec = {c c}
-		, cells = { mode = dmath } 
-		, rows = {abovesep=10pt, belowsep=10pt}
-		, vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
-		, cells = { preto = {\footnotesize} }
-		}
-		\AXC{$\async[A]{\Psi}{\Delta}{\Phi}$}
-		\LeftLabel{\derRule[A]{\displaybot}}
-		\UIC{$\async[A]{\Psi}{\Delta}{\llbot, \Phi}$}
-		\DP
-		&
-		\AXC{}
-		\LeftLabel{\derRule[A]{\displaytop}}
-		\UIC{$\async[A]{\Psi}{\Delta}{\lltop, \Phi}$}
-		\DP
-		\\
-		\AXC{$\async[A]{\Psi}{\Delta}{\phi_1, \phi_2, \Phi}$}
-		\LeftLabel{\derRule[A]{\displaypar}}
-		\UIC{$\async[A]{\Psi}{\Delta}{\phi_1 \llpar \phi_2, \Phi}$}
-		\DP
-		&
-		\AXC{$\async[A]{\Psi}{\Delta}{\phi_1, \Phi}$}
-		\AXC{$\async[A]{\Psi}{\Delta}{\phi_2, \Phi}$}
-		\LeftLabel{\derRule[A]{\displaywith}}
-		\BIC{$\async[A]{\Psi}{\Delta}{\phi_1 \llwith \phi_2, \Phi}$}
-		\DP
-		\\
-		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_1}$}
-		\LeftLabel{\derRule[A]{\displayplus[L]}}
-		\UIC{$\focus[A]{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
-		\DP
-		&
-		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_2}$}
-		\LeftLabel{\derRule[A]{\displayplus[R]}}
-		\UIC{$\focus[A]{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
-		\DP
-		\\
-		\AXC{$\focus[A]{\Psi}{\Gamma}{\phi_1}$}
-		\AXC{$\focus[A]{\Psi}{\Delta}{\phi_2}$}
-		\LeftLabel{\derRule[A]{\displayten}}
-		\BIC{$\focus[A]{\Psi}{\Gamma, \Delta}{\phi_1 \llten \phi_2}$}
-		\DP
-		&
-		\AXC{}
-		\LeftLabel{\derRule[A]{\displayone}}
-		\UIC{$\focus[A]{\Psi}{.}{\llone}$}
-		\DP
-		\\
-		\AXC{$\async[A]{\phi, \Psi}{\Delta}{\Phi}$}
-		\LeftLabel{\derRule[A]{\displaywn}}
-		\UIC{$\async[A]{\Psi}{\Delta}{\llwn{\phi}, \Phi}$}
-		\DP
-		&
-		\AXC{$\async[A]{\Psi}{.}{\phi}$}
-		\LeftLabel{\derRule[A]{\displaybang}}
-		\UIC{$\focus[A]{\Psi}{.}{\llbang{\phi}}$}
-		\DP
-		\\
-		\AXC{$\isNegLit{\alpha}$}
-		\LeftLabel{\derRule[A]{\displayid[1]}}
-		\UIC{$\focus[A]{\Psi}{\alpha}{\llnot{\alpha}}$}
-		\DP
-		&
-		\AXC{$\isNegLit{\alpha}$}
-		\LeftLabel{\derRule[A]{\displayid[2]}}
-		\UIC{$\focus[A]{\alpha, \Psi}{.}{\llnot{\alpha}}$}
-		\DP
-		\\
-		\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
-		\LeftLabel{\derRule[A]{\displaydecide[1]}}
-		\UIC{$\async[A]{\Psi}{\phi, \Delta}{.}$}
-		\DP
-		&
-		\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
-		\LeftLabel{\derRule[A]{\displaydecide[2]}}
-		\UIC{$\async[A]{\phi, \Psi}{\Delta}{.}$}
-		\DP
-		\\
-		\AXC{$\neg \isAsy{\phi}$}
-		\AXC{$\async[A]{\Psi}{\phi, \Delta}{\Phi}$}
-		\LeftLabel{\derRule[A]{\displaytodelta}}
-		\BIC{$\async[A]{\Psi}{\Delta}{\phi, \Phi}$}
-		\DP
-		&
-		\AXC{$\phi \; \mathrm{negative}$}
-		\AXC{$\async[A]{\Psi}{\Delta}{\phi}$}
-		\LeftLabel{\derRule[A]{\displaytoasy}}
-		\BIC{$\focus[A]{\Psi}{\Delta}{\phi}$}
-		\DP
-	\end{tblr}
+	\input{figures/triadic-calculus}
 	\caption{J.-M. Andreoli's triadic calculus.\label{fig:triadic}}
 \end{figure}
 Figure \ref{fig:triadic} shows the triadic calculus of \cite{Focusing}.
-This calculus has sequents with three members: a set of unrestricted formulae, a multiset of linear formulae put to the side, and either a single formula or another multiset of linear formulae.
+This has judgments with three members: a set of unrestricted formulae; a multiset of linear formulae put to the side; and either a single formula or another multiset of linear formulae.
 An arrow pointing up symbolizes the asynchronous phase, and an arrow pointing down the focusing phase.
 Phase switching happens using the decide rules (\derRule[A]{\displaydecide[1]}, \derRule[A]{\displaydecide[2]}), which non-deterministically choose a formula to focus on.
-We now expand the concept of this triadic judgment by adding explicit constraints.
-\begin{define}[Members of the sequent]
-	Given any sequent it can be in either two forms:
+We now expand the concept of triadic judgment by adding explicit constraints.
+\begin{define}
+	Given any judgment in our calculus, it can be in either two forms:
 	\begin{itemize}
 		\item focused or in the synchronous phase, written:
 			$$\focus{\Psi}{\Delta}{\phi} \separator \constr{\Lambda}{\mathV}$$
 		\item in the asynchronous phase, written:
-			$$\async{\Psi}{\Delta}{\Phi} \separator \constr{\Lambda}{\mathV}$$
+			$$\async{\Psi}{\Delta}{\Gamma} \separator \constr{\Lambda}{\mathV}$$
 	\end{itemize}
 	Where 
 	\begin{itemize}
-		\item $\Psi$ is a set of unrestricted non annotated formulae, or all formulae that can be freely discarded or duplicated.
-		\item $\Delta$ and $\Phi$ are multi-sets of linear (annotated) formulae, these are respectively the formulas ``put to the side'' and the formulae which are being ``worked on'' during a certain moment of the asynchronous phase;
+		\item $\Psi$ is the same as the triadic calculus of \cite{Focusing}: a set of unrestricted non annotated formulae, or all formulae that can be freely discarded or duplicated.
+		\item $\Delta$ and $\Gamma$ are multi-sets of linear (annotated) formulae, these are respectively the formulas ``put to the side'' and the formulae which are being ``worked on'' during a certain moment of the asynchronous phase;
 		\item $\Lambda$ and V are the constraints and the assignment as defined in Definition \ref{def:sat}.
 			By adding these members we make the flow of constraints through the proof tree explicit, leaving no ambiguity to where the constraints should be checked.
 			This approach to constraints differs from the one in \cite{HarlandPym}, which prioritizes generality.
@@ -289,8 +246,8 @@ We now expand the concept of this triadic judgment by adding explicit constraint
 
 \begin{define}[Splitting]
 	\label{def:split}
-	Given a sequent of annotated formulae $\Delta$ and a set of variables $X$ such that $|\Delta| = |X|$ we define the operation of splitting it as a function
-	$$ \mathrm{split}(\Delta, X) \mapsto (\Delta_L, \Delta_R) $$
+	Given a sequent of annotated formulae $\Delta$ and a set of variables $X$ such that $|\Delta| = |X|$, we define the operation of splitting it as a function
+	$$ \spliton{\Delta}{X} \mapsto (\Delta_L, \Delta_R) $$
 	where
 	\begin{align*}
 		\Delta_L &= \{ \af{\phi_i}{x_i \wedge e_i} \mid i \in \{1, \dots, n\}\} \\
@@ -298,8 +255,7 @@ We now expand the concept of this triadic judgment by adding explicit constraint
 	\end{align*}
 	with $n$ the cardinality of $\Delta$, and $\phi_i$ (resp. $e_i$) the formula (resp. the expression) of the $i$-eth annotated formula in $\Delta$ using an arbitrary order.
 	The same holds for $x_i$ and $X$.
-
-	\noindent With a slight abuse of notation we will write $\Delta_L^X$ and $\Delta_R^X$ respectively as the left projection and the right projection of the pair $(\Delta_L, \Delta_R)$.
+	With a slight abuse of notation we will write $\Delta_L^X$ and $\Delta_R^X$ to mean respectively the left projection and the right projection of the pair $(\Delta_L, \Delta_R)$.
 \end{define}
 As a small example for clarity, given the sequent
 \begin{align*}
@@ -318,219 +274,34 @@ this is split into
 \end{define}
 
 % TODO: expand
-Figure \ref{fig:hp calculus} shows the calculus of \cite{HarlandPym} using our notation of explicit constraints.
-What is actually represented is roughly what they define as the ``lazy'' strategy.
+Figure \ref{fig:hp calculus} shows the calculus of \cite{HarlandPym} using our notation of explicit constraints implementing the ``lazy'' strategy.
 Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 \begin{figure}[h!]
 	\centering
-	\begin{tblr}{ colspec = { cc }
-		, rows = {abovesep=7pt, belowsep=7pt}
-		, cells = { preto = {\footnotesize} }
-		}
-		\SetCell[c=2]{c}
-		\AX$\vdash_\text{PH} \Delta, \af{\phi_1}{e}, \af{\phi_2}{e}\fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
-		\LeftLabel{\derRule[PH]{\displaypar}}
-		\UI$\vdash_\text{PH} \Delta, \af{\phi_1 \llpar \phi_2}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
-		\DP
-		\\
-		\AX$\vdash_\text{PH} \Delta \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
-		\LeftLabel{\derRule[PH]{\displaybot}}
-		\UI$\vdash_\text{PH} \Delta, \af{\llbot}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
-		\DP
-		&
-		\AXC{}
-		\LeftLabel{\derRule[PH]{\displaytop}}
-		\UIC{$\vdash_\text{PH} \Delta, \af{\lltop}{-} \separator \constr{\Lambda}{\mathV}$}
-		\DP
-		\\
-		\SetCell[c=2]{c} 
-		\AXC{$\vdash_\text{PH} \Delta, \af{\phi_2}{e} \separator \constr{\used{e}, \Lambda}{\mathV'}$}
-		\AXC{$\vdash_\text{PH} \Delta, \af{\phi_1}{e} \separator \constr{\used{e}, \Lambda}{\mathV''}$}
-		\LeftLabel{\derRule[PH]{\displaywith}}
-		\BIC{$\vdash_\text{PH} \Delta, \af{\phi_1 \llwith \phi_2}{e} \separator \constr{\Lambda}{\mathV''}$}	
-		\DP
-		\\
-		\SetCell[c=2]{c} 
-		\AXC{$\vdash_\text{PH} \Delta_L^X, \af{\phi_1}{e} \separator \constr{\used{e}, \Lambda}{\mathV'}$}
-		\AXC{$\vdash_\text{PH} \Delta_R^X, \af{\phi_2}{e} \separator \constr{\mathV'}{\mathV''}$}
-		\LeftLabel{\derRule[PH]{\displayten}}
-		\BIC{$\vdash_\text{PH} \Delta, \af{\phi_1 \llten \phi_2}{e} \separator \constr{\Lambda}{\mathV''}$}	% capisco il movimento dei constraint
-		\DP
-		\\ 
-		\SetCell[c=2]{c} 
-		\AXC{$\new{x}$}
-		\AXC{$\vdash_\text{PH} \Delta, \af{\phi_1}{x}, \af{\phi_2}{\varNot{x}} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$}
-		\LeftLabel{\derRule[PH]{\displayplus}}
-		\BIC{$\vdash_\text{PH} \Delta, \af{\phi_1 \llplus \phi_2}{e} \fCenter \separator \constr{\Lambda}{\mathV}$}
-		\DP
-		\\
-		\AXC{$\sat{ \used{e}, \Lambda, \avail{\Delta}}{\mathV}$}
-		\LeftLabel{\derRule[PH]{\displayone}}
-		\UIC{$\vdash_\text{PH} \Delta, \af{\llone}{e} \separator \constr{\Lambda}{\mathV}$}
-		\DP
-		&
-		\AX$\vdash_\text{PH} \llwn{\Delta}, \af{\phi}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
-		\LeftLabel{\derRule[PH]{\displaybang}}
-		\UI$\vdash_\text{PH} \llwn{\Delta}, \af{\llbang{\phi}}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
-		\DP
-		\\
-		\SetCell[c=2]{c} 
-		\AX$\vdash_\text{PH} \Delta, \af{\phi}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
-		\LeftLabel{\derRule[PH]{\displaywn}}
-		\UI$\vdash_\text{PH} \Delta, \af{\llwn{\phi}}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
-		\DP
-		\\
-		\AX$\vdash_\text{PH} \Delta \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
-		\LeftLabel{\derRule[PH]{W?}}
-		\UI$\vdash_\text{PH} \llwn{\af{\phi}{e}}, \Delta \fCenter \separator \constr{\Lambda}{\mathV}$
-		\DP
-		&
-		\AX$\vdash_\text{PH} \af{\llwn{\phi}}{e}, \af{\llwn{\phi}}{e}, \Delta \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
-		\LeftLabel{\derRule[PH]{C?}}
-		\UI$\vdash_\text{PH} \llwn{\af{\phi}{e}}, \Delta \fCenter \separator \constr{\Lambda}{\mathV}$
-		\DP
-		\\
-		\SetCell[c=2]{c} 
-		\AXC{$ \isNegLit{\alpha} $}
-		\AXC{$ \sat{\Lambda, \used{e_1}, \used{e_2}, \avail{\Delta}}{\mathV}$}
-		\LeftLabel{\derRule[PH]{A}}
-		\BIC{$\vdash_\text{PH} \af{\alpha}{e_1}, \af{\llnot{\alpha}}{e_2}, \Delta \separator \constr{\Lambda}{\mathV}$}
-		\DP
-	\end{tblr}
-	\caption{The one sided version of the calculus from \cite{HarlandPym} with explicit constraint propagation.}
-	\label{fig:hp calculus}
+	\input{figures/hp-calculus}
+	\caption{The one sided version of the calculus from \cite{HarlandPym} with explicit constraint propagation.\label{fig:hp calculus}}
 \end{figure}
-\begin{figure}[h!]
+\begin{figure}[H]
 	\begin{subfigure}{\textwidth}
 		\centering
-			\begin{tblr}{ colspec = { cc }
-				    , rows = {abovesep=10pt, belowsep=10pt}
-				    , cells = { preto = {\footnotesize} }
-				    }
-			\SetCell[c=2]{c} 
-			\AX$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
-			\LeftLabel{\derRule{\displaypar}}
-			\UI$\async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
-			\DP 
-			\\
-			\AX$\async{\Psi}{\Delta}{\Phi} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
-			\LeftLabel{\derRule{\displaybot}}
-			\UI$\async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
-			\DP
-			&
-			\AXC{}
-			\LeftLabel{\derRule{\displaytop}}
-			\UIC{$\async{\Psi}{\Delta}{\af{\lltop}{-}, \Phi} \separator \constr{-}{-}$}
-			\DP
-			\\
-			\SetCell[c=2]{c} 
-			\AX$\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV'},$
-			\noLine
-			\UI$\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV''}$
-			\AXC{$\mathV' \sim_{\mathrm{vars}(\Delta, \Phi)} \mathV''$}
-			\LeftLabel{\derRule{\displaywith}}
-			\BIC{$\async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV''}$}	
-			\DP
-			\\
-			\SetCell[c=2]{c} 
-			\AX$\async{\phi, \Psi}{\Delta}{\Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
-			\LeftLabel{\derRule{\displaywn}}
-			\UI$\async{\Psi}{\Delta}{\af{\llwn{\phi}}{-}, \Phi} \fCenter \separator \constr{\Lambda}{\mathV}$
-			\DP
-			\\
-			\SetCell[c=2]{c} 
-			\AXC{$\neg\isAsy{\phi}$}
-			\AXC{$\async{\Psi}{\af{\phi}{e}, \Delta}{\Phi} \separator \constr{\Lambda}{\mathV}$}
-			\LeftLabel{\derRule{\displaytodelta}}
-			\BIC{$\async{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\mathV}$}
-			\DP
-		\end{tblr}
-		\caption{Asynchronous rules.}
+		\input{figures/asy-calculus}
+		\caption{Asynchronous rules.\label{fig:asy calculus}}
 	\end{subfigure}
 \end{figure}
-\begin{figure}[h!]
+\begin{figure}[H]
 	\ContinuedFloat
 	\begin{subfigure}{\textwidth}
 		\centering
-		\begin{tblr}{ colspec = { cc } 
-			    , rows = {abovesep=10pt, belowsep=10pt}
-			    , vborder{1-2} = { leftspace = 2pt, rightspace = 2pt } 
-			    , cells = { preto = {\footnotesize} }
-			    }
-			\SetCell[c=2]{c}
-			\AXC{$ \new{X} $}
-			\AX$\focus{\Psi}{\Delta_L^X}{\af{\phi_1}{e}} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV'},$
-			\noLine
-			\UI$\focus{\Psi}{\Delta_R^X}{\af{\phi_2}{e}} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV''}$
-			\AXC{$\mathV' \sim_{\mathrm{vars}(\Delta), X} \mathV''$}
-			\LeftLabel{\derRule{\displayten}}
-			\TIC{$\focus{\Psi}{\Delta}{\af{\phi_1 \llten \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\mathV''}$} % capisco il movimento dei constraint
-			\DP
-			\\ 
-			\AX$\focus{\Psi}{\Delta}{\af{\phi_1}{e}} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
-			\LeftLabel{\derRule{\displayplus[L]}}
-			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
-			\DP
-			&
-			\AX$\focus{\Psi}{\Delta}{\af{\phi_2}{e}} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
-			\LeftLabel{\derRule{\displayplus[R]}}
-			\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
-			\DP
-			\\
-			\AXC{$\sat{ \used{e}, \avail{\Delta}, \Lambda}{\mathV}$}
-			\LeftLabel{\derRule{\displayone}}
-			\UIC{$\focus{\Psi}{\Delta}{\af{\llone}{e}} \separator \constr{\Lambda}{\mathV}$}
-			\DP
-			&
-			\AX$\focus{\Psi}{\Delta}{\af{\phi}{e}} \fCenter \separator \constr{\used{e}, \avail{\Delta}, \Lambda }{\mathV}$
-			\LeftLabel{\derRule{\displaybang}}
-			\UI$\focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
-			\DP
-			\\
-			\SetCell[c=2]{c}
-			\AXC{$\phi \; \mathrm{negative}$}
-			\AXC{$\async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\used{e}, \Lambda}{\mathV}$}
-			\LeftLabel{\derRule{\displaytoasy}}
-			\BIC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV}$}
-			\DP
-		\end{tblr}
-		\caption{Synchronous rules.}
+		\input{figures/sync-calculus}
+		\caption{Synchronous rules.\label{fig:sync calculus}}
 	\end{subfigure}
 \end{figure}
-\begin{figure}[h!]
+\begin{figure}[H]
 	\ContinuedFloat
 	\begin{subfigure}{\textwidth}
 		\centering
-		\begin{tblr}{ colspec = { c }
-			    , rows = {abovesep=10pt, belowsep=10pt}
-			    , cells = { preto = {\footnotesize} }
-			    }
-			\AXC{$ \isNegLit{\alpha} $}
-			\AXC{$ \sat{\used{e_1}, \used{e_2}, \avail{\Delta}, \Lambda}{\mathV}$}
-			\LeftLabel{\derRule{\displayid[1]}}
-			\BIC{$\focus{\Psi}{\af{\alpha}{e_1}, \Delta}{\af{\llnot{\alpha}}{e_2}} \separator \constr{\Lambda}{\mathV}$}
-			\DP
-			\\
-			\AXC{$ \isNegLit{\alpha} $}
-			\AXC{$ \sat{\used{e}, \avail{\Delta}, \Lambda }{\mathV}$}
-			\LeftLabel{\derRule{\displayid[2]}}
-			\BIC{$\focus{\alpha, \Psi}{\Delta}{\af{\llnot{\alpha}}{e}} \separator \constr{\Lambda}{\mathV}$}
-			\DP
-			\\
-			\AXC{$\neg \isNegLit{\phi}$}
-			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\used{e}, \Lambda}{\mathV}$}
-			\LeftLabel{\derRule{\displaydecide[1]}}
-			\BIC{$\async{\Psi}{\af{\phi}{e}, \Delta}{.} \separator \constr{\Lambda}{\mathV}$}
-			\DP
-			\\
-			\AXC{$\neg \isNegLit{\phi}$}
-			\AXC{$\new{x}$}
-			\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\used{e}, \Lambda}{\mathV}$}
-			\LeftLabel{\derRule{\displaydecide[2]}}
-			\TrinaryInfC{$\async{\phi, \Psi}{\Delta}{.} \separator \constr{\Lambda}{\mathV}$}
-			\DP
-		\end{tblr}
-		\caption{Identity and decide rules.}
+		\input{figures/id-dec-calculus}
+		\caption{Identity and decide rules.\label{fig:id dec calculus}}
 	\end{subfigure}
 	\caption{Focused constraint calculus for Linear Logic. \label{fig:calculus}}
 \end{figure}
@@ -564,17 +335,10 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 	\end{align*}
 	But either $x_i$ or $\varNot{x_i}$ must be true in a certain assignment, thus either $x_i \varAnd e$ or $\varNot{x_i} \varAnd e$ must be true, contradicting the hypothesis.
 \end{proof}
-\begin{lemma}
-	Given any sequent $\Delta$ and any assignment $\mathV$ which covers $\vars{\Delta}$, splitting induces a partition on the sequent $\Delta[\mathV]$.
-\end{lemma}
-\begin{proof}
-	See Lemma \ref{lemma:cap} and \ref{lemma:cup}.
-\end{proof}
 
 \begin{teor}[Soundness]\label{thm:soundness}
-	For some assignment $\mathV$:
 	\begin{align*}
-		\async{\Psi}{\Delta}{\Phi} \separator \constr{\Lambda}{\mathV} &\Rightarrow \async[A]{\Psi}{\Delta[\mathV]}{\Phi[\mathV]} \\
+		\async{\Psi}{\Delta}{\Gamma} \separator \constr{\Lambda}{\mathV} &\Rightarrow \async[A]{\Psi}{\Delta[\mathV]}{\Gamma[\mathV]} \\
 		\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} &\Rightarrow \focus[A]{\Psi}{\Delta[\mathV]}{\phi}
 	\end{align*}
 	where $A$ is the triadic calculus of \cite{Focusing} defined in Figure \ref{fig:triadic}.
@@ -643,9 +407,9 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			\DP
 			$$
 		\indCase{\displaytop} Given the rule \derRule{\displaytop} we have that
-			$$ \async{\Psi}{\Delta}{\af{\top}{-}, \Phi} \separator \constr{-}{-} $$
-			we can choose any assignment $\mathV$ which covers $\vars{\Delta, \Phi}$ and obtain
-			$$ \async[A]{\Psi}{\Delta[\mathV]}{\top, \Phi[\mathV]} $$
+			$$ \async{\Psi}{\Delta}{\af{\top}{-}, \Gamma} \separator \constr{-}{-} $$
+			Thus we can choose whichever assignment $\mathV$ that covers $\vars{\Delta, \Gamma}$, and obtain
+			$$ \async[A]{\Psi}{\Delta[\mathV]}{\top, \Gamma[\mathV]} $$
 	\end{itemize}
 	The induction then follows like this:
 	\begin{itemize}
@@ -672,44 +436,44 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			should be mapped to.
 		\indCase{\displaywith} Given the rule \derRule{\displaywith}, we apply the inductive hypothesis, and from the premises
 			\begin{align*}
-				&\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Phi} \separator \constr{\used{e}, \Lambda}{\mathV'} \\
-				&\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Phi} \separator \constr{\used{e}, \Lambda}{\mathV''} 
+				&\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Gamma} \separator \constr{\used{e}, \Lambda}{\mathV'} \\
+				&\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Gamma} \separator \constr{\used{e}, \Lambda}{\mathV''} 
 			\end{align*}
 			we extract the triadic proofs
 			\begin{align*}
-			 	&\async{\Psi}{\Delta[\mathV']}{\phi_2, \Phi[\mathV']} \\
-			 	&\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Phi[\mathV'']}
+			 	&\async{\Psi}{\Delta[\mathV']}{\phi_2, \Gamma[\mathV']} \\
+			 	&\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Gamma[\mathV'']}
 			\end{align*}
-			Now since $\mathV' \sim_{\vars{\Delta, \Phi}} \mathV''$, we can write
+			Now since $\mathV' \sim_{\vars{\Delta, \Gamma}} \mathV''$, we can write
 			\begin{align*}
-				&\async{\Psi}{\Delta[\mathV'']}{\phi_2, \Phi[\mathV'']} \\
-				&\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Phi[\mathV'']}
+				&\async{\Psi}{\Delta[\mathV'']}{\phi_2, \Gamma[\mathV'']} \\
+				&\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Gamma[\mathV'']}
 			\end{align*}
 			this way we can apply \derRule[A]{\displaywith}, to obtain
-			$$ \async[A]{\Psi}{\Delta[\mathV'']}{\phi_1 \llwith \phi_2, \Phi[\mathV'']} $$
+			$$ \async[A]{\Psi}{\Delta[\mathV'']}{\phi_1 \llwith \phi_2, \Gamma[\mathV'']} $$
 			which correctly corresponds to what the conclusion
-			$$ \async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV''} $$
+			$$ \async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Gamma} \separator \constr{\Lambda}{\mathV''} $$
 			should be mapped to.
 %			which after erasing the unused formulae using the assignment becomes
 %			\LeftLabel{$[\llwith]$}
-%			\BIC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1 \llwith \phi_2, \Phi[\mathV'']}$}
+%			\BIC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1 \llwith \phi_2, \Gamma[\mathV'']}$}
 %			or equivalently 
-%			\AXC{$\async{\Psi}{\Delta[\mathV']}{\phi_2, \Phi[\mathV']}$}
-%			\AXC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Phi[\mathV'']}$}
+%			\AXC{$\async{\Psi}{\Delta[\mathV']}{\phi_2, \Gamma[\mathV']}$}
+%			\AXC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Gamma[\mathV'']}$}
 %			\LeftLabel{$[\llwith]$}
-%			\BIC{$\async{\Psi}{\Delta[\mathV']}{\phi_1 \llwith \phi_2, \Phi[\mathV']}$}
+%			\BIC{$\async{\Psi}{\Delta[\mathV']}{\phi_1 \llwith \phi_2, \Gamma[\mathV']}$}
 %			\DP
 %			since  $\Lambda \subseteq \used{e}, \Lambda$ and Lemma \ref{lemma:subsume}.
 		\indCase{\displaypar} Given the rule \derRule{\displaypar}, we apply the inductive hypothesis, and from the premise
-			$$ \async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Phi} \separator \constr{\used{e}, \Lambda}{\mathV}$$
+			$$ \async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Gamma} \separator \constr{\used{e}, \Lambda}{\mathV}$$
 			we extract the triadic proof 
-			$$\async[A]{\Psi}{\Delta[\mathV]}{\phi_1, \phi_2, \Phi[\mathV]} $$
+			$$\async[A]{\Psi}{\Delta[\mathV]}{\phi_1, \phi_2, \Gamma[\mathV]} $$
 			Then we apply \derRule[A]{\displaypar}, and obtain
-			$$\async[A]{\Psi}{\Delta[\mathV]}{\phi_1 \llpar \phi_2, \Phi[\mathV]} $$
+			$$\async[A]{\Psi}{\Delta[\mathV]}{\phi_1 \llpar \phi_2, \Gamma[\mathV]} $$
 			which correctly corresponds to what the conclusion
-			$$ \async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Phi} \separator \constr{\Lambda}{\mathV} $$
+			$$ \async{\Psi}{\Delta}{\af{\phi_1 \llpar \phi_2}{e}, \Gamma} \separator \constr{\Lambda}{\mathV} $$
 			should be mapped to.
-			% Furthermore, since the assignment $\mathV$ is the same between premise and conclusion, then $\Delta[\mathV]$ and $\Phi[\mathV]$ stay the same, and since the assignment respects the constraint $\used{e}$, then $\phi_1 \llpar \phi_2$ must be present.
+			% Furthermore, since the assignment $\mathV$ is the same between premise and conclusion, then $\Delta[\mathV]$ and $\Gamma[\mathV]$ stay the same, and since the assignment respects the constraint $\used{e}$, then $\phi_1 \llpar \phi_2$ must be present.
 		\indCase{\displayplus[L]} Given the rule \derRule{\displayplus[L]}, we apply the inductive hypothesis, and from the premise
 			$$ \focus{\Psi}{\Delta}{\af{\phi_1}{e}} \separator \constr{\used{e}, \Lambda}{\mathV}$$
 			we extract the triadic proof
@@ -739,22 +503,22 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			$$ \focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e}} \separator \constr{\Lambda}{\mathV} $$
 			should be mapped to
 		\indCase{\displaywn} Given the rule \derRule{\displaywn}, we apply the inductive hypothesis, and from the premise
-			$$ \async{\phi, \Psi}{\Delta}{\Phi} \separator \constr{\used{e}, \Lambda}{\mathV} $$
+			$$ \async{\phi, \Psi}{\Delta}{\Gamma} \separator \constr{\used{e}, \Lambda}{\mathV} $$
 			we extract the triadic proof
-			$$ \async[A]{\phi, \Psi}{\Delta[\mathV]}{\Phi[\mathV]}$$
+			$$ \async[A]{\phi, \Psi}{\Delta[\mathV]}{\Gamma[\mathV]}$$
 			Then we apply \derRule[A]{\displaywn} and obtain
-			$$ \async[A]{\Psi}{\Delta[\mathV]}{\,\llwn{\phi}, \Phi[\mathV]} $$
+			$$ \async[A]{\Psi}{\Delta[\mathV]}{\,\llwn{\phi}, \Gamma[\mathV]} $$
 			which correctly corresponds to what the conclusion
-			$$ \async{\Psi}{\Delta}{\af{\llwn{\phi}}{e}, \Phi} \separator \constr{\Lambda}{\mathV} $$
+			$$ \async{\Psi}{\Delta}{\af{\llwn{\phi}}{e}, \Gamma} \separator \constr{\Lambda}{\mathV} $$
 			should be mapped to.
 		\indCase{\displaybot} Given the rule \derRule{\displaybot}, we apply the inductive hypothesis, and from the premise
-			$$ \async{\Psi}{\Delta}{\Phi} \separator \constr{\used{e}, \Lambda}{\mathV} $$
+			$$ \async{\Psi}{\Delta}{\Gamma} \separator \constr{\used{e}, \Lambda}{\mathV} $$
 			we extract the triadic proof
-			$$ \async[A]{\Psi}{\Delta[\mathV]}{\Phi[\mathV]} $$
+			$$ \async[A]{\Psi}{\Delta[\mathV]}{\Gamma[\mathV]} $$
 			Then we apply \derRule[A]{\displaybot} and obtain
-			$$ \async[A]{\Psi}{\Delta[\mathV]}{\llbot, \Phi[\mathV]} $$
+			$$ \async[A]{\Psi}{\Delta[\mathV]}{\llbot, \Gamma[\mathV]} $$
 			which correctly corresponds to what the conclusion
-			$$ \async{\Psi}{\Delta}{\af{\llbot}{e}, \Phi} \separator \constr{\Lambda}{\mathV} $$
+			$$ \async{\Psi}{\Delta}{\af{\llbot}{e}, \Gamma} \separator \constr{\Lambda}{\mathV} $$
 			should be mapped to.
 		\indCase{\displaydecide[1]} Given the rule \derRule{\displaydecide[1]}, we apply the inductive hypothesis, and from the premise
 			$$ \focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\used{e}, \Lambda}{\mathV} $$
@@ -773,20 +537,20 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			which correctly corresponds to what the conclusion
 			$$ \async{\phi, \Psi}{\Delta}{.} \separator \constr{\Lambda}{\mathV} $$
 		\indCase{\displaytodelta} Given the rule \derRule{\displaytodelta}, we apply the inductive hypothesis, and from the premise
-			$$ \async{\Psi}{\af{\phi}{e}, \Delta}{\Phi} \separator \constr{\Lambda}{\mathV} $$
+			$$ \async{\Psi}{\af{\phi}{e}, \Delta}{\Gamma} \separator \constr{\Lambda}{\mathV} $$
 			when we extract the triadic proof, two cases arise:
 			\begin{itemize}
 				\item $\phi$ disappears under assignment $\mathV$, and we get
-					$$ \async[A]{\Psi}{\Delta[\mathV]}{\Phi[\mathV]} $$
+					$$ \async[A]{\Psi}{\Delta[\mathV]}{\Gamma[\mathV]} $$
 					which correctly corresponds to what the conclusion
-					$$ \async{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\mathV} $$
+					$$ \async{\Psi}{\Delta}{\af{\phi}{e}, \Gamma} \separator \constr{\Lambda}{\mathV} $$
 					should be mapped to, since if $\phi$ disappears from the premise, it will also disappear from the conclusion.
 				\item $\phi$ remains under assignment $\mathV$, and we get
-					$$ \async[A]{\Psi}{\phi, \Delta[\mathV]}{\Phi[\mathV]} $$
+					$$ \async[A]{\Psi}{\phi, \Delta[\mathV]}{\Gamma[\mathV]} $$
 					Then we apply \derRule[A]{\displaytodelta} and obtain
-					$$ \async[A]{\Psi}{\Delta[\mathV]}{\phi, \Phi[\mathV]} $$
+					$$ \async[A]{\Psi}{\Delta[\mathV]}{\phi, \Gamma[\mathV]} $$
 					which correctly corresponds to what the conclusion
-					$$ \async{\Psi}{\Delta}{\af{\phi}{e}, \Phi} \separator \constr{\Lambda}{\mathV} $$
+					$$ \async{\Psi}{\Delta}{\af{\phi}{e}, \Gamma} \separator \constr{\Lambda}{\mathV} $$
 					should be mapped to.
 			\end{itemize}
 		\indCase{\displaytoasy} Given the rule \derRule{\displaytoasy}, we apply the inductive hypothesis, and from the premise

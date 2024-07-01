@@ -1,0 +1,42 @@
+\begin{tblr}{ colspec = { cc } 
+	    , rows = {abovesep=10pt, belowsep=10pt}
+	    , vborder{1-2} = { leftspace = 2pt, rightspace = 2pt } 
+	    , cells = { preto = {\footnotesize} }
+	    }
+	\SetCell[c=2]{c}
+	\AXC{$ \new{X} $}
+	\AX$\focus{\Psi}{\Delta_L^X}{\af{\phi_1}{e}} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV'},$
+	\noLine
+	\UI$\focus{\Psi}{\Delta_R^X}{\af{\phi_2}{e}} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV''}$
+	\AXC{$\mathV' \sim_{\mathrm{vars}(\Delta), X} \mathV''$}
+	\LeftLabel{\derRule{\displayten}}
+	\TIC{$\focus{\Psi}{\Delta}{\af{\phi_1 \llten \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\mathV''}$} % capisco il movimento dei constraint
+	\DP
+	\\ 
+	\AX$\focus{\Psi}{\Delta}{\af{\phi_1}{e}} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+	\LeftLabel{\derRule{\displayplus[L]}}
+	\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
+	\DP
+	&
+	\AX$\focus{\Psi}{\Delta}{\af{\phi_2}{e}} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+	\LeftLabel{\derRule{\displayplus[R]}}
+	\UI$\focus{\Psi}{\Delta}{\af{\phi_1 \llplus \phi_2}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
+	\DP
+	\\
+	\AXC{$\sat{ \used{e}, \avail{\Delta}, \Lambda}{\mathV}$}
+	\LeftLabel{\derRule{\displayone}}
+	\UIC{$\focus{\Psi}{\Delta}{\af{\llone}{e}} \separator \constr{\Lambda}{\mathV}$}
+	\DP
+	&
+	\AX$\focus{\Psi}{\Delta}{\af{\phi}{e}} \fCenter \separator \constr{\used{e}, \avail{\Delta}, \Lambda }{\mathV}$
+	\LeftLabel{\derRule{\displaybang}}
+	\UI$\focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e}} \fCenter \separator \constr{\Lambda}{\mathV}$
+	\DP
+	\\
+	\SetCell[c=2]{c}
+	\AXC{$\phi \; \mathrm{negative}$}
+	\AXC{$\async{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\used{e}, \Lambda}{\mathV}$}
+	\LeftLabel{\derRule{\displaytoasy}}
+	\BIC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV}$}
+	\DP
+\end{tblr}
