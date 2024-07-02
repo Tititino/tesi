@@ -49,21 +49,24 @@ Since in linear logic negation is symmetric and an involution, it is usual to wo
 \begin{define}[Negated Normal Form -- NNF]
 	\label{def:nnf}
 	A formula is in NNF if all its linear implications ($\displaylolli$) are expanded to pars ($\displaypar$) using the tautology
-	$$ a \lolli b \Leftrightarrow \llnot{a} \llpar b$$
-	and negation is pushed down to atoms.	% terms?
-	Intuitively, a sequent is in NNF if all its formulae are in NNF.
-	Formulae in NNF are terms defined as follows
+	$$ a \lolli b \Leftrightarrow \llnot{a} \llpar b $$
+	and negation is pushed down to atoms.
+	Alternatively a formula in NNF is defined as follows:
 	\begin{center}
-		\begin{tblr}{ colspec = {cccccccccr}
+		\begin{tblr}{ colspec = {ccccc}
 			, cells = { mode = math } 
 			% , vborder{1-4} = { leftspace = 0pt, rightspace = 0pt } 
+	    		, rows = {abovesep=0pt, belowsep=0pt}
 			}
-			\phi & ::=  & 1              &\mid& \phi \llten \phi  &\mid& \bot &\mid& \phi \llpar \phi  & \text{(Multiplicatives and their constants)} \\
-			     & \mid & 0              &\mid& \phi \llplus \phi &\mid& \top &\mid& \phi \llwith \phi & \text{(Additives and their constants)} \\
-			     & \mid & \llbang{\phi}  &\mid& \llwn{\phi}       &    &      &    &                   & \text{(Exponentials)} \\
-			     & \mid & \llnot{\alpha} &\mid& \alpha            &    &      &    &                   & \text{(Where $\alpha$ is an atom)}
+			\phi & ::=  & \phi \llten \phi  & \mid & 1 \\
+			     & \mid & \phi \llpar \phi  & \mid & \bot \\
+			     & \mid & \phi \llplus \phi & \mid & 0 \\
+			     & \mid & \phi \llwith \phi & \mid & \bot \\
+			     & \mid & \llbang{\phi}     & \mid & \llwn{\phi} \\
+			     & \mid & \llnot{\alpha}    & \mid & \alpha 
 		\end{tblr}
 	\end{center}
+	A sequent is in NNF iff all its formulae are in NNF.
 \end{define}
 A generic formula is normalized by applying recursively the DeMorgan rules for linear logic, until NNF is reached.
 Normalization of judgments instead takes a two-sided judgment of the form
@@ -77,8 +80,8 @@ Normalization has some implementation-wise advantages, but for now it is only im
 \section{Focusing}
 Focusing is a technique described by Andreoli in his seminal paper \cite{Focusing}.
 In it he recognizes two alternating phases in a proof: a deterministic phase, where the order of rule application does not matter; and a non deterministic phase, where several choices may be available.
-These two phases are respectively called asynchronous and synchronous phase.
-All terms are assigned a polarity: 
+These two phases are called respectively asynchronous and synchronous phase.
+To all formulae is assigned a polarity: 		% TODO: random
 \begin{itemize}
 	\item connectives with a synchronous right rule are defined to have a positive polarity, these are:
 		$$ \displayten, \displayplus, \displaybang, \displayone$$
@@ -89,11 +92,11 @@ and thus the polarity of a formula depends on its top-level connective.
 For atoms instead polarities may be assigned with some arbitrarily complex mechanisms.
 We will follow \cite{LiangMiller} and simply assign atoms with a negative polarity and negated atoms with a positive one.
 Since we work in one sided linear logic and connectives have only right rules, positive connectives may also be called synchronous, and negative connectives asynchronous.
-\begin{define}
+\begin{define}\label{def:focusing predicates}
 	Based on the definitions above we define the following predicates:
 	\begin{itemize}
 		\item ``$\phi \; \mathrm{atom}$'' is true whenever $\phi$ is an atom;
-		\item ``$\phi \; \mathrm{asy}$'' is true whenever $\phi$ is an asynchronous connective;
+		\item ``$\phi \; \mathrm{asy}$'' is true whenever $\phi$ has as an asynchronous top-level connective;
 		\item ``$\phi \; \mathrm{negative}$'' is true whenever $\phi$ is either an atom or an asynchronous connective, so
 			$$ \phi \; \mathrm{negative} = \phi \; \mathrm{atom} \vee \phi \; \mathrm{asy} $$
 	\end{itemize}
@@ -105,7 +108,7 @@ The purpose of these is to ensure that if the constraints generated are satisfia
 There are a number of ways in which solutions to these sets of constraints may be propagated during proof search.
 What we will use is the strategy called ``lazy'' by \cite{HarlandPym}, which consists of checking for satisfiability on the leaves, and propagating the assignments to the next branch.
 \begin{define}[Variables, expressions]
-	\label{def:bool-expr}
+	\label{def:bool expr}
 	A boolean variable is simply a symbol to which one can associate a value of true or false.
 	A boolean expression, in our case, is just a conjunction of possibly negated boolean variables as 
 	\begin{center}
@@ -133,12 +136,12 @@ What we will use is the strategy called ``lazy'' by \cite{HarlandPym}, which con
 
 \begin{define}[Annotated formula]
 	\label{def:annotated}
-	Given a formula $\phi$ defined as in Figure \ref{def:ll formula} and a boolean expression $e$ defined as in Definition \ref{def:bool-expr}, an \textit{annotated formula} is simply a term 
+	Given a formula $\phi$ defined as in Definition \ref{def:ll formula} and a boolean expression $e$ defined as in Definition \ref{def:bool expr}, an \textit{annotated formula} is simply a pair
 	$$ \af{\phi}{e} $$
 	that associates the formula to the expression.
 	We denote 
 	\begin{itemize}
-		\item the operation of extracting the boolean expression associated do a given formula as
+		\item the operation of extracting the boolean expression associated to a given formula as
 			$$ \expr{\af{\phi}{e}} = e $$
 			and then extend this notation to sequents such that $ \expr{\Delta} $ is the set of all boolean expressions of $\Delta$
 			$$ \expr{\Delta} = \{ \expr{\phi} \mid \phi \in \Delta \} $$
@@ -155,7 +158,7 @@ The purpose of putting formulae and expressions together in the annotated formul
 	\item the actions taken on the formula determine the constraints that will be generated, and these refer to the expressions associated to said formula;
 	\item after the constraints are solved we can query the assignment of the variables and find out if the associated formula is used or not in a certain branch of a proof (see Definition \ref{def:evaluation}).
 \end{itemize}
-These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
+The above constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
 \begin{define}[Constraints]
 	\label{def:constraints}
 	Given an annotated formula $\af{\phi}{e}$ as in Definition \ref{def:annotated}, a constraint $\lambda$ is either
@@ -167,7 +170,7 @@ These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
 			This corresponds to saying the expression $e$ is not true or
 			$$ x_i \wedge \dots \wedge x_j \leftrightarrow \bot $$
 	\end{itemize}
-	We then extend these predicates to sequents
+	We then extend to sequents, such that
 	\begin{align*}
 		\used{\Delta} &= \{ \used{e} \mid e \in \mathrm{exp}(\Delta) \} \\
 		\avail{\Delta} &= \{ \avail{e} \mid e \in \mathrm{exp}(\Delta) \}
@@ -183,7 +186,7 @@ These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
 	\label{def:assignment}
 	An assignment is a function
 	$$ \mathV : \{ \dots, x_i, x_j, \dots \} \rightarrow \{ \top, \bot \} $$
-	that associates a set of variables to either true or false.
+	that associates the members of a set of variables to either true or false.
 	Given a set of variables $X$, we say that the assignment $\mathV$ \textit{covers} $X$ if no variable in $X$ is left undefined under $\mathV$, or
 	$$ X \subseteq \Dom{\mathV} $$
 \end{define}
@@ -191,7 +194,7 @@ These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
 	\label{def:evaluation}
 	Given a boolean expression $e$ and an assignment $\mathV$, such that $\mathV$ covers $\vars{e}$, we write
 		$$ e[\mathV] = e[\dots, x_i \subst \mathV(x_i), x_j \subst \mathV(x_j), \dots] $$
-	as the value of the expression $e$ substituting with the assignment $\mathV$.
+	as the value of the expression $e$ substituting its variables using assignment $\mathV$.
 	We extend this notation, such that
 	\begin{itemize}
 		\item given a constraint $\lambda$ and an assignment $\mathV$ that covers $\vars{\lambda}$
@@ -207,9 +210,15 @@ These constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$''.
 			$$ \Delta[\mathV] = \{ \phi \mid \af{\phi}{e} \in \Delta , e[\mathV] = \top \} $$
 	\end{itemize}
 \end{define}
-A branch is considered correct if its constraints are satisfiable.
+\begin{define}
+	\label{def:coincidence}
+	Given two assignments $\mathV'$ and $\mathV''$ and a set of variables $X$, we say that $\mathV'$ and $\mathV''$ coincide for $X$ -- written $\mathV' \sim_X \mathV''$ -- when they both map all the variables in $X$ to the same values, or
+	$$ \mathV' \sim_X \mathV'' \Leftrightarrow \forall x \in X \mid \mathV'(x) = \mathV''(x) $$
+\end{define}
+
+A judgment is considered provable if its constraints are satisfiable.
 Otherwise the branch of the proof fails.
-\begin{define}[Satisfaiability of constraints]
+\begin{define}[Satisfaiability]
 	\label{def:sat}
 	Given a set of constraints $\Lambda$ and an assignment function V that covers $\mathrm{vars}(\Lambda)$, we say that $\mathV$ satisfies $\Lambda$ iff every constraint in $\Lambda$ is true under $\mathV$, or
 	$$ \sat{\Lambda}{\mathV} \Leftrightarrow \bigwedge_{\lambda \in \Lambda} \lambda[\mathV] = \top $$
@@ -268,11 +277,6 @@ this is split into
 	\Delta_R^X &= \af{a \llten b}{\varNot{x_3} \varAnd x_1}, \af{\llnot{c}}{\varNot{x_4} \varAnd x_2} 
 \end{align*}
 
-\begin{define}
-	Given two assignments $\mathV'$ and $\mathV''$ and a set of variables $X$, we say that $\mathV'$ and $\mathV''$ coincide for $X$ -- written $\mathV' \sim_X \mathV''$ -- when they both map all the variables in $X$ to the same values, or
-	$$ \mathV' \sim_X \mathV'' \Leftrightarrow \forall x \in X \mid \mathV'(x) = \mathV''(x) $$
-\end{define}
-
 % TODO: expand
 Figure \ref{fig:hp calculus} shows the calculus of \cite{HarlandPym} using our notation of explicit constraints implementing the ``lazy'' strategy.
 Figure \ref{fig:calculus} instead presents our focused constraint calculus.
@@ -281,6 +285,19 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 	\input{figures/hp-calculus}
 	\caption{The one sided version of the calculus from \cite{HarlandPym} with explicit constraint propagation.\label{fig:hp calculus}}
 \end{figure}
+\begin{lemma}
+	\label{lemma:cap}
+	For all sequents $\Delta$ and assignments $\mathV$ which cover $\vars{\Delta} \cup X$:
+	$$ \Delta_L^X[\mathV] \cap \Delta_R^X[\mathV] = \varnothing $$
+\end{lemma}
+\begin{proof}
+	This is a simple consequence of the fact that if $\phi \in \Delta_L^X[\mathV]$ there is a annotated formula $\af{\phi}{e} \in \Delta$ such that 
+	$$ e[\mathV] = \top $$
+	Since $e$ is defined as a conjunction on boolean variables, all the variables in it must evaluate to true.
+	It is straightforward to see that if the variable added by the split in $\Delta_L^X$ is $x_i$, and the corresponding one in $\Delta_R^X$ is $\varNot{x_i}$, then when $x_i$ is true in the assignment V, $\llnot{x_i}$ is false.
+	Hence $\phi \not \in \Delta_R^X[\mathV]$.
+	The same can be done to show that if $\phi \in \Delta_R^X[\mathV]$ then $\phi \not \in \Delta_L^X[\mathV]$.
+\end{proof}
 \begin{figure}[H]
 	\begin{subfigure}{\textwidth}
 		\centering
@@ -307,21 +324,8 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 \end{figure}
 
 \begin{lemma}
-	\label{lemma:cap}
-	For all sequents $\Delta$ and assignments $\mathV$ which cover $\mathrm{vars}(\Delta)$:
-	$$ \Delta_L^X[\mathV] \cap \Delta_R^X[\mathV] = \varnothing $$
-\end{lemma}
-\begin{proof}
-	This is a simple consequence of the fact that if $\phi \in \Delta_L^X[\mathV]$ there is a annotated formula $\af{\phi}{e} \in \Delta$ such that 
-	$$ e[\mathV] = \top $$
-	Since $e$ is defined as a conjunction on boolean variables, all the variables in it must evaluate to true.
-	It is straightforward to see that if the variable added by the split in $\Delta_L^X$ is $x_i$, and the corresponding one in $\Delta_R^X$ is $\varNot{x_i}$, then when $x_i$ is true in the assignment V, $\llnot{x_i}$ is false.
-	Hence $\phi \not \in \Delta_R^X[\mathV]$.
-	The same can be done to show that if $\phi \in \Delta_R^X[\mathV]$ then $\phi \not \in \Delta_L^X[\mathV]$.
-\end{proof}
-\begin{lemma}
 	\label{lemma:cup}
-	For all sequents $\Delta$ and assignments $\mathV$ which cover $\vars{\Delta}$,
+	For all sequents $\Delta$ and assignments $\mathV$ which cover $\vars{\Delta} \cup X$,
 	$$ \Delta[\mathV] = \Delta_L^X[\mathV] \cup \Delta_R^X[\mathV] $$
 \end{lemma}
 \begin{proof}
@@ -336,15 +340,22 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 	But either $x_i$ or $\varNot{x_i}$ must be true in a certain assignment, thus either $x_i \varAnd e$ or $\varNot{x_i} \varAnd e$ must be true, contradicting the hypothesis.
 \end{proof}
 
+% TODO: write this better
 \begin{teor}[Soundness]\label{thm:soundness}
+	For any judgment in our constraint calculus:
+	\begin{itemize}
+		\item if $ \async{\Psi}{\Delta}{\Gamma} \separator \constr{\Lambda}{\mathV} $, then $ \vDash\; \llwn{\Psi}, \Delta, \Gamma $
+		\item if $ \focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} $, then $ \vDash\; \llwn{\Psi}, \Delta, \phi $
+	\end{itemize}
+\end{teor}
+\begin{proof}
+	As a soundness proof we give a translation from our constraint calculus to $A$: the triadic calculus of \cite{Focusing} defined in Figure \ref{fig:triadic}.
+	We will show that
 	\begin{align*}
 		\async{\Psi}{\Delta}{\Gamma} \separator \constr{\Lambda}{\mathV} &\Rightarrow \async[A]{\Psi}{\Delta[\mathV]}{\Gamma[\mathV]} \\
 		\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} &\Rightarrow \focus[A]{\Psi}{\Delta[\mathV]}{\phi}
 	\end{align*}
-	where $A$ is the triadic calculus of \cite{Focusing} defined in Figure \ref{fig:triadic}.
-\end{teor}
-\begin{proof}
-	The three base cases are proved essentially in the same way:
+	The four base cases are proved essentially in the same way, with the exception of top ($\displaytop$):
 	\begin{itemize}
 		\indCase{\displayid[1]} Given the rule \derRule{\displayid[1]}
 			$$
@@ -407,9 +418,17 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			\DP
 			$$
 		\indCase{\displaytop} Given the rule \derRule{\displaytop} we have that
-			$$ \async{\Psi}{\Delta}{\af{\top}{-}, \Gamma} \separator \constr{-}{-} $$
+			$$ 
+			\AXC{}
+			\UIC{$\async{\Psi}{\Delta}{\af{\top}{-}, \Gamma} \separator \constr{-}{-}$} 
+			\DP
+			$$
 			Thus we can choose whichever assignment $\mathV$ that covers $\vars{\Delta, \Gamma}$, and obtain
-			$$ \async[A]{\Psi}{\Delta[\mathV]}{\top, \Gamma[\mathV]} $$
+			$$ 
+			\AXC{}
+			\UIC{$\async[A]{\Psi}{\Delta[\mathV]}{\top, \Gamma[\mathV]}$}
+			\DP
+			$$
 	\end{itemize}
 	The induction then follows like this:
 	\begin{itemize}
@@ -436,34 +455,24 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			should be mapped to.
 		\indCase{\displaywith} Given the rule \derRule{\displaywith}, we apply the inductive hypothesis, and from the premises
 			\begin{align*}
-				&\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Gamma} \separator \constr{\used{e}, \Lambda}{\mathV'} \\
-				&\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Gamma} \separator \constr{\used{e}, \Lambda}{\mathV''} 
+				&\async{\Psi}{\Delta}{\af{\phi_1}{e}, \Gamma} \separator \constr{\used{e}, \Lambda}{\mathV'} \\
+				&\async{\Psi}{\Delta}{\af{\phi_2}{e}, \Gamma} \separator \constr{\used{e}, \Lambda}{\mathV''} 
 			\end{align*}
 			we extract the triadic proofs
 			\begin{align*}
-			 	&\async{\Psi}{\Delta[\mathV']}{\phi_2, \Gamma[\mathV']} \\
-			 	&\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Gamma[\mathV'']}
+			 	&\async{\Psi}{\Delta[\mathV']}{\phi_1, \Gamma[\mathV']}\\
+			 	&\async{\Psi}{\Delta[\mathV'']}{\phi_2, \Gamma[\mathV'']} 
 			\end{align*}
-			Now since $\mathV' \sim_{\vars{\Delta, \Gamma}} \mathV''$, we can write
+			Now, since $\mathV' \sim_{\vars{\Delta, \Gamma}} \mathV''$, we can write
 			\begin{align*}
-				&\async{\Psi}{\Delta[\mathV'']}{\phi_2, \Gamma[\mathV'']} \\
-				&\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Gamma[\mathV'']}
+				&\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Gamma[\mathV'']} \\
+				&\async{\Psi}{\Delta[\mathV'']}{\phi_2, \Gamma[\mathV'']} 
 			\end{align*}
-			this way we can apply \derRule[A]{\displaywith}, to obtain
+			this way we can apply \derRule[A]{\displaywith} to obtain
 			$$ \async[A]{\Psi}{\Delta[\mathV'']}{\phi_1 \llwith \phi_2, \Gamma[\mathV'']} $$
 			which correctly corresponds to what the conclusion
 			$$ \async{\Psi}{\Delta}{\af{\phi_1 \llwith \phi_2}{e}, \Gamma} \separator \constr{\Lambda}{\mathV''} $$
 			should be mapped to.
-%			which after erasing the unused formulae using the assignment becomes
-%			\LeftLabel{$[\llwith]$}
-%			\BIC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1 \llwith \phi_2, \Gamma[\mathV'']}$}
-%			or equivalently 
-%			\AXC{$\async{\Psi}{\Delta[\mathV']}{\phi_2, \Gamma[\mathV']}$}
-%			\AXC{$\async{\Psi}{\Delta[\mathV'']}{\phi_1, \Gamma[\mathV'']}$}
-%			\LeftLabel{$[\llwith]$}
-%			\BIC{$\async{\Psi}{\Delta[\mathV']}{\phi_1 \llwith \phi_2, \Gamma[\mathV']}$}
-%			\DP
-%			since  $\Lambda \subseteq \used{e}, \Lambda$ and Lemma \ref{lemma:subsume}.
 		\indCase{\displaypar} Given the rule \derRule{\displaypar}, we apply the inductive hypothesis, and from the premise
 			$$ \async{\Psi}{\Delta}{\af{\phi_1}{e}, \af{\phi_2}{e}, \Gamma} \separator \constr{\used{e}, \Lambda}{\mathV}$$
 			we extract the triadic proof 
@@ -498,7 +507,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			$$ \async[A]{\Psi}{.}{\phi} $$
 			since $\Delta[\mathV] = \varnothing$ under assignment $\mathV$.
 			We then apply \derRule[A]{\displaybang} and obtain
-			$$ \focus[A]{\Psi}{.}{\llbang{\phi}} $$
+			$$ \focus[A]{\Psi}{.}{\;\llbang{\phi}} $$
 			which correctly corresponds to what the conclusion 
 			$$ \focus{\Psi}{\Delta}{\af{\llbang{\phi}}{e}} \separator \constr{\Lambda}{\mathV} $$
 			should be mapped to
@@ -528,14 +537,16 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			$$ \async[A]{\Psi}{\phi, \Delta[\mathV]}{.} $$
 			which correctly corresponds to what the conclusion
 			$$ \async{\Psi}{\af{\phi}{e}, \Delta}{.} \separator \constr{\Lambda}{\mathV} $$
+			should be mapped to.
 		\indCase{\displaydecide[2]} Given the rule \derRule{\displaydecide[2]}, we apply the inductive hypothesis, and from the premise
-			$$ \focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\used{e}, \Lambda}{\mathV} $$
+			$$ \focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\used{x}, \Lambda}{\mathV} $$
 			where $\new{x}$, we extract the triadic proof
 			$$ \focus[A]{\Psi}{\Delta[\mathV]}{\phi} $$
 			Then we apply \derRule[A]{\displaydecide[2]} and obtain
 			$$ \async[A]{\phi, \Psi}{ \Delta[\mathV]}{.} $$
 			which correctly corresponds to what the conclusion
 			$$ \async{\phi, \Psi}{\Delta}{.} \separator \constr{\Lambda}{\mathV} $$
+			should be mapped to.
 		\indCase{\displaytodelta} Given the rule \derRule{\displaytodelta}, we apply the inductive hypothesis, and from the premise
 			$$ \async{\Psi}{\af{\phi}{e}, \Delta}{\Gamma} \separator \constr{\Lambda}{\mathV} $$
 			when we extract the triadic proof, two cases arise:

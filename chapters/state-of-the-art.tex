@@ -1,13 +1,13 @@
 \chapter{State of the art}\label{chapter:state of the art}
-Most forward provers for classic linear logic use some combination of focusing and normalization to structure their proofs, with the notable exception of llprover not using normalization.	% credo
+Most bottom-up provers for classic linear logic use some combination of focusing and normalization to structure their proofs, with the notable exception of llprover not using normalization.	% credo
 We confront our prover with two other provers: llprover (1997, %cit
 ) and APLL (circa 2019, %cit
 ).
 
-Usually the splitting is handled in two ways: trying every partition possible, or using something called the method of input/output %cit
-. The latter tries to do one branch of the proof of a multiplicative, and then feeds the remaining formulae in the sequent of the other branch.
+Usually the splitting is handled in two ways: trying every partition possible, or using something called the input/output %cit
+method. The latter tries to do one branch of the proof of a multiplicative, and then feeds the remaining formulae in the sequent of the other branch.
 
-We now give a deeper look at the provers we confront with.
+We now take a deeper look at the provers we confront with.
 
 \section{APLL}\label{sec:apll}
 APLL is the underlying prover of click\&collect. % cit
@@ -47,13 +47,16 @@ let rec split_list_aux (acc1, acc2) l k = match l with
 		\end{minted}
 
 		As we will see in \ref{sec:benchmarking} this implementation choice will result in a degradation of performance on formulae with a high number of multiplicatives.
+	\item Their particular usage of why-not height and implementation of the decide rule has been already described in \S\ref{chapter:implementation}.
+		For the sake of clarity though, the prover uses a fixed local bound.
+		This bound represents the number of times per branch the unrestricted formulae can be copied in the queue.
 \end{itemize}
 
 \section{\texttt{llprover}}
-\texttt{llprover} is a prover by Naoyuki Tamura.
+\texttt{llprover} is a prover written in Prolog by Naoyuki Tamura.
 Where APLL had different provers for implicative and classical linear logic, this prover encodes all the rules as the same predicate \texttt{rule/6}, using the first argument as a selector for the system.
-Using classical logic as the system uses all the rules, included the ones for implicative linear logic.
-For this reason the prover does not implement normalization to NNF before proof search; instead the option is given to transform the two-sided proof to a one-sided one.
+Choosing full classical logic as the system uses all the rules, included the ones for implicative linear logic.
+For this reason the prover does normalize; instead the option is given to transform the two-sided proof to a one-sided one.
 
 Tensor splitting is implemented similarly to APLL by trying every possible partition
 \begin{minted}[linenos]{prolog}
@@ -69,5 +72,5 @@ rule([ill,0], no,  r(*), S, [S1, S2], [r(N),r(N1),r(N2)]) :-
 Here \texttt{merge/3} (lines 3, 4 and 5) -- called with the only the third argument bound -- generates all possible lists that when merged together return the original sequents.
 
 Another particular characteristic of llprover is that it uses a local bound with iterative deepening: llprover will try to prove the formula with bounds $1, 2, \dots$ up to the maximum specified.
-This guarantees finding the simplest proof, at the expense of the overall speed.
+This guarantees finding the simplest proof, at the expense of the overall performance.
 

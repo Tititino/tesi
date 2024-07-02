@@ -15,15 +15,16 @@
 	&
 	\AXC{}
 	\LeftLabel{\derRule[PH]{\displaytop}}
-	\UIC{$\vdash_\text{PH} \Delta, \af{\lltop}{-} \separator \constr{\Lambda}{\mathV}$}
+	\UIC{$\vdash_\text{PH} \Delta, \af{\lltop}{-} \separator \constr{-}{-}$}
 	\DP
 	\\
 	\SetCell[c=2]{c} 
-	\AXC{$\vdash_\text{PH} \Delta, \af{\phi_2}{e} \separator \constr{\used{e}, \Lambda}{\mathV'}$}
-	\AXC{$\vdash_\text{PH} \Delta, \af{\phi_1}{e} \separator \constr{\used{e}, \Lambda}{\mathV''}$}
+	\AX$\vdash_\text{PH} \Delta, \af{\phi_1}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV''}$
+	\noLine
+	\UI$\vdash_\text{PH} \Delta, \af{\phi_2}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV'}$
 	\AXC{$\mathV' \sim_{\vars{\Delta, \Gamma}} \mathV''$}
 	\LeftLabel{\derRule[PH]{\displaywith}}
-	\TIC{$\vdash_\text{PH} \Delta, \af{\phi_1 \llwith \phi_2}{e} \separator \constr{\Lambda}{\mathV''}$}	
+	\BIC{$\vdash_\text{PH} \Delta, \af{\phi_1 \llwith \phi_2}{e} \separator \constr{\Lambda}{\mathV''}$}	
 	\DP
 	\\
 	\SetCell[c=2]{c} 

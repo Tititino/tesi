@@ -1,68 +1,53 @@
 \chapter{Intro}\label{chapter:intro}
-In 2001 D. Pym and J. Harland publish a paper \cite{HarlandPym} where they propose a new way to tackle the problem of splitting sequents during linear logic proof search using boolean expressions associated to each formula.
-During proof search these expressions are then used to generate constraint that enforce linearity, and a proof is valid if its constraints are satisfiable.
-This way the complexity shifts from choosing the right set of formulas to prove a certain branch, to solving for boolean assignment -- a problem for which there are much more sophisticated algorithms.
 
-In \S\ref{chapter:calculus} we define a focused and one-sided version to the calculus described in \cite{HarlandPym}, and we give a proof of its soundness consisting of a forgetful functor to the triadic calculus of \cite{Focusing}.
-In \S\ref{chapter:implementation} we discuss a Prolog implementation of the calculus of the previous chapter.
-In \S\ref{chapter:state of the art} we quickly describe the main implementation details of two other top-down provers for full linear logic: llprover and APLL.
-Finally in \S\ref{chapter:testing} we describe the framework built to test and compare our prover with the others from the previous section, and then we show the results of these benchmarks.
+... 
 
-% \section{Sequent calculus}
-% We will often talk about sequents, a seuquent of the form
-% $$ \Delta_1, \dots, \Delta_n \vdash \Gamma_1, \dots, \Gamma_m $$
-% is another way of writing
-% $$ \Delta_1 \wedge \dots \wedge \Delta_n \Rightarrow \Gamma_1 \vee \dots \vee \Gamma_m $$
-% In sequent calculus we define some rules to manipulate these sequents, these rules are for example 
-% $$
-% \AXC{$\Gamma, \phi \vdash \Delta$}
-% \AXC{$\Gamma, \psi \vdash \Delta$}
-% \BIC{$\Gamma, \phi \vee \psi \vdash \Delta$}
-% \DP
-% $$
-% means that if $\Gamma, \phi \vdash \Delta$ and $\Gamma, \psi \vdash \Delta$ hold, then $\Gamma, \phi \vee \psi \vdash \Delta$ holds.
-% This for example is the classic rule for $\vee$.
-% 
-% When trying to build a proof bottom up, we utilize these rules inversed to try to arrive at what are called axioms or leafs, rules with no premises.
-% $$
-% \AXC{}
-% \UIC{$\phi \vdash \phi$}
-% \DP
-% $$
-% 
-% Gentzen introduced the sequent calculus LK for classical logic, this had -- other that the usual rules -- three so called structural rules.
-% These rules were used to manipulate the sequent itself, and are
-% \begin{itemize}
-% 	\item weakening: we can always ``weaken'' the sequent by adding a proposition without changing its truth,
-% 		$$
-% 		\AXC{$\Gamma \vdash \Delta$}
-% 		\UIC{$\Gamma, \phi \vdash \Delta$}
-% 		\DP
-% 		$$
-% 	\item contraction: we can always ``contract'' two copies of the same proposition into one without changing the truth of the sequent,
-% 		$$
-% 		\AXC{$\Gamma, \phi, \phi \vdash \Delta$}
-% 		\UIC{$\Gamma, \phi \vdash \Delta$}
-% 		\DP
-% 		$$
-% 	\item exchange: we can change position of two propositions in a sequent freely without changing its truth
-% 		$$
-% 		\AXC{$\Gamma, \phi, \psi \vdash \Delta$}
-% 		\UIC{$\Gamma, \psi, \phi \vdash \Delta$}
-% 		\DP
-% 		$$
-% \end{itemize}
-% and their symmetric right rules.
-% These structural rules will be important in the next section where we will introduce linear logic.
+Sequent calculus is a formalism first introduced by G. Gentzen in 1934 \cite{Gentzen1935I, Gentzen1935II}.
+Very briefly, a sequent is just an implication between finite sequences of formulae, such that
+$$ \Delta \vdash \Gamma $$ 
+is to be interpreted as
+$$ \bigwedge_{\phi \in \Delta} \phi \Rightarrow \bigvee_{\gamma \in \Gamma} \gamma $$
+where $\Delta$ is called the antecedent, and $\Gamma$ the succedent.
 
-\section{Linear logic}
+Sequents are manipulated using rules.
+These rules are represented by having premises and conclusion separated by what is called the inference line.
+A rule acting on the antecedent is called a left rule or an introduction rule, whereas a rule acting on the succedent is called a right rule or an elimination rule.
+To build a proof the conclusions of rules are chained to the premises of other rules, thus building a tree.
+
+There are three special rules -- called structural rules -- often left implicit in proofs.
+We give their left versions:
+\begin{itemize}
+	\item weakening: one may ``weaken'' the sequent by adding a proposition without changing its truth
+		$$
+		\AXC{$\Gamma \vdash \Delta$}
+		\UIC{$\Gamma, \phi \vdash \Delta$}
+		\DP
+		$$
+	\item contraction: one may ``contract'' two copies of the same proposition into one without changing the truth of the sequent
+		$$
+		\AXC{$\Gamma, \phi, \phi \vdash \Delta$}
+		\UIC{$\Gamma, \phi \vdash \Delta$}
+		\DP
+		$$
+	\item exchange: one may switch position of two propositions in a sequent freely without changing its truth
+		$$
+		\AXC{$\Gamma, \phi, \psi \vdash \Delta$}
+		\UIC{$\Gamma, \psi, \phi \vdash \Delta$}
+		\DP
+		$$
+\end{itemize}
+
+...
+
 Linear logic is a logic proposed by Jean-Yves Girard in his seminal paper of 1987 \cite{LinearLogic}.
-The distinctive trait of this logic is that its formulae cannot be copied (weakening) or discarded (contraction), but instead they are consumed.
-Under these rules a certain judgment it true if and only if all of its formulae get used exactly once; for this reason this logic is sometimes called a logic of resources, in the same way classical logic is a logic of truths and intuitionistic logic is a logic of proofs.
+The distinctive trait of this logic is that its formulae cannot be copied or discarded, but instead they are consumed.
+Put differently, its sequent calculus lacks the structural rules of weakening and contraction, making linear logic a substructural logic.
+
+Under these rules a certain judgment is provable if and only if all of its formulae get used exactly once; for this reason this logic is sometimes called a logic of resources, in the same way classical logic is a logic of truths and intuitionistic logic is a logic of proofs.
 % Questo particolare utilizzo delle formule permette di avere una logica che mantiene la simmetria delle logica classica, e il costruttivismo delle logica intuizionista.
 
-In linear logic each connective of classical logic has two versions: an additive one -- where the two branches keep the same context, and a multiplicative one -- where the context gets portioned between the two branches.
-To better understand why let's analyze classic conjunction, this can be defined as 
+In linear logic each connective of classical logic has two versions: an additive one -- where the two branches keep the same context, and a multiplicative one -- where the context gets partitioned between the two branches.
+To better understand why let's analyze classic conjunction, which can be defined as 
 $$
 \begin{array}{cc}
 \AXC{$\Delta \vdash \phi_2, \Gamma$}
@@ -76,7 +61,7 @@ $$
 \DP
 \end{array}
 $$
-These two rules are equivalent only if the use of weakening and contraction is permitted, so linear logic distinguishes the two interpretations: the left one is the additive one, and the right one the multiplicative one.
+These two rules are equivalent only if the use of weakening and contraction is permitted, so in linear logic the two interpretations are distinct: the left one is the additive one, and the right one the multiplicative one.
 Obviously the constants $\top$ and $\bot$ also have two versions.
 We have that
 \begin{center}
@@ -91,7 +76,7 @@ We have that
 		$\bot$ & $0$ & $\bot$ \\
 	\end{tblr}
 \end{center}
-It is the multiplicative side which brings the most complexity: in top-down proof search, the action of searching the correct partition of the sequents -- called splitting -- may imply an exponential number of attempts.
+It is the multiplicative side which brings the most complexity: in bottom-up proof search, the action of searching the correct partition of the sequents -- called splitting -- may imply an exponential number of attempts.
 
 Linear logic defined as of right now, albeit having the added complexity of splitting, is nonetheless decidable: since formulae are finite and they cannot be copied, it is possible to explore all the possibilities.
 To make linear logic as strong as classical logic two new connectives are added: $\llbang{\phi}$ and $\llwn{\phi}$ -- called respectively ``of-course'' and ``why-not''.
@@ -117,3 +102,11 @@ This has the side effect of making the proover sometimes reject judgments which 
 % Petri nets can be encoded in linear logic, for example, 
 % https://johnwickerson.github.io/talks/linearlogic.pdf
 
+In 2001 D. Pym and J. Harland publish a paper \cite{HarlandPym} where they propose a new way of tackling the problem of splitting in a number of different logics, by means of boolean constraints.
+These constraints are generated during proof search from boolean expressions associated to the formulae, and are used to enforce linearity.
+This way the complexity shifts from choosing the right set of formulas to prove a certain branch, to solving for boolean assignment -- a problem for which there are much more sophisticated algorithms.
+
+In \S\ref{chapter:calculus} we define a focused and one-sided version to the calculus described in \cite{HarlandPym}, and we give a proof of its soundness consisting of a forgetful functor to the triadic calculus of \cite{Focusing}.
+In \S\ref{chapter:implementation} we discuss a Prolog implementation of the calculus of the previous chapter.
+In \S\ref{chapter:state of the art} we quickly describe the main implementation details of two other top-down provers for full linear logic: llprover and APLL.
+Finally in \S\ref{chapter:testing} we describe the framework built to test and compare our prover with the others from the previous section, and then we show the results of these benchmarks.
