@@ -79,21 +79,22 @@ Normalization has some implementation-wise advantages, but for now it is only im
 
 \section{Focusing}
 Focusing is a technique described by Andreoli in his seminal paper \cite{Focusing}.
-In it he recognizes two alternating phases in a proof: a deterministic phase, where the order of rule application does not matter; and a non deterministic phase, where several choices may be available.
-These two phases are called respectively asynchronous and synchronous phase.
-To all formulae is assigned a polarity: 		% TODO: random
+In it he recognizes two alternating phases in a proof: a deterministic phase; and a non-deterministic phase, where several choices may be available.
+These two phases are called respectively asynchronous and synchronous or focusing phase.
+In the asynchronous phase the applicable rules are invertible, thus their order does not matter. 
+For this reason these rules are called asynchronous rules, wheareas the non-invertible ones are called synchronous.
+In this system to each formula is assigned a positive or neagative polarity based on its top-level connective:
 \begin{itemize}
 	\item connectives with a synchronous right rule are defined to have a positive polarity, these are:
 		$$ \displayten, \displayplus, \displaybang, \displayone$$
-	\item whereas connectives with a asynchronous right rule have a negative one, these are:
+	\item whereas connectives with an asynchronous right rule have a negative polarity, these are:
 		$$ \displaypar, \displaywith, \displaywn, \displaytop, \displaybot$$
 \end{itemize}
-and thus the polarity of a formula depends on its top-level connective.
-For atoms instead polarities may be assigned with some arbitrarily complex mechanisms.
+For atoms polarities may be assigned with some arbitrarily complex mechanisms.
 We will follow \cite{LiangMiller} and simply assign atoms with a negative polarity and negated atoms with a positive one.
 Since we work in one sided linear logic and connectives have only right rules, positive connectives may also be called synchronous, and negative connectives asynchronous.
 \begin{define}\label{def:focusing predicates}
-	Based on the definitions above we define the following predicates:
+	Based on the definitions above we get the following predicates:
 	\begin{itemize}
 		\item ``$\phi \; \mathrm{atom}$'' is true whenever $\phi$ is an atom;
 		\item ``$\phi \; \mathrm{asy}$'' is true whenever $\phi$ has as an asynchronous top-level connective;
@@ -102,11 +103,19 @@ Since we work in one sided linear logic and connectives have only right rules, p
 	\end{itemize}
 \end{define}
 
+\begin{figure}[h!]
+	\centering
+	\input{figures/triadic-calculus}
+	\caption{J.-M. Andreoli's triadic calculus.\label{fig:triadic}}
+\end{figure}
+Figure \ref{fig:triadic} shows the triadic calculus of \cite{Focusing}.
+This has judgments with three members: a set of unrestricted formulae; a multiset of linear formulae put to the side; and either a single formula or another multiset of linear formulae.
+An arrow pointing up symbolizes the asynchronous phase, and an arrow pointing down the focusing phase.
+Phase switching happens using the decide rules (\derRule[A]{\displaydecide[1]}, \derRule[A]{\displaydecide[2]}), which non-deterministically choose a formula to focus on.
+
 \section{Constraints}
 During proof search the calculus generates constraints as the formulae get broken up.
 The purpose of these is to ensure that if the constraints generated are satisfiable, then the formulae have been used linearly.
-There are a number of ways in which solutions to these sets of constraints may be propagated during proof search.
-What we will use is the strategy called ``lazy'' by \cite{HarlandPym}, which consists of checking for satisfiability on the leaves, and propagating the assignments to the next branch.
 \begin{define}[Variables, expressions]
 	\label{def:bool expr}
 	A boolean variable is simply a symbol to which one can associate a value of true or false.
@@ -217,23 +226,12 @@ The above constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$
 \end{define}
 
 A judgment is considered provable if its constraints are satisfiable.
-Otherwise the branch of the proof fails.
 \begin{define}[Satisfaiability]
 	\label{def:sat}
 	Given a set of constraints $\Lambda$ and an assignment function V that covers $\mathrm{vars}(\Lambda)$, we say that $\mathV$ satisfies $\Lambda$ iff every constraint in $\Lambda$ is true under $\mathV$, or
 	$$ \sat{\Lambda}{\mathV} \Leftrightarrow \bigwedge_{\lambda \in \Lambda} \lambda[\mathV] = \top $$
 \end{define}
-
-\begin{figure}[h!]
-	\centering
-	\input{figures/triadic-calculus}
-	\caption{J.-M. Andreoli's triadic calculus.\label{fig:triadic}}
-\end{figure}
-Figure \ref{fig:triadic} shows the triadic calculus of \cite{Focusing}.
-This has judgments with three members: a set of unrestricted formulae; a multiset of linear formulae put to the side; and either a single formula or another multiset of linear formulae.
-An arrow pointing up symbolizes the asynchronous phase, and an arrow pointing down the focusing phase.
-Phase switching happens using the decide rules (\derRule[A]{\displaydecide[1]}, \derRule[A]{\displaydecide[2]}), which non-deterministically choose a formula to focus on.
-We now expand the concept of triadic judgment by adding explicit constraints.
+We now expand the concept of triadic judgment from \cite{Focusing} (Figure \ref{fig:triadic}) by adding explicit constraints.
 \begin{define}
 	Given any judgment in our calculus, it can be in either two forms:
 	\begin{itemize}
@@ -278,8 +276,9 @@ this is split into
 \end{align*}
 
 % TODO: expand
-Figure \ref{fig:hp calculus} shows the calculus of \cite{HarlandPym} using our notation of explicit constraints implementing the ``lazy'' strategy.
-Figure \ref{fig:calculus} instead presents our focused constraint calculus.
+Figure \ref{fig:hp calculus} shows the calculus of \cite{HarlandPym} using our notation of explicit constraints.
+In their paper they describe different ways of accumulating and checking constraints, roughly comparable to breadth first search, depth first search and a third intermediate method.
+In Figure \ref{fig:calculus} and in Figure \ref{fig:hp calculus} we represent what the paper calls a ``lazy'' strategy, corresponding to a DFS.
 \begin{figure}[h!]
 	\centering
 	\input{figures/hp-calculus}
@@ -350,7 +349,7 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 \end{teor}
 \begin{proof}
 	As a soundness proof we give a translation from our constraint calculus to $A$: the triadic calculus of \cite{Focusing} defined in Figure \ref{fig:triadic}.
-	We will show that
+	By mutual induction on the structure of the given derivation we will show that
 	\begin{align*}
 		\async{\Psi}{\Delta}{\Gamma} \separator \constr{\Lambda}{\mathV} &\Rightarrow \async[A]{\Psi}{\Delta[\mathV]}{\Gamma[\mathV]} \\
 		\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} &\Rightarrow \focus[A]{\Psi}{\Delta[\mathV]}{\phi}
@@ -575,5 +574,6 @@ Figure \ref{fig:calculus} instead presents our focused constraint calculus.
 			should be mapped to.
 	\end{itemize}
 \end{proof}
+In Appendix \ref{appendix:example} we show an example derivation using this calculus.
 
 

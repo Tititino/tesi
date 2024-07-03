@@ -66,17 +66,19 @@
 	\UIC{$\focus[A]{\alpha, \Psi}{.}{\llnot{\alpha}}$}
 	\DP
 	\\
+	\AXC{$\phi\;\text{not atom}$}
 	\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
 	\LeftLabel{\derRule[A]{\displaydecide[1]}}
-	\UIC{$\async[A]{\Psi}{\phi, \Delta}{.}$}
+	\BIC{$\async[A]{\Psi}{\phi, \Delta}{.}$}
 	\DP
 	&
+	\AXC{$\phi\;\text{not atom}$}
 	\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
 	\LeftLabel{\derRule[A]{\displaydecide[2]}}
-	\UIC{$\async[A]{\phi, \Psi}{\Delta}{.}$}
+	\BIC{$\async[A]{\phi, \Psi}{\Delta}{.}$}
 	\DP
 	\\
-	\AXC{$\neg \isAsy{\phi}$}
+	\AXC{$\phi\;\text{not asy}$}
 	\AXC{$\async[A]{\Psi}{\phi, \Delta}{\Gamma}$}
 	\LeftLabel{\derRule[A]{\displaytodelta}}
 	\BIC{$\async[A]{\Psi}{\Delta}{\phi, \Gamma}$}

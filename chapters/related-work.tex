@@ -1,0 +1,74 @@
+\chapter{Related work}\label{chapter:related work}
+Most bottom-up provers for classic linear logic use some combination of focusing and normalization to structure their proofs, with the notable exception of llprover not using normalization.	% credo
+In this chapter we give a closer look to two other bottom-up provers for classic linear logic: llprover \cite{llprover} and APLL \cite{APLL}.
+In particular we will talk about three main characteristics: normalization, how spitting is handled, and bounds for exponentials.
+
+Obviously there are many other provers for linear logic, for example: 
+\begin{itemize}
+	\item sympli \cite{sympli}, a top-down prover based on the inverse method proposed by K. Chaudhuri in \cite{inverse};
+	\item linTAP \cite{linTAPwebsite, linTAP}, a tableau prover for MELL (the multiplicative and exponential fragment of linear logic)\footnote{We were not able to make linTAP work.}.
+\end{itemize}
+Ultimately we chose to compare against the two provers above as they more or less implement the same algorithm as us.
+
+\section{APLL}\label{sec:apll}
+APLL is the underlying prover of click\&collect \cite{clickAndCollect}, an interactive tool for building linear logic proofs in sequent calculus.
+It provides 4 different searches -- forward and backwards for classic and intuitionistic linear logic. 
+We will focus on the backwards algorithm for classic linear logic.
+
+The program is written in OCaML and implements a standard focused proof search on normalized formulae as seen in \cite{LiangMiller}.
+Sequent splitting when encountering a tensor is done by generating all the numbers up to $2^{|\Delta|}$ -- where $\Delta$ is the sequent -- and using the bit representation of those to create the two subsets.
+This can be seen in the function \texttt{split\_list}, which in turn calls \texttt{split\_list\_aux}
+\begin{minted}{ocaml}
+let rec split_list_aux (acc1, acc2) l k = match l with
+  | [] -> acc1, acc2
+  | hd :: tl -> 
+      if k mod 2 = 0 
+      then split_list_aux (acc1, hd :: acc2) tl (k / 2)
+      else split_list_aux (hd :: acc1, acc2) tl (k / 2)
+\end{minted}
+where the argument \texttt{k} is the number that determines the decomposition of the sequent.
+This function is called recursively when a tensor is encountered during proof search, starting at $ k = 2^{|\Delta|}$ and decreasing by one at each iteration
+\begin{minted}{ocaml}
+(* ... *)
+| Tensor (g, h) ->
+  let rec split_gamma k = 
+    if k = -1 then None
+    else
+      let gamma1, gamma2 = split_list gamma k in
+        try
+	  (* ... *)
+        with NoValue ->
+          split_gamma (k - 1) 
+  in
+    let k = fast_exp_2 (List.length gamma) - 1 in
+      (* ... *)
+\end{minted}
+As we will see in \ref{sec:benchmarking} this implementation choice will result in a degradation of performance on formulae with a high number of multiplicatives.
+
+Their particular usage of why-not height and implementation of the decide rule has been already described in \S\ref{chapter:implementation}.
+For the sake of clarity though, the prover uses a fixed local bound.
+This bound represents the number of times per branch the unrestricted formulae can be copied in the queue.
+
+\section{llprover}
+\texttt{llprover} is a prover written in Prolog by Naoyuki Tamura.
+Where APLL had different provers for intuitionistic and classical linear logic, this prover encodes all the rules as the same predicate \texttt{rule/6}, using the first argument as a selector for the system.
+Choosing full classical logic as the system uses all the rules, included the ones for intuitionistic linear logic.
+For this reason the prover does normalize; instead the option is given to transform the two-sided proof to a one-sided one.
+
+Tensor splitting is implemented similarly to APLL by trying every possible partition
+\begin{minted}[linenos]{prolog}
+rule([ill,0], no,  r(*), S, [S1, S2], [r(N),r(N1),r(N2)]) :-
+  match(S,  ([X]-->[Y1,[A*B],Y2])),
+  merge(X1, X2, X),
+  merge(Y11, Y12, Y1),
+  merge(Y21, Y22, Y2),
+  match(S1, ([X1]-->[Y11,[A],Y21])),
+  match(S2, ([X2]-->[Y12,[B],Y22])),
+  length(Y1, N), length(Y11, N1), length(Y12, N2).
+\end{minted}
+Here \texttt{merge/3} (lines 3, 4 and 5) -- called with the only the third argument bound -- generates all possible lists that when merged together return the original sequents.
+
+Another particular characteristic of llprover is that it uses a local bound with iterative deepening: the prover will repeatedly try to prove the sequent, each time incrementing the bound up to the maximum specified.
+This guarantees finding the simplest proof, at the expense of the overall performance.
+This is unlike our prover or APLL, which instead directly use the specified bound.
+

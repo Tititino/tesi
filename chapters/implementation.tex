@@ -10,19 +10,20 @@ When explaining the code we will use some common names for Prolog variables:
 	\item \texttt{L} is a list of constraints.
 \end{itemize}
 
-\section{Why Prolog}
+\section{Why Prolog}% talk about unification
 Prolog as a language and as an environment has been historically tied to automated theorem proving for its ability to express backtracking algorithms naturally.
 % In particular we chose SWI-Prolog because it offers a comprehensive and mature free Prolog environment.
 Most Prolog implementations also support CLP (constraint logic programming) through dedicated libraries.
 These allow to express constraints referring some attributes of Prolog variables in the body of the clauses; in our case we will use \CLPB{} \cite{clpb}, which provides tools to deal with boolean constraints.
-Which, in this context, are expressions made of Prolog variables and the constants 1 and 0, respectively true and false.
+Its implementation is based on reduced and ordered Binary Decision Diagrams (BDDs).
+A boolean expression, in this context, are expressions made of Prolog variables and the constants 1 and 0, respectively true and false.
 The allowed operators are the usual ones one would expect; in our case we will use exclusively conjunction, negation and equality, respectively:
 \begin{minted}{prolog}
 X * Y.
 ~ X.
 X =:= Y.
 \end{minted}
-Usually constraints will be accumulated in a list, for this reason \CLPB{} provides the functor \texttt{*(L)} to express the conjunction of its members.
+Usually constraints will be accumulated in a list; for this reason \CLPB{} provides the functor \texttt{*(L)} to express the conjunction of its members.
 The main predicate of the library is \texttt{sat/1}, which checks for the satisfiability of a constraint.
 Since we only deal with conjunctions we define the helper predicate \texttt{check/1}
 \begin{minted}{prolog}
@@ -49,7 +50,15 @@ It is important to point out, altought abvious, that constraint satisfaction als
 This mechanism is used to implcitly deal with the propagation of solutions.
 
 We use the library with the flag \texttt{clpb\_monotonic} set to \texttt{true}.
-This makes the algorithm many orders of magnitude faster but mandates that all Prolog variables be wrapped by the functor \texttt{v/1}.
+This makes the algorithm many orders of magnitude faster with the condition that adding constraints cannot yield new solutions. 
+As a side effect, the flag mandates that all Prolog variables are wrapped by the functor \texttt{v/1}, so instead of writing
+\begin{minted}{prolog}
+X * Y =:= 1
+\end{minted}
+we have to write
+\begin{minted}{prolog}
+v(X) * v(Y) =:= 1
+\end{minted}
 This small explanation sums up the extent of the library we use in our prover.
 
 \section{Formula transformations}
@@ -71,9 +80,9 @@ Next, to each formula we assign its why-not height, a measure borrowed from APLL
 	Why-not height is the maximum number of nested ``why-not''s in a formula, or
 	$$ \mathrm{wnh}(\phi) = 
 	\begin{cases}	
-		0 & \text{if }\phi \in \{\llbot, \lltop, \llone, \llzero\} \\
+		0 & \text{if }\phi \in \{\llbot, \lltop, \llone, \llzero, \alpha, \llnot{\alpha} \} \\
 		\max(\mathrm{wnh}(\phi_1), \mathrm{wnh}(\phi_2)) & \text{if } \phi \in \{ \phi_1 \llten \phi_2, \phi_1 \llpar \phi_2, \phi_1 \llplus \phi_2, \phi_1 \llwith \phi_2 \} \\
-		\mathrm{wnh}(\phi_1) & \text{if }\phi \in \{ \llnot{\phi_1}, \llbang{\phi_1}\} \\
+		\mathrm{wnh}(\phi_1) & \text{if }\phi \in \{ \llbang{\phi_1}\} \\
 		1 + \mathrm{wnh}(\phi_1) & \text{if }\phi \in \{ \llwn{\phi_1} \} 
 	\end{cases}
 	$$
@@ -82,8 +91,8 @@ The purpose of this attribute is to guide the prover to the reasonably simpler c
 This happens in three ways: 
 \begin{itemize}
 	\item When a rule generates two branches ($\displayten$, $\displaywith$), the branch associated to the formula with the least why-not height is tried first.
-		This will presumably make the prover choose the simpler branch of the two, making it so we can fail early if the branch turns out to be false.
-		An example of this is Section \ref{sec:asy phase}.
+		This will presumably make the prover choose the simpler branch of the two, making it so that we can fail early if the branch turns out to be false.
+		An example of this is Section \ref{sec:focusing impl}.
 	\item In the case of plus ($\llplus$), the branch associated to the least why-not height is tried first; this makes it so we can continue if the branch turns out to be true, ignoring the other harder branch.
 	\item During the $D_2$ rule, the exponentials are tried in order of ascending why-not height.
 		This process is further explained in Section \ref{sec:decide}.
@@ -112,12 +121,11 @@ For example the formula \texttt{*(a, ?(b))} becomes \texttt{*(a-0, ?(b-0)-1)-1},
 \end{figure}
 
 As a third and final transformation, each formula gets annotated as in Definition \ref{def:annotated}.
-The process of annotation is implemented by the predicate \texttt{annotate/3}.
 This also returns the initial constraints, which set each formula in the sequent to ``used''; thus stating that in the proof each and every formula must be used.
 % continuo?
 
 \section{Helper predicates}\label{sec:helper}
-The prover needs a series of helper predicates ranging from predicates that just implement $\phi\;\mathrm{asy}$ from Definition \ref{def:focusing predicates}, to ones which aid the generation of constraints.
+For the prover we define a series of helper predicates ranging from ones that just implement $\phi\;\mathrm{asy}$ from Definition \ref{def:focusing predicates}, to ones which aid the generation of constraints.
 In particular we now cover the implementation of the splitting function from Definition \ref{def:split}
 \begin{minted}[linenos]{prolog}
 %! split_ctx(+[AFs], -[AFs], -[AFs], -[Cns], -[Cns]) is det.
@@ -195,16 +203,16 @@ The method consists of not using directly the set $\Psi$ in the $D_2$ rule, but 
 This can be seen in the definition of the rule \texttt{decide\_2} for the \texttt{async/8} predicate
 \begin{minted}{prolog}
 async(A, U, D, [], [H|T], M, L) :-
-  \+ U = [],
-  gensym(x, X),
-  focus(A, U, D, af(H, X, E), T, M, [v(E) =:= 1|L]).
+  ( \+ (U == []) ->
+    gensym(x, X),
+    focus(A, U, D, af(H, X, E), T, M, [v(E) =:= 1|L])
+  ).
 async(A, U, D, [], [_|T], M, L) :-
-  \+ U = [],
-  async(A, U, D, [], T, M, L).
+  ( \+ (U == []) -> async(A, U, D, [], T, M, L) ).
 async(A, U, D, [], [], M, L) :-
-  \+ U = [],
-  refill(U, M, S, M1),
-  early_stop(A, U, D, S, M1, L).
+  ( \+ (U == []) ->
+    refill(U, M, S, M1),
+    early_stop(A, U, D, S, M1, L) ).
 \end{minted}
 Here the fifth argument is the queue and the sixth is the bound.
 Two cases arise:
@@ -213,10 +221,10 @@ Two cases arise:
 		This can be seen in the predicate \texttt{refill/4}
 		\begin{minted}{prolog}
 refill(U, M, S, M1) :-
-  \+ M = 0,
-  \+ U = [], 
-  sort(2, @=<, U, S), 
-  M1 is M - 1.
+  ( \+ (M == 0; U == []) -> 
+    sort(2, @=<, U, S), 
+    M1 is M - 1
+  ).
 		\end{minted}
 		This new list of unrestricted formulae becomes the new \texttt{S} and \texttt{M} is decreased.
 		Otherwise if if \texttt{M} is 0 (line 2) the branch fails.
@@ -225,8 +233,6 @@ refill(U, M, S, M1) :-
 \end{itemize}
 In particular, if the queue \texttt{S} is refilled, we do not directly call \texttt{async/8}, but instead call the predicate \texttt{early\_stop/7} (line 11), defined as:
 \begin{minted}{prolog}
-early_stop(_, _, _, [], _, _) :-
-  false.
 early_stop(A, U, D, [H|T], M, L) :-
   gensym(x, X),
   focus(A, U, D, af(H, X, E), T, M, [v(E) =:= 1|L]).

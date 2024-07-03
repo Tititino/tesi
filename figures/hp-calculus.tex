@@ -31,7 +31,7 @@
 	\AXC{$\new{X}$}
 	\AX$\vdash_\text{PH} \Delta_L^X, \af{\phi_1}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV'}$
 	\noLine
-	\UI$\vdash_\text{PH} \Delta_R^X, \af{\phi_2}{e} \fCenter \separator \constr{\mathV'}{\mathV''}$
+	\UI$\vdash_\text{PH} \Delta_R^X, \af{\phi_2}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV''}$
 	\AXC{$\mathV' \sim_{\vars{\Delta}, X} \mathV''$}
 	\LeftLabel{\derRule[PH]{\displayten}}
 	\TIC{$\vdash_\text{PH} \Delta, \af{\phi_1 \llten \phi_2}{e} \separator \constr{\Lambda}{\mathV''}$}	% capisco il movimento dei constraint
@@ -62,12 +62,12 @@
 	\\
 	\AX$\vdash_\text{PH} \Delta \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
 	\LeftLabel{\derRule[PH]{W?}}
-	\UI$\vdash_\text{PH} \llwn{\af{\phi}{e}}, \Delta \fCenter \separator \constr{\Lambda}{\mathV}$
+	\UI$\vdash_\text{PH} \af{\llwn{\phi}}{e}, \Delta \fCenter \separator \constr{\Lambda}{\mathV}$
 	\DP
 	&
 	\AX$\vdash_\text{PH} \af{\llwn{\phi}}{e}, \af{\llwn{\phi}}{e}, \Delta \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
 	\LeftLabel{\derRule[PH]{C?}}
-	\UI$\vdash_\text{PH} \llwn{\af{\phi}{e}}, \Delta \fCenter \separator \constr{\Lambda}{\mathV}$
+	\UI$\vdash_\text{PH} \af{\llwn{\phi}}{e}, \Delta \fCenter \separator \constr{\Lambda}{\mathV}$
 	\DP
 	\\
 	\SetCell[c=2]{c} 

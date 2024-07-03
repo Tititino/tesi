@@ -76,7 +76,7 @@ For this purpose we define a prefix format for linear logic formulae inspired by
 Each single character not representing an operator is considered as a variable name.
 Longer names can be specified by enclosing them in single quotes as in \texttt{'varname'}.
 As an example we give the translation of DeMorgan for the tensor:
-$$ \mathrm{trans}(\llnot{(a \llten b)} \lolli \llnot{a} \llpar \llnot{b}) = \text{\texttt{@\^{}ab|\^{}a\^{}b}} $$
+$$ \mathrm{prefix}(\llnot{(a \llten b)} \lolli \llnot{a} \llpar \llnot{b}) = \text{\texttt{@\^{}ab|\^{}a\^{}b}} $$
 
 % Since most one of the datasets we use is LLTP % cite
 % , which is written in TPTP's format % cite
@@ -217,8 +217,8 @@ The additive case is not that significant as the formulae remain manageable and 
 When reviewing these outputs it is important to remember that randomly generated tests lack the structure of real formulae, and this may impact the quality of the measurement.
 All these test were done generating suites of 100 tests using a timeout of \qty{60}{\second}:
 \begin{itemize}
-	\item Figure \ref{fig:mll bars}'s tests were composed of formulae of \texttt{size} 100, and \texttt{atoms} 50, using just tensor ($\llten$) and par ($\llpar$) as connectives;
-	\item Figure \ref{fig:mall bars}'s tests were composed of formulae of \texttt{size} 500, and \texttt{atoms} 250, with all the connectives, except the exponentials ($\llten, \llpar, \llwith$ and $\llplus$)
+	\item Figure \ref{fig:mll bars}'s tests were composed of formulae of \texttt{size} 100, and \texttt{atoms} 50, using just tensor ($\displayten$) and par ($\displaypar$) as connectives;
+	\item Figure \ref{fig:mall bars}'s tests were composed of formulae of \texttt{size} 500, and \texttt{atoms} 250, with all the connectives, except the exponentials ($\displayten, \displaypar, \displaywith$ and $\displayplus$)
 \end{itemize}
 
 \begin{table}[h!]

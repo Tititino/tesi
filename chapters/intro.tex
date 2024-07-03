@@ -1,9 +1,6 @@
 \chapter{Intro}\label{chapter:intro}
-
-... 
-
 Sequent calculus is a formalism first introduced by G. Gentzen in 1934 \cite{Gentzen1935I, Gentzen1935II}.
-Very briefly, a sequent is just an implication between finite sequences of formulae, such that
+Very briefly, a sequent is just an implication between finite (possibly empty) sequences of formulae, such that
 $$ \Delta \vdash \Gamma $$ 
 is to be interpreted as
 $$ \bigwedge_{\phi \in \Delta} \phi \Rightarrow \bigvee_{\gamma \in \Gamma} \gamma $$
@@ -13,11 +10,12 @@ Sequents are manipulated using rules.
 These rules are represented by having premises and conclusion separated by what is called the inference line.
 A rule acting on the antecedent is called a left rule or an introduction rule, whereas a rule acting on the succedent is called a right rule or an elimination rule.
 To build a proof the conclusions of rules are chained to the premises of other rules, thus building a tree.
+Leaves are just rules without any premises, also called axioms.
 
 There are three special rules -- called structural rules -- often left implicit in proofs.
 We give their left versions:
 \begin{itemize}
-	\item weakening: one may ``weaken'' the sequent by adding a proposition without changing its truth
+	\item weakening: one may ``weaken'' the sequent by adding a proposition without changing the truth of the sequent
 		$$
 		\AXC{$\Gamma \vdash \Delta$}
 		\UIC{$\Gamma, \phi \vdash \Delta$}
@@ -36,18 +34,18 @@ We give their left versions:
 		\DP
 		$$
 \end{itemize}
+In this context, a theorem prover, or simply a prover, is an algorithm which determines whether a sequent is provable or not.
+More precisely a bottom-up prover starts at the final sequent, and tries to build the proof tree by applying the rules of the calculus backwards.
 
-...
-
-Linear logic is a logic proposed by Jean-Yves Girard in his seminal paper of 1987 \cite{LinearLogic}.
+Linear logic is a logic proposed by J.-Y. Girard in his seminal paper of 1987 \cite{LinearLogic}.
 The distinctive trait of this logic is that its formulae cannot be copied or discarded, but instead they are consumed.
-Put differently, its sequent calculus lacks the structural rules of weakening and contraction, making linear logic a substructural logic.
+Put differently, its sequent calculus lacks the structural rules of weakening and contraction, for this reason linear logic is a king of substructural logic: a logic missing one or more structural rules.
 
 Under these rules a certain judgment is provable if and only if all of its formulae get used exactly once; for this reason this logic is sometimes called a logic of resources, in the same way classical logic is a logic of truths and intuitionistic logic is a logic of proofs.
 % Questo particolare utilizzo delle formule permette di avere una logica che mantiene la simmetria delle logica classica, e il costruttivismo delle logica intuizionista.
 
-In linear logic each connective of classical logic has two versions: an additive one -- where the two branches keep the same context, and a multiplicative one -- where the context gets partitioned between the two branches.
-To better understand why let's analyze classic conjunction, which can be defined as 
+In linear logic each connective from classical logic has two versions: an additive one -- where the context is the same for all the premises, and a multiplicative one -- where the context is partitioned between the premises.
+To better understand why let's analyze classic conjunction.
 $$
 \begin{array}{cc}
 \AXC{$\Delta \vdash \phi_2, \Gamma$}
@@ -61,32 +59,31 @@ $$
 \DP
 \end{array}
 $$
-These two rules are equivalent only if the use of weakening and contraction is permitted, so in linear logic the two interpretations are distinct: the left one is the additive one, and the right one the multiplicative one.
-Obviously the constants $\top$ and $\bot$ also have two versions.
-We have that
+These two rules above are equivalent only if the use of weakening and contraction is permitted, thus in linear logic the two interpretations are distinct: the left one is the additive one, and the right one the multiplicative one.
+The same process happens for the constants $\top$ and $\bot$, which also have two versions.
 \begin{center}
-	\begin{tblr}{ccc}
+	\begin{tblr}{c|cc}
 		\hline
 		Class. & Add. & Mult. \\
 		\hline
 		\hline
-		$\wedge$ & $\llwith$ & $\llten$ \\
-		$\vee$ & $\llplus$ & $\llpar$ \\
-		$\top$ & $\top$ & $1$ \\
-		$\bot$ & $0$ & $\bot$ \\
+		$\wedge$ & $\displaywith$  & $\displayten$ \\
+		$\vee$   & $\displayplus$  & $\displaypar$ \\
+		$\top$   & $\displaytop$   & $\displayone$ \\
+		$\bot$   & $\displayzero$  & $\displaybot$ \\
 	\end{tblr}
 \end{center}
-It is the multiplicative side which brings the most complexity: in bottom-up proof search, the action of searching the correct partition of the sequents -- called splitting -- may imply an exponential number of attempts.
+It is the multiplicative side which brings the most complexity in bottom-up proof search: the action of partitioning the sequent -- called splitting -- may imply an exponential number of attempts to find the correct subsets.
 
-Linear logic defined as of right now, albeit having the added complexity of splitting, is nonetheless decidable: since formulae are finite and they cannot be copied, it is possible to explore all the possibilities.
+% Linear logic defined as of right now, albeit having the added complexity of splitting, is nonetheless decidable: since formulae are finite and they cannot be copied, it is possible to explore all the possibilities.
 To make linear logic as strong as classical logic two new connectives are added: $\llbang{\phi}$ and $\llwn{\phi}$ -- called respectively ``of-course'' and ``why-not''.
 % Linear logic defined as of right now is decidable, since formulas cannot grow in size we can explore each possibility.
 % To be as strong as classical logic, there are two so called exponentials: bang or $!\phi$ and why not or $?\phi$.
 % These have the purpose of localizing the uses of weakening and contraction:
 These are called exponentials and their purpose is to localize uses of contraction and weakening.
 For example, formulas marked with $!$ can be used any number of times. %, so the intuistic implication $a \rightarrow b$ is translated as $!(a \lolli b)$, and transitions in a petri net are represented by $!(resources_1 \lolli resources_2)$.
-Since undecidability may lead to non-termination during proof search, usally some kind of bound is put (e.g. on the number of contractions per branch).
-This has the side effect of making the proover sometimes reject judgments which may be true, but would need too many contractions.
+% Since undecidability may lead to non-termination during proof search, usally some kind of bound is put (e.g. on the number of contractions per branch).
+% This has the side effect of making the proover sometimes reject judgments which may be true, but would need too many contractions.
 
 % Linear logic can be used to ensure that objects are used exactly once, thus allowing the system to safely deallocate an object after its use.
 % The Haskell's compiler GHC has an experimental extensions to permit signatures with linear types.
@@ -102,11 +99,11 @@ This has the side effect of making the proover sometimes reject judgments which 
 % Petri nets can be encoded in linear logic, for example, 
 % https://johnwickerson.github.io/talks/linearlogic.pdf
 
-In 2001 D. Pym and J. Harland publish a paper \cite{HarlandPym} where they propose a new way of tackling the problem of splitting in a number of different logics, by means of boolean constraints.
+In 2001 D. Pym and J. Harland publish a paper \cite{HarlandPym} where they propose a new way of tackling the problem of splitting by means of boolean constraints.
 These constraints are generated during proof search from boolean expressions associated to the formulae, and are used to enforce linearity.
 This way the complexity shifts from choosing the right set of formulas to prove a certain branch, to solving for boolean assignment -- a problem for which there are much more sophisticated algorithms.
 
 In \S\ref{chapter:calculus} we define a focused and one-sided version to the calculus described in \cite{HarlandPym}, and we give a proof of its soundness consisting of a forgetful functor to the triadic calculus of \cite{Focusing}.
 In \S\ref{chapter:implementation} we discuss a Prolog implementation of the calculus of the previous chapter.
-In \S\ref{chapter:state of the art} we quickly describe the main implementation details of two other top-down provers for full linear logic: llprover and APLL.
+In \S\ref{chapter:related work} we quickly describe the main implementation details of two other top-down provers for full linear logic: llprover and APLL.
 Finally in \S\ref{chapter:testing} we describe the framework built to test and compare our prover with the others from the previous section, and then we show the results of these benchmarks.
