@@ -3,12 +3,12 @@
 
 % Explaination on constraints why we use them ecc ecc ecc
 In this chapter we will define the focused one sided constraint calculus for full linear logic.
-This calculus is a hybrid between the one defined in \cite{HarlandPym} and the triadic calculus in \cite{Focusing}: it uses focusing for its performance wise advantages; and constraints to manage splitting efficiently.
+This calculus is a hybrid between the one defined in \cite{HarlandPym} and the triadic calculus in \cite{Focusing}: it uses focusing for its performance wise advantages, and constraints to manage splitting efficiently.
 
-Before all, we give we definition of a linear logic formula.
+Before all, we give the definition of a linear logic formula.
 \begin{define}[Linear logic formula]
 	\label{def:ll formula}
-	A linear logic formula is a term defined as follows 
+	A linear logic formula is defined as follows:
 	\begin{center}
 		\begin{tblr}{ colspec = {Q[l,t]}
 			, cells = { mode = math } 
@@ -40,8 +40,7 @@ Before all, we give we definition of a linear logic formula.
 			     	\end{tblr} \right. \text{(Atom)} \\
 		\end{tblr}
 	\end{center}
-	We will use $\phi$ to denote formulae and $\alpha$ to denote atoms.
-	A sequent, written $\Delta$ or $\Gamma$, is a multiset of formulae.
+	We will use $\phi$ to denote formulae, $\alpha$ to denote atoms, and $\Delta$ or $\Gamma$ to denote multisets of formulae.
 \end{define}
 
 \section{Normalization}\label{sec:normalization}
@@ -66,22 +65,21 @@ Since in linear logic negation is symmetric and an involution, it is usual to wo
 			     & \mid & \llnot{\alpha}    & \mid & \alpha 
 		\end{tblr}
 	\end{center}
-	A sequent is in NNF iff all its formulae are in NNF.
+	Accordingly, a sequent is in NNF iff all of its formulae are in NNF.
 \end{define}
-A generic formula is normalized by applying recursively the DeMorgan rules for linear logic, until NNF is reached.
+A generic formula is normalized by applying recursively the DeMorgan rules for linear logic until NNF is reached.
 Normalization of judgments instead takes a two-sided judgment of the form
 $$ \Delta \vdash \Gamma $$
 and transforms it into a one-sided judgment
 $$ \vdash \Delta' $$
 where the right side is composed of the normalization of $\Gamma$ and $\llnot{\Delta}$.
 
-Normalization has some implementation-wise advantages, but for now it is only important because it shrinks the size of the complete calculus by roughly half, since we only have to deal with the right rules of the connectives.
+Normalization has some implementation-wise advantages, but for now it is only important because it shrinks the size of the complete calculus by roughly half since only the right rules remain, thus making the calculus easier to represent (see. Figure \ref{fig:hp calculus} and \ref{fig:calculus}) and making the proof of Theorem \ref{thm:soundness} significantly shorter.
 
 \section{Focusing}
 Focusing is a technique described by Andreoli in his seminal paper \cite{Focusing}.
-In it he recognizes two alternating phases in a proof: a deterministic phase; and a non-deterministic phase, where several choices may be available.
-These two phases are called respectively asynchronous and synchronous or focusing phase.
-In the asynchronous phase the applicable rules are invertible, thus their order does not matter. 
+In it he recognizes two alternating phases in a proof: a deterministic phase -- called asynchronous phase; and a non-deterministic phase -- called synchronous phase or focused phase.
+In the asynchronous phase the applicable rules are all invertible, making their order of application irrelevant.
 For this reason these rules are called asynchronous rules, wheareas the non-invertible ones are called synchronous.
 In this system to each formula is assigned a positive or neagative polarity based on its top-level connective:
 \begin{itemize}
@@ -108,14 +106,14 @@ Since we work in one sided linear logic and connectives have only right rules, p
 	\input{figures/triadic-calculus}
 	\caption{J.-M. Andreoli's triadic calculus.\label{fig:triadic}}
 \end{figure}
-Figure \ref{fig:triadic} shows the triadic calculus of \cite{Focusing}.
-This has judgments with three members: a set of unrestricted formulae; a multiset of linear formulae put to the side; and either a single formula or another multiset of linear formulae.
+Figure \ref{fig:triadic} shows the focused calculus described by Anderoli in \cite{Focusing}.
+This calculus is also called triadic calculus, since its judgments have three members: a set of unrestricted formulae; a multiset of linear formulae put to the side; and either a single formula or another multiset of linear formulae depending on the current phase.
 An arrow pointing up symbolizes the asynchronous phase, and an arrow pointing down the focusing phase.
 Phase switching happens using the decide rules (\derRule[A]{\displaydecide[1]}, \derRule[A]{\displaydecide[2]}), which non-deterministically choose a formula to focus on.
 
 \section{Constraints}
-During proof search the calculus generates constraints as the formulae get broken up.
-The purpose of these is to ensure that if the constraints generated are satisfiable, then the formulae have been used linearly.
+During proof search constraint are generated as the formulae get broken up.
+These are generated in a particular way, such that if an assignment exists that satisfies the constraints, then the formulae have been used linearly.
 \begin{define}[Variables, expressions]
 	\label{def:bool expr}
 	A boolean variable is simply a symbol to which one can associate a value of true or false.
@@ -130,22 +128,10 @@ The purpose of these is to ensure that if the constraints generated are satisfia
 	Given a boolean expression $e$ we write
 	$$ \mathrm{vars}(e) = \{ x_i \mid x_i \in e \} $$
 \end{define}
-\begin{define}[New variables]
-	\label{def:new}
-	Sometimes we will write 
-	$$ \new{x}, \new{X} $$
-	These respectively mean that:
-	\begin{itemize}
-		\item the variable name $x$ has not yet occurred in any expression of the proof tree.
-			One can think of a global counter which is incremented for each new variable.
-		\item each variable name $x_i, x_j \in X$ has not yet occurred in the proof and each variable in $X$ is distinct:
-			$$ \left (\forall x_i \in X \mid \new{x_i}\right ) \wedge \left (\forall x_i, x_j \in X \mid i \neq j \Rightarrow x_i \neq x_j \right ) $$
-	\end{itemize}
-\end{define}
 
 \begin{define}[Annotated formula]
 	\label{def:annotated}
-	Given a formula $\phi$ defined as in Definition \ref{def:ll formula} and a boolean expression $e$ defined as in Definition \ref{def:bool expr}, an \textit{annotated formula} is simply a pair
+	Given a formula $\phi$ defined as in Definition \ref{def:nnf} and a boolean expression $e$ defined as in Definition \ref{def:bool expr}, an \textit{annotated formula} is simply a pair
 	$$ \af{\phi}{e} $$
 	that associates the formula to the expression.
 	We denote 
@@ -173,13 +159,9 @@ The above constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$
 	Given an annotated formula $\af{\phi}{e}$ as in Definition \ref{def:annotated}, a constraint $\lambda$ is either
 	\begin{itemize}
 		\item ``$\used{e}$'', which states that the formula $\phi$ gets consumed in this branch of the proof.
-			This corresponds to saying the expression $e$ is true or
-			$$ x_i \wedge \dots \wedge x_j \leftrightarrow \top $$
 		\item ``$\avail{e}$'', which states that the formula $\phi$ does not get consumed in this branch of the proof, and thus is available to be used in another branch.
-			This corresponds to saying the expression $e$ is not true or
-			$$ x_i \wedge \dots \wedge x_j \leftrightarrow \bot $$
 	\end{itemize}
-	We then extend to sequents, such that
+	We then extend these constraints to sequents, such that
 	\begin{align*}
 		\used{\Delta} &= \{ \used{e} \mid e \in \mathrm{exp}(\Delta) \} \\
 		\avail{\Delta} &= \{ \avail{e} \mid e \in \mathrm{exp}(\Delta) \}
@@ -224,8 +206,6 @@ The above constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$
 	Given two assignments $\mathV'$ and $\mathV''$ and a set of variables $X$, we say that $\mathV'$ and $\mathV''$ coincide for $X$ -- written $\mathV' \sim_X \mathV''$ -- when they both map all the variables in $X$ to the same values, or
 	$$ \mathV' \sim_X \mathV'' \Leftrightarrow \forall x \in X \mid \mathV'(x) = \mathV''(x) $$
 \end{define}
-
-A judgment is considered provable if its constraints are satisfiable.
 \begin{define}[Satisfaiability]
 	\label{def:sat}
 	Given a set of constraints $\Lambda$ and an assignment function V that covers $\mathrm{vars}(\Lambda)$, we say that $\mathV$ satisfies $\Lambda$ iff every constraint in $\Lambda$ is true under $\mathV$, or
@@ -275,10 +255,13 @@ this is split into
 	\Delta_R^X &= \af{a \llten b}{\varNot{x_3} \varAnd x_1}, \af{\llnot{c}}{\varNot{x_4} \varAnd x_2} 
 \end{align*}
 
+
+
 % TODO: expand
-Figure \ref{fig:hp calculus} shows the calculus of \cite{HarlandPym} using our notation of explicit constraints.
-In their paper they describe different ways of accumulating and checking constraints, roughly comparable to breadth first search, depth first search and a third intermediate method.
-In Figure \ref{fig:calculus} and in Figure \ref{fig:hp calculus} we represent what the paper calls a ``lazy'' strategy, corresponding to a DFS.
+Figure \ref{fig:hp calculus} shows the calculus of \cite{HarlandPym} using our notation of explicit constraints, Figure \ref{fig:calculus} shows our focused calculus instead.
+Pym and Harland in \cite{HarlandPym} describe a number different ways of accumulating and checking constraints, roughly comparable to breadth first search, depth first search and a third intermediate method.
+Figure \ref{fig:calculus} and \ref{fig:hp calculus} represent what the \cite{HarlandPym} calls a ``lazy'' strategy, corresponding to a DFS.
+In both the calculi it is easy to see that most of the rules simply make sure the constraints remain consistent, and only the axioms (\derRule{\displayid[1]}, \derRule{\displayid[2]}, \derRule[PH]{A}, $\dots$) and the tensor (\derRule{\displayten}, \derRule[PH]{\displayten}) actyally introduce new variables or significant constraints.
 \begin{figure}[h!]
 	\centering
 	\input{figures/hp-calculus}
@@ -321,6 +304,53 @@ In Figure \ref{fig:calculus} and in Figure \ref{fig:hp calculus} we represent wh
 	\end{subfigure}
 	\caption{Focused constraint calculus for Linear Logic. \label{fig:calculus}}
 \end{figure}
+\begin{define}[New variables]
+	\label{def:new}
+	In Figure \ref{fig:hp calculus} and \ref{fig:calculus} we write
+	$$ \new{x} $$
+	to state that the variable name $x$ has not yet occurred in any expression of the proof tree.
+	One can think of a counter threaded through the proof tree, which is incremented for each new variable:
+	$$
+		\AXC{$\phi\;\text{not atom}$}
+		\AXC{$\new{x_i}$}
+		\AXC{$\vdash^{i + 1, n} \Psi : \Delta \Uparrow \af{\phi}{x_i} \separator \constr{\used{x_i}, \Lambda}{\mathV} $}
+		\LeftLabel{\derRule{\displaydecide[2]}}
+		\TIC{$\vdash^{i, n} \phi, \Psi : \Delta \Uparrow . \separator \constr{\Lambda}{\mathV} $}
+		\DP
+	$$
+	here $i$ is the current value of the counter, and $n$ is the value of the counter exiting the proof, such that:
+	$$
+		\AXC{$x\;\text{atom}$}
+		\AXC{$\sat{\used{e_1}, \used{e_2}, \avail{\Delta}}{\mathV}$}
+		\LeftLabel{\derRule{\displayid[1]}}
+		\BIC{$\vdash^{i, i} \Psi : \af{\alpha}{e_1}, \Delta \Uparrow \af{\llnot{\alpha}}{e_2} \separator \constr{\Lambda}{\mathV} $}
+		\DP
+	$$
+	Given this, we then define 
+	$$\new{X}$$
+	as a set of variable names such that the members have not yet occurred in the proof and are all distinct:
+		$$ \left (\forall x_i \in X \mid \new{x_i}\right ) \wedge \left (\forall x_i, x_j \in X \mid i \neq j \Rightarrow x_i \neq x_j \right ) $$
+	Then the counter is updated as follows:
+	$$
+	\AXC{$ \new{X} $}
+	\AX$\vdash^{i + |X|,n} \Psi : \Delta_L^X \Downarrow \af{\phi_1}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV'}$
+	\noLine
+	\UI$\vdash^{n,n'} \Psi : \Delta_R^X \Downarrow \af{\phi_2}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV''}$
+	\AXC{$\mathV' \sim_{\mathrm{vars}(\Delta), X} \mathV''$}
+	\LeftLabel{\derRule{\displayten}}
+	\TIC{$\vdash^{i, n'} \Psi : \Delta \Downarrow \af{\phi_1 \llten \phi_2}{e} \separator \constr{\Lambda}{\mathV''}$} 
+	\DP
+	$$
+\end{define}
+\begin{define}
+	Given a judgment
+	$$ \vdash \Delta $$
+	the corresponding judgment in the calculus of Figure \ref{fig:calculus} is
+	$$ \async{.}{.}{\hat{\Delta}}\separator \constr{\used{X}}{\mathV} $$
+	with $\new{X}$, and
+	$$ \hat{\Delta} = \{ \af{\phi_i}{x_i} \mid \phi_i \in \Delta, x_i \in X\} $$
+	for some arbitrary ordering of $\Delta$ and $X$.
+\end{define}
 
 \begin{lemma}
 	\label{lemma:cup}
@@ -348,7 +378,7 @@ In Figure \ref{fig:calculus} and in Figure \ref{fig:hp calculus} we represent wh
 	\end{itemize}
 \end{teor}
 \begin{proof}
-	As a soundness proof we give a translation from our constraint calculus to $A$: the triadic calculus of \cite{Focusing} defined in Figure \ref{fig:triadic}.
+	As a soundness proof we give a translation from our constraint calculus to the triadic calculus of \cite{Focusing} defined in Figure \ref{fig:triadic}.
 	By mutual induction on the structure of the given derivation we will show that
 	\begin{align*}
 		\async{\Psi}{\Delta}{\Gamma} \separator \constr{\Lambda}{\mathV} &\Rightarrow \async[A]{\Psi}{\Delta[\mathV]}{\Gamma[\mathV]} \\
@@ -574,6 +604,6 @@ In Figure \ref{fig:calculus} and in Figure \ref{fig:hp calculus} we represent wh
 			should be mapped to.
 	\end{itemize}
 \end{proof}
-In Appendix \ref{appendix:example} we show an example derivation using this calculus.
+In Appendix \ref{appendix:example} we show an example derivation using our calculus of Figure \ref{fig:calculus}.
 
 

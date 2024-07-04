@@ -13,8 +13,9 @@ endif
 all:
 	sed 's/OPTIONS/$(OPTIONS)/' thesis.tex > out.tex
 	latexmk -pdf -$(LCC) -latexoption="-shell-escape" 	\
-		-pretex=$(PRETEX)							\
-		-usepretex out.tex
+		-pretex=$(PRETEX)				\
+		-usepretex					\
+		out.tex				
 	mv out.pdf thesis.pdf
 
 clean:

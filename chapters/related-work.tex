@@ -1,9 +1,9 @@
 \chapter{Related work}\label{chapter:related work}
-Most bottom-up provers for classic linear logic use some combination of focusing and normalization to structure their proofs, with the notable exception of llprover not using normalization.	% credo
-In this chapter we give a closer look to two other bottom-up provers for classic linear logic: llprover \cite{llprover} and APLL \cite{APLL}.
+Most bottom-up provers for classic linear logic use some combination of focusing and normalization to structure their proofs, with the notable exception of llprover \cite{llprover} not using normalization.	% credo
+In this chapter we give a closer look to two such provers: the aforementioned llprover and APLL \cite{APLL}.
 In particular we will talk about three main characteristics: normalization, how spitting is handled, and bounds for exponentials.
 
-Obviously there are many other provers for linear logic, for example: 
+Obviously there are many other provers for linear logic, among all we cite: 
 \begin{itemize}
 	\item sympli \cite{sympli}, a top-down prover based on the inverse method proposed by K. Chaudhuri in \cite{inverse};
 	\item linTAP \cite{linTAPwebsite, linTAP}, a tableau prover for MELL (the multiplicative and exponential fragment of linear logic)\footnote{We were not able to make linTAP work.}.
@@ -17,43 +17,17 @@ We will focus on the backwards algorithm for classic linear logic.
 
 The program is written in OCaML and implements a standard focused proof search on normalized formulae as seen in \cite{LiangMiller}.
 Sequent splitting when encountering a tensor is done by generating all the numbers up to $2^{|\Delta|}$ -- where $\Delta$ is the sequent -- and using the bit representation of those to create the two subsets.
-This can be seen in the function \texttt{split\_list}, which in turn calls \texttt{split\_list\_aux}
-\begin{minted}{ocaml}
-let rec split_list_aux (acc1, acc2) l k = match l with
-  | [] -> acc1, acc2
-  | hd :: tl -> 
-      if k mod 2 = 0 
-      then split_list_aux (acc1, hd :: acc2) tl (k / 2)
-      else split_list_aux (hd :: acc1, acc2) tl (k / 2)
-\end{minted}
-where the argument \texttt{k} is the number that determines the decomposition of the sequent.
-This function is called recursively when a tensor is encountered during proof search, starting at $ k = 2^{|\Delta|}$ and decreasing by one at each iteration
-\begin{minted}{ocaml}
-(* ... *)
-| Tensor (g, h) ->
-  let rec split_gamma k = 
-    if k = -1 then None
-    else
-      let gamma1, gamma2 = split_list gamma k in
-        try
-	  (* ... *)
-        with NoValue ->
-          split_gamma (k - 1) 
-  in
-    let k = fast_exp_2 (List.length gamma) - 1 in
-      (* ... *)
-\end{minted}
 As we will see in \ref{sec:benchmarking} this implementation choice will result in a degradation of performance on formulae with a high number of multiplicatives.
 
-Their particular usage of why-not height and implementation of the decide rule has been already described in \S\ref{chapter:implementation}.
-For the sake of clarity though, the prover uses a fixed local bound.
-This bound represents the number of times per branch the unrestricted formulae can be copied in the queue.
+Their particular usage of why-not height and implementation of the decide rule was a major influence on our own implementation and thus has been already discussed in \S\ref{chapter:implementation}.
+For the sake of clarity the prover uses a fixed local bound.
+This bound does not represents the number of contraction per branch, but instead the number of times the unrestricted formulae can be copied in the queue per branch.
 
 \section{llprover}
 \texttt{llprover} is a prover written in Prolog by Naoyuki Tamura.
 Where APLL had different provers for intuitionistic and classical linear logic, this prover encodes all the rules as the same predicate \texttt{rule/6}, using the first argument as a selector for the system.
-Choosing full classical logic as the system uses all the rules, included the ones for intuitionistic linear logic.
-For this reason the prover does normalize; instead the option is given to transform the two-sided proof to a one-sided one.
+Choosing full classical logic as the system uses all the rules, including the ones for intuitionistic linear logic.
+For this reason the prover does not use normalization; instead the option is given to transform the two-sided proof to a one-sided one.
 
 Tensor splitting is implemented similarly to APLL by trying every possible partition
 \begin{minted}[linenos]{prolog}

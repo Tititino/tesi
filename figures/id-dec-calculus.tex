@@ -1,6 +1,6 @@
 \begin{tblr}{ colspec = { c }
 	    , rows = {abovesep=7pt, belowsep=7pt}
-	    , cells = { preto = {\footnotesize} }
+	    , cells = { preto = {\small} }
 	    }
 	\AXC{$ \isNegLit{\alpha} $}
 	\AXC{$ \sat{\used{e_1}, \used{e_2}, \avail{\Delta}, \Lambda}{\mathV}$}
@@ -22,7 +22,7 @@
 	\\
 	\AXC{$\phi\;\text{not atom}$}
 	\AXC{$\new{x}$}
-	\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\used{e}, \Lambda}{\mathV}$}
+	\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\used{x}, \Lambda}{\mathV}$}
 	\LeftLabel{\derRule{\displaydecide[2]}}
 	\TrinaryInfC{$\async{\phi, \Psi}{\Delta}{.} \separator \constr{\Lambda}{\mathV}$}
 	\DP
