@@ -3,42 +3,37 @@
 
 % Explaination on constraints why we use them ecc ecc ecc
 In this chapter we will define the focused one sided constraint calculus for full linear logic.
-This calculus is a hybrid between the one defined in \cite{HarlandPym} and the triadic calculus in \cite{Focusing}: it uses focusing for its performance wise advantages, and constraints to manage splitting efficiently.
-
+This calculus is a hybrid between the one defined in \cite{HarlandPym} and the triadic calculus in \cite{Focusing}.
 Before all, we give the definition of a linear logic formula.
 \begin{define}[Linear logic formula]
 	\label{def:ll formula}
-	A linear logic formula is defined as follows:
+	A propositional linear logic formula is defined as follows:
 	\begin{center}
-		\begin{tblr}{ colspec = {Q[l,t]}
-			, cells = { mode = math } 
-			% , vborder{1-4} = { leftspace = 0pt, rightspace = 0pt } 
-	    		, rows = {abovesep=0pt, belowsep=0pt}
-			}
-			\left. 
-				\begin{tblr}{ colspec = {ccccc}, column{1,5} = {.5cm}, column{3} = {1.5cm}, column{2,4} = {0.2cm}}
+		\begin{tabular}{l}
+			$\left. 
+				\begin{array}{wc{.5cm}wc{.2cm}wc{1.5cm}wc{.2cm}wc{.5cm}}
 					\phi & ::=  & \phi \llten \phi & \mid & 1 \\
 					     & \mid & \phi \llpar \phi & \mid & \bot \\
 					     & \mid & \phi \lolli \phi &      &
-				\end{tblr} \; \right \} \text{(Multiplicatives and their identities)} \\
-			\left.
-				\begin{tblr}{ colspec = {ccccc}, column{1,5} = {.5cm}, column{3} = {1.5cm}, column{2,4} = {0.2cm}}
+				\end{array} \; \right \} \text{(Multiplicatives and their identities)} $ \\
+			$\left.
+				\begin{array}{wc{.5cm}wc{.2cm}wc{1.5cm}wc{.2cm}wc{.5cm}}
 					& \mid & \phi \llplus \phi & \mid & 0 \\
 					& \mid & \phi \llwith \phi & \mid & \bot 
-				\end{tblr} \; \right \} \text{(Additives and their identities)} \\
-			\left.
-				\begin{tblr}{ colspec = {ccccc}, column{1,5} = {.5cm}, column{3} = {1.5cm}, column{2,4} = {0.2cm}}
+				\end{array} \; \right \} \text{(Additives and their identities)} $ \\
+			$ \left.
+				\begin{array}{wc{.5cm}wc{.2cm}wc{1.5cm}wc{.2cm}wc{.5cm}}
 				     	& \mid & \llbang{\phi}    & \mid & \llwn{\phi} 
-			     	\end{tblr} \right. \text{(Exponentials)} \\
-			\left.
-				\begin{tblr}{ colspec = {ccccc}, column{1,5} = {.5cm}, column{3} = {1.5cm}, column{2,4} = {0.2cm}}
+			     	\end{array} \right. \text{(Exponentials)} $ \\
+			$ \left.
+				\begin{array}{wc{.5cm}wc{.2cm}wc{1.5cm}wc{.2cm}wc{.5cm}}
 					& \mid & \llnot{\phi} & & 
-			     	\end{tblr} \right. \text{(Negation)} \\
-			\left.
-				\begin{tblr}{ colspec = {ccccc}, column{1,5} = {.5cm}, column{3} = {1.5cm}, column{2,4} = {0.2cm}}
+			     	\end{array} \right. \text{(Negation)} $ \\
+			$ \left.
+				\begin{array}{wc{.5cm}wc{.2cm}wc{1.5cm}wc{.2cm}wc{.5cm}}
 					& \mid & \alpha & & 
-			     	\end{tblr} \right. \text{(Atom)} \\
-		\end{tblr}
+			     	\end{array} \right. \text{(Atom)} $ \\
+		\end{tabular}
 	\end{center}
 	We will use $\phi$ to denote formulae, $\alpha$ to denote atoms, and $\Delta$ or $\Gamma$ to denote multisets of formulae.
 \end{define}
@@ -52,18 +47,14 @@ Since in linear logic negation is symmetric and an involution, it is usual to wo
 	and negation is pushed down to atoms.
 	Alternatively a formula in NNF is defined as follows:
 	\begin{center}
-		\begin{tblr}{ colspec = {ccccc}
-			, cells = { mode = math } 
-			% , vborder{1-4} = { leftspace = 0pt, rightspace = 0pt } 
-	    		, rows = {abovesep=0pt, belowsep=0pt}
-			}
-			\phi & ::=  & \phi \llten \phi  & \mid & 1 \\
-			     & \mid & \phi \llpar \phi  & \mid & \bot \\
-			     & \mid & \phi \llplus \phi & \mid & 0 \\
-			     & \mid & \phi \llwith \phi & \mid & \bot \\
-			     & \mid & \llbang{\phi}     & \mid & \llwn{\phi} \\
-			     & \mid & \llnot{\alpha}    & \mid & \alpha 
-		\end{tblr}
+		\begin{tabular}{ccccc}
+			$\phi$ & $ ::=  $  & $ \phi \llten \phi  $ & $ \mid $ & $ 1    $ \\
+			       & $ \mid $  & $ \phi \llpar \phi  $ & $ \mid $ & $ \bot $ \\
+			       & $ \mid $  & $ \phi \llplus \phi $ & $ \mid $ & $ 0    $ \\
+			       & $ \mid $  & $ \phi \llwith \phi $ & $ \mid $ & $ \bot $ \\
+			       & $ \mid $  & $ \llbang{\phi}     $ & $ \mid $ & $ \llwn{\phi} $ \\
+			       & $ \mid $  & $ \llnot{\alpha}    $ & $ \mid $ & $ \alpha $
+		\end{tabular}
 	\end{center}
 	Accordingly, a sequent is in NNF iff all of its formulae are in NNF.
 \end{define}
@@ -118,12 +109,10 @@ These are generated in a particular way, such that if an assignment exists that 
 	\label{def:bool expr}
 	A boolean variable is simply a symbol to which one can associate a value of true or false.
 	A boolean expression, in our case, is just a conjunction of possibly negated boolean variables as 
-	\begin{center}
-	\begin{tblr}{ colspec = {cccccr}, cells = { mode = math } }
+	$$\begin{array}{cccccr}
 		x & ::=  & x_i &\mid& \overline{x_i} & \text{(Variable)}\\
 		e & ::=  & x \wedge e    &\mid& x & \text{(Expression)} \\
-	\end{tblr}
-	\end{center}
+	\end{array}$$
 	We will call $e$ such a conjunction and $x$ the single boolean variables.
 	Given a boolean expression $e$ we write
 	$$ \mathrm{vars}(e) = \{ x_i \mid x_i \in e \} $$
@@ -280,14 +269,14 @@ In both the calculi it is easy to see that most of the rules simply make sure th
 	Hence $\phi \not \in \Delta_R^X[\mathV]$.
 	The same can be done to show that if $\phi \in \Delta_R^X[\mathV]$ then $\phi \not \in \Delta_L^X[\mathV]$.
 \end{proof}
-\begin{figure}[H]
+\begin{figure}[p]
 	\begin{subfigure}{\textwidth}
 		\centering
 		\input{figures/asy-calculus}
 		\caption{Asynchronous rules.\label{fig:asy calculus}}
 	\end{subfigure}
 \end{figure}
-\begin{figure}[H]
+\begin{figure}[p]
 	\ContinuedFloat
 	\begin{subfigure}{\textwidth}
 		\centering
@@ -295,7 +284,7 @@ In both the calculi it is easy to see that most of the rules simply make sure th
 		\caption{Synchronous rules.\label{fig:sync calculus}}
 	\end{subfigure}
 \end{figure}
-\begin{figure}[H]
+\begin{figure}[ht]
 	\ContinuedFloat
 	\begin{subfigure}{\textwidth}
 		\centering

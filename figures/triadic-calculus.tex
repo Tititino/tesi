@@ -1,9 +1,6 @@
-\begin{tblr}{ colspec = {c c}
-	, cells = { mode = dmath } 
-	, rows = {abovesep=10pt, belowsep=10pt}
-	, vborder{1-2} = { leftspace = -5pt, rightspace = -5pt } 
-	, cells = { preto = {\small} }
-	}
+{\small
+$$
+\begin{array}{c c}
 	\AXC{$\async[A]{\Psi}{\Delta}{\Gamma}$}
 	\LeftLabel{\derRule[A]{\displaybot}}
 	\UIC{$\async[A]{\Psi}{\Delta}{\llbot, \Gamma}$}
@@ -13,7 +10,7 @@
 	\LeftLabel{\derRule[A]{\displaytop}}
 	\UIC{$\async[A]{\Psi}{\Delta}{\lltop, \Gamma}$}
 	\DP
-	\\
+	\\[30pt]
 	\AXC{$\async[A]{\Psi}{\Delta}{\phi_1, \phi_2, \Gamma}$}
 	\LeftLabel{\derRule[A]{\displaypar}}
 	\UIC{$\async[A]{\Psi}{\Delta}{\phi_1 \llpar \phi_2, \Gamma}$}
@@ -24,7 +21,7 @@
 	\LeftLabel{\derRule[A]{\displaywith}}
 	\BIC{$\async[A]{\Psi}{\Delta}{\phi_1 \llwith \phi_2, \Gamma}$}
 	\DP
-	\\
+	\\[30pt]
 	\AXC{$\focus[A]{\Psi}{\Delta}{\phi_1}$}
 	\LeftLabel{\derRule[A]{\displayplus[L]}}
 	\UIC{$\focus[A]{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
@@ -34,7 +31,7 @@
 	\LeftLabel{\derRule[A]{\displayplus[R]}}
 	\UIC{$\focus[A]{\Psi}{\Delta}{\phi_1 \llplus \phi_2}$}
 	\DP
-	\\
+	\\[30pt]
 	\AXC{$\focus[A]{\Psi}{\Gamma}{\phi_1}$}
 	\AXC{$\focus[A]{\Psi}{\Delta}{\phi_2}$}
 	\LeftLabel{\derRule[A]{\displayten}}
@@ -45,7 +42,7 @@
 	\LeftLabel{\derRule[A]{\displayone}}
 	\UIC{$\focus[A]{\Psi}{.}{\llone}$}
 	\DP
-	\\
+	\\[30pt]
 	\AXC{$\async[A]{\phi, \Psi}{\Delta}{\Gamma}$}
 	\LeftLabel{\derRule[A]{\displaywn}}
 	\UIC{$\async[A]{\Psi}{\Delta}{\llwn{\phi}, \Gamma}$}
@@ -55,7 +52,7 @@
 	\LeftLabel{\derRule[A]{\displaybang}}
 	\UIC{$\focus[A]{\Psi}{.}{\llbang{\phi}}$}
 	\DP
-	\\
+	\\[30pt]
 	\AXC{$\isNegLit{\alpha}$}
 	\LeftLabel{\derRule[A]{\displayid[1]}}
 	\UIC{$\focus[A]{\Psi}{\alpha}{\llnot{\alpha}}$}
@@ -65,7 +62,7 @@
 	\LeftLabel{\derRule[A]{\displayid[2]}}
 	\UIC{$\focus[A]{\alpha, \Psi}{.}{\llnot{\alpha}}$}
 	\DP
-	\\
+	\\[30pt]
 	\AXC{$\phi\;\text{not atom}$}
 	\AXC{$\focus[A]{\Psi}{\Delta}{\phi}$}
 	\LeftLabel{\derRule[A]{\displaydecide[1]}}
@@ -77,7 +74,7 @@
 	\LeftLabel{\derRule[A]{\displaydecide[2]}}
 	\BIC{$\async[A]{\phi, \Psi}{\Delta}{.}$}
 	\DP
-	\\
+	\\[30pt]
 	\AXC{$\phi\;\text{not asy}$}
 	\AXC{$\async[A]{\Psi}{\phi, \Delta}{\Gamma}$}
 	\LeftLabel{\derRule[A]{\displaytodelta}}
@@ -89,4 +86,6 @@
 	\LeftLabel{\derRule[A]{\displaytoasy}}
 	\BIC{$\focus[A]{\Psi}{\Delta}{\phi}$}
 	\DP
-\end{tblr}
+\end{array}
+$$
+}

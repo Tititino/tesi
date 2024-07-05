@@ -17,6 +17,7 @@
 	      amsmath
 	      amscls
 	      amstex
+	      babel-italian
 	      bussproofs
 	      cancel
 	      caption
@@ -33,18 +34,20 @@
 	      listings
 	      minted
 	      ninecolors
+	      pdfx
 	      setspace
 	      siunitx
 	      tabularray
 	      todonotes
 	      url
-	      xcolor;
+	      xcolor
+	      xmpincl;
 	  });
     in rec {
         packages = 
-	  let makeThesis = flags:
+	  let makePdf = fname: flags:
 	    stdenvNoCC.mkDerivation rec {
-              name = "thesis";
+              name = fname;
 
               system = system;
 
@@ -65,17 +68,18 @@
                 mkdir -p .cache/texmf-var
                 env TEXMFHOME=.cache TEXMFVAR=.cache/texmf-var    \
                   SOURCE_DATE_EPOCH=${toString self.lastModified} \
-		  make OPTIONS='[${toString flags}]' all
+		  make OPTIONS='[${toString flags}]' LCC=pdflatex ${fname}.pdf
 	      '';
 
               installPhase = ''
 		  mkdir -p $out
-		  cp thesis.pdf $out/thesis.pdf
+		  cp thesis.pdf $out/${fname}.pdf
 	      '';
             };
 	in rec {
-	  thesis = makeThesis [];
-	  debug = makeThesis ["dbg"];
+	  thesis = makePdf "thesis" [];
+	  debug = makePdf "thesis" ["dbg"];
+	  riassunto = makePdf "riassunto" [];
 	  default = thesis;
         };
 

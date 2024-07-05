@@ -1,29 +1,30 @@
-\begin{tblr}{ colspec = { c }
-	    , rows = {abovesep=7pt, belowsep=7pt}
-	    , cells = { preto = {\small} }
-	    }
+{\small
+$$
+\begin{array}{ c }
 	\AXC{$ \isNegLit{\alpha} $}
 	\AXC{$ \sat{\used{e_1}, \used{e_2}, \avail{\Delta}, \Lambda}{\mathV}$}
 	\LeftLabel{\derRule{\displayid[1]}}
 	\BIC{$\focus{\Psi}{\af{\alpha}{e_1}, \Delta}{\af{\llnot{\alpha}}{e_2}} \separator \constr{\Lambda}{\mathV}$}
 	\DP
-	\\
+	\\[30pt]
 	\AXC{$ \isNegLit{\alpha} $}
 	\AXC{$ \sat{\used{e}, \avail{\Delta}, \Lambda }{\mathV}$}
 	\LeftLabel{\derRule{\displayid[2]}}
 	\BIC{$\focus{\alpha, \Psi}{\Delta}{\af{\llnot{\alpha}}{e}} \separator \constr{\Lambda}{\mathV}$}
 	\DP
-	\\
+	\\[30pt]
 	\AXC{$\phi\;\text{not atom}$}
 	\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\used{e}, \Lambda}{\mathV}$}
 	\LeftLabel{\derRule{\displaydecide[1]}}
 	\BIC{$\async{\Psi}{\af{\phi}{e}, \Delta}{.} \separator \constr{\Lambda}{\mathV}$}
 	\DP
-	\\
+	\\[30pt]
 	\AXC{$\phi\;\text{not atom}$}
 	\AXC{$\new{x}$}
 	\AXC{$\focus{\Psi}{\Delta}{\af{\phi}{x}} \separator \constr{\used{x}, \Lambda}{\mathV}$}
 	\LeftLabel{\derRule{\displaydecide[2]}}
 	\TrinaryInfC{$\async{\phi, \Psi}{\Delta}{.} \separator \constr{\Lambda}{\mathV}$}
 	\DP
-\end{tblr}
+\end{array}
+$$
+}

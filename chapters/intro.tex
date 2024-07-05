@@ -1,6 +1,6 @@
-\chapter{Intro}\label{chapter:intro}
+\chapter{Introduction}\label{chapter:intro}
 Sequent calculus is a formalism first introduced by G. Gentzen in 1934 \cite{Gentzen1935I, Gentzen1935II}.
-Very briefly, a sequent is just an implication between finite (possibly empty) sequences of formulae, such that
+In classical logic, a sequent is just an implication between finite (possibly empty) sequences of formulae, such that
 $$ \Delta \vdash \Gamma $$ 
 is to be interpreted as
 $$ \bigwedge_{\phi \in \Delta} \phi \Rightarrow \bigvee_{\gamma \in \Gamma} \gamma $$
@@ -8,7 +8,7 @@ where $\Delta$ is called the antecedent, and $\Gamma$ the succedent.
 
 Sequents are manipulated using rules that have sequents as premises and as a conclusion.
 These rules are used to describe connectives operationally: defining their behaviour by how they are derived from smaller formulae.
-A rule acting on the antecedent is called a left rule or an introduction rule, whereas a rule acting on the succedent is called a right rule or an elimination rule.
+A rule acting on the antecedent is called a left rule whereas a rule acting on the succedent is called a right rule.
 A proof is then a tree where the root is the sequent to prove, and the inner nodes are the rules chained one to another by matching all the premises of a rule to the conclusion of another.
 This way the leaves are just rules without any premises, also called axioms.
 In this context a theorem prover, or simply a prover, is an algorithm that tries to build a proof of a given sequent to determine if it is true or not.
@@ -40,10 +40,10 @@ These do not directly specify the behaviour of some connective, but rather show 
 Logics missing at least one of these three rules are called substructural; it is in this class that lies linear logic.
 
 Linear logic is a logic proposed by J.-Y. Girard in his seminal paper of 1987 \cite{LinearLogic}.
-The distinctive trait of this logic is that its formulae cannot be copied or discarded, but instead they are consumed.
-Put differently, its sequent calculus lacks the structural rules of weakening and contraction.
+The distinctive trait of this logic is that in general its formulae cannot be copied or discarded, but instead they are consumed.
+Put differently, its sequent calculus lacks the structural rules of weakening and contraction\footnote{There are logics where even the exchange rule is missing, these are called non-commutative because the order of the formulae in the sequent matters (e.g. Lambek calculus)}.
 
-Under these assumptions a certain judgment is provable if and only if all of its formulae get used exactly once; for this reason this logic is sometimes called a logic of resources, in the same way classical logic is a logic of truths and intuitionistic logic is a logic of proofs.
+Under these assumptions a certain sequent (interpreting sequents as multisets) is provable if and only if all of its formulae get used exactly once; for this reason this logic is sometimes called a logic of resources, in the same way classical logic is a logic of truths and intuitionistic logic is a logic of proofs.
 % Questo particolare utilizzo delle formule permette di avere una logica che mantiene la simmetria delle logica classica, e il costruttivismo delle logica intuizionista.
 
 In linear logic each connective from classical logic has two versions: an additive one -- where the context is the same for all the premises, and a multiplicative one -- where the context is partitioned between the premises.
@@ -65,7 +65,7 @@ The two rules above are equivalent only if the use of weakening and contraction 
 The same holds for the constants $\top$ and $\bot$, which also have two versions.
 \begin{table}[h!]
 	\centering
-	\begin{tblr}{c|cc}
+	\begin{tabular}{c|cc}
 		\hline
 		Class. & Add. & Mult. \\
 		\hline
@@ -74,7 +74,7 @@ The same holds for the constants $\top$ and $\bot$, which also have two versions
 		$\vee$   & $\displayplus$  & $\displaypar$ \\
 		$\top$   & $\displaytop$   & $\displayone$ \\
 		$\bot$   & $\displayzero$  & $\displaybot$ \\
-	\end{tblr}
+	\end{tabular}
 	\caption{Classical connectives and their corresponding linear ones.\label{table:classic to linear}}
 \end{table}
 Table \ref{table:classic to linear} shows the linear logic connectives corresponding to the classical ones.
@@ -107,7 +107,10 @@ In 2001 D. Pym and J. Harland publish a paper \cite{HarlandPym} where they prese
 These constraints are generated during proof search from boolean expressions associated to the formulae, and are used to enforce linearity.
 This way the complexity shifts from choosing the right set of formulas to prove a certain branch, to solving for boolean assignment -- a problem for which there are much more sophisticated algorithms.
 
-In \S\ref{chapter:calculus} we define a focused and one-sided version to the calculus described in \cite{HarlandPym}, and we give a proof of its soundness consisting of a forgetful functor to the triadic calculus of \cite{Focusing}.
-In \S\ref{chapter:implementation} we discuss a Prolog implementation of the calculus of the previous chapter.
-In \S\ref{chapter:related work} we quickly describe the main implementation details of two other bottom-up provers for full linear logic: llprover \cite{llprover} and APLL \cite{APLL}.
-Finally in \S\ref{chapter:testing} we present the framework built to test and compare our prover with the others from the previous section, and then we show the results of these benchmarks.
+This thesis is organized as follows:
+\begin{itemize}
+	\item in \S\ref{chapter:calculus} we define a focused and one-sided version to the calculus described in \cite{HarlandPym}, and we give a proof of its soundness consisting of a forgetful functor to the triadic calculus of \cite{Focusing};
+	\item in \S\ref{chapter:implementation} we discuss a Prolog implementation of the calculus of the previous chapter;
+	\item in \S\ref{chapter:related work} we quickly describe the main implementation details of two other bottom-up provers for full linear logic: llprover \cite{llprover} and APLL \cite{APLL};
+	\item finally in \S\ref{chapter:testing} we present the framework built to test and compare our prover with the others from the previous section, and then we show the results of these benchmarks.
+\end{itemize}

@@ -1,2 +1,14 @@
 \chapter{Conclusion}\label{chapter:conclusion}
-placeholder.
+The purpose of the original paper \cite{HarlandPym} was to show a general way to handle splitting which could be adapted to a series of different logics.
+In \S\ref{chapter:testing} we show that, after modifying the original calculus using techniques from proof theory (i.e. focusing \cite{Focusing} and normalization), this usage of constraints is an effective way of hadling multiplicatives during linear logic proof search.
+Furthermore in \S\ref{chapter:implementation}, our Prolog implementation demostrates how this method can be fairly easily integrated into a standard focusing prover without needing excessive modification, in part thanks to Prolog's elegant interface for CLP.
+
+There are many ways in which our work may be expanded in the future, just to cite a few:
+\begin{itemize}
+	\item our prover as of right now handles exponentials rather poorly (see Section \ref{sec:benchmarking}), research could be made to devise alternative heuristics or a more refined use of constraints;
+	\item a constraint calculus for intuitionistic linear logic (ILL) may be defined and a prover similar to ours implemented; the same could be said about the logic of bunched implications (BI) using the calculus described in \cite{HarlandPym};
+	\item more exotic uses of constraints may be explored, perhaps using disjunction on the axioms such that
+		$$ \vdash \af{a}{e_1}, \af{a}{e_2}, \af{\llnot{a}}{e_3} $$
+	generates the constraints
+		$$ ((\used{e_1} \wedge \avail{e_2}) \vee (\avail{e_1} \wedge \used{e_2})) \wedge \used{e_3} $$
+\end{itemize}

@@ -5,61 +5,60 @@ which is normalized to
 $$ \vdash (a \llten b), \llnot{a} \llpar \llnot{b} $$
 corresponds in our calculus to 
 $$
-	\footnotesize
+	\small
 	\AXC{${\normalsize \nabla'} \hspace{5cm} {\normalsize \nabla''}$}
-	\LeftLabel{$[\llten]$}
+	\LeftLabel{\derRule{\displayten}}
 	\UIC{$\focus{.}{\af{\llnot{a}}{x_2}, \af{\llnot{b}}{x_2}}{\af{a \llten b}{x_1}} \separator \constr{\used{x_1}, \used{x_2}}{\mathV}$}
-	\LeftLabel{$[D_1]$}
+	\LeftLabel{\derRule{\displaydecide[1]}}
 	\UIC{$\async{.}{\af{\llnot{a}}{x_2}, \af{\llnot{b}}{x_2}, \af{a \llten b}{x_1}}{.} \separator \constr{\used{x_1}, \used{x_2}}{\mathV}$}
-	\LeftLabel{$[R\!\Uparrow]$}
+	\LeftLabel{\derRule{\displaytodelta}}
 	\UIC{$\async{.}{ \af{\llnot{b}}{x_2}, \af{a \llten b}{x_1}}{\af{\llnot{a}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{\mathV}$}
-	\LeftLabel{$[R\!\Uparrow]$}
+	\LeftLabel{\derRule{\displaytodelta}}
 	\UIC{$\async{.}{\af{a \llten b}{x_1}}{\af{\llnot{b}}{x_2}, \af{\llnot{a}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{\mathV}$}
-	\LeftLabel{$[\llpar]$}
+	\LeftLabel{\derRule{\displaypar}}
 	\UIC{$\async{.}{\af{a \llten b}{x_1}}{\af{\llnot{a} \llpar \llnot{b}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{\mathV}$}
-	\LeftLabel{$[R\!\Uparrow]$}
+	\LeftLabel{\derRule{\displaytodelta}}
 	\UIC{$\async{.}{.}{\af{a \llten b}{x_1}, \af{\llnot{a} \llpar \llnot{b}}{x_2}} \separator \constr{\used{x_1}, \used{x_2}}{\mathV}$}
 	\DP
 $$
 with
-\begin{align*}
-	\nabla' =\;& {\footnotesize
+	$$ \nabla' =\; {\small
 	\AXC{$\sat{\used{x_1}, \used{x_2}, \used{x_2x_3}, \avail{x_2x_4}}{\mathV}$}
-	\LeftLabel{$[I_1]$}
+	\LeftLabel{\derRule{\displayid[1]}}
 	\UIC{$\focus{.}{\af{a}{x_1}, \cancel{\af{\llnot{b}}{x_2x_4}}}{\af{\llnot{a}}{x_2x_3}} \separator \constr{\used{x_1}, \used{x_2}}{\mathV}$}
-	\LeftLabel{$[D_1]$}
+	\LeftLabel{\derRule{\displaydecide[1]}}
 	\UIC{$\async{.}{\af{a}{x_1}, \af{\llnot{a}}{x_2x_3}, \cancel{\af{\llnot{b}}{x_2x_4}}}{.} \separator \constr{\used{x_1}, \used{x_2}}{\mathV}$}
-	\LeftLabel{$[R\!\Uparrow]$}
+	\LeftLabel{\derRule{\displaytodelta}}
 	\UIC{$\async{.}{\af{\llnot{a}}{x_2x_3}, \cancel{\af{\llnot{b}}{x_2x_4}}}{\af{a}{x_1}} \separator \constr{\used{x_1}, \used{x_2}}{\mathV}$}
-	\LeftLabel{$[R\!\Downarrow]$}
+	\LeftLabel{\derRule{\displaytoasy}}
 	\UIC{$\focus{.}{\af{\llnot{a}}{x_2x_3}, \cancel{\af{\llnot{b}}{x_2x_4}}}{\af{a}{x_1}} \separator \constr{\used{x_1}, \used{x_2}}{\mathV}$}
-	\DP} \\
-	& \\
-	\nabla'' =\;& {\footnotesize
+	\DP} $$
+	$$
+	\nabla'' =\; {\small
 	\AXC{$\sat{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}, \used{x_2\varNot{x_4}}, \avail{x_2\varNot{x_3}}}{\mathV}$}
-	\LeftLabel{$[I_1]$}
+	\LeftLabel{\derRule{\displayid[1]}}
 	\UIC{$\focus{.}{\af{b}{x_1}, \cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}}{\af{\llnot{b}}{x_2\varNot{x_4}}} \separator \constr{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}}{\mathV}$}
-	\LeftLabel{$[D_1]$}
+	\LeftLabel{\derRule{\displaydecide[1]}}
 	\UIC{$\async{.}{\af{b}{x_1}, \cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}, \af{\llnot{b}}{x_2\varNot{x_4}}}{.} \separator \constr{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}}{\mathV}$}
-	\LeftLabel{$[R\!\Uparrow]$}
+	\LeftLabel{\derRule{\displaytodelta}}
 	\UIC{$\async{.}{\cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}, \af{\llnot{b}}{x_2\varNot{x_4}}}{\af{b}{x_1}} \separator \constr{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}}{\mathV}$}
-	\LeftLabel{$[R\!\Downarrow]$}
+	\LeftLabel{\derRule{\displaytoasy}}
 	\UIC{$\focus{.}{\cancel{\af{\llnot{a}}{x_2\varNot{x_3}}}, \af{\llnot{b}}{x_2\varNot{x_4}}}{\af{b}{x_1}} \separator \constr{\used{x_1}, \used{x_2}, \used{x_3}, \avail{x_4}}{\mathV}$} 
-	\DP} \\
-	& \\
-	\mathV =\;& \{ x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot \} 
-\end{align*}
+	\DP} 
+	$$
+and
+	$$ \mathV = \{ x_1 \mapsto \top, x_2 \mapsto \top, x_3 \mapsto \top, x_4 \mapsto \bot \} $$
 For reference we show the classic proof (non focused, without constraints) for the same judgment:
 $$
 	\AXC{}
-	\LeftLabel{$[A]$}
+	\LeftLabel{\derRule{A}}
 	\UIC{$\vdash a, \llnot{a}$}
 	\AXC{}
-	\LeftLabel{$[A]$}
+	\LeftLabel{\derRule{A}}
 	\UIC{$\vdash b, \llnot{b}$}
-	\LeftLabel{$[\llten]$}
+	\LeftLabel{\derRule{\displayten}}
 	\BIC{$\vdash \llnot{a}, \llnot{b}, (a \llten b)$}
-	\LeftLabel{$[\!\llpar\!]$}
+	\LeftLabel{\derRule{\displaypar}}
 	\UIC{$\vdash (a \llten b), (\llnot{a} \llpar \llnot{b})$}
 	\DP
 $$

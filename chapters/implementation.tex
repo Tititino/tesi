@@ -37,7 +37,7 @@ To better understand how the predicate works, we give some examples:
 ?- check([X * Y =:= 0]).
 sat(1#X*Y).
 \end{minted}
-	\item if the constraints are unstisfiable, the predicate fails:
+	\item if the constraints are unsatisfiable, the predicate fails:
 \begin{minted}{prolog}
 ?- check([X * Y =:= 1, X =:= 0]).
 false.
