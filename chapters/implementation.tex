@@ -155,7 +155,7 @@ Finally, it must be noted that there is no predicate implementing the concept of
 Focusing is implemented by two mutually defined predicates: \texttt{async/8} and \texttt{focus/8}, encoding respectively the asynchronous and the synchronous rules of Figure \ref{fig:calculus}.
 
 During the asynchronous phase there are two lists: \texttt{Fs} and \texttt{D}, representing $\Gamma$ and $\Delta$.
-The asynchronous rules always work on the head of \texttt{Fs}, breaking it down into its sub-formulae.
+The asynchronous rules always work on the head of \texttt{Fs}, breaking it down into its subformulae.
 This process can be seen for example in the clause for with ($\displaywith$):
 \begin{minted}[linenos]{prolog}
 async(A, U, D, [F|Fs], S, M, L) :-
@@ -178,7 +178,7 @@ When each formula is moved from \texttt{Fs} to \texttt{D}, the phase switches an
 The decide rules will be discussed further ahead in Section \ref{sec:decide}.
 The chosen formula gets broken down until either an asynchronous connective or a negated atom is left. 
 Unlike the asynchronous phase, the rules applied in this phase are non-deterministic and may be backtracked, so not cut is introduced.
-Other than this the implementation of the predicate \texttt{focus/8} is almost the same as \texttt{async/8}: the formula is broken down into its sub-formulae, and -- if necessary -- the why not heights are used to guide the proof search.
+Other than this the implementation of the predicate \texttt{focus/8} is almost the same as \texttt{async/8}: the formula is broken down into its subformulae, and -- if necessary -- the why not heights are used to guide the proof search.
 
 \subsection{Identity rules}\label{sec:identity}
 This process of alternating asynchronous and synchronous phases in normal focusing (i.e. without constraints) goes on until only a positive literal (in our case a negated atom) in \texttt{Fs} is left, and the corresponding negative literal (in our case just an atom) in either present in \texttt{U} or \texttt{D}.
@@ -267,8 +267,8 @@ async(A, U, D, [F|Fs], S, M, L, node(par, A, U, D, [F|Fs], [T])) :-
   Fs1 = [af(F1, N, E), af(F2, N, E)|Fs],
   async(A, U, D, Fs1, S, M, [v(E) =:= 1|L], T).
 \end{minted}
-we can see clearly in the eight argument the structure of one node of the tree: a label, the context and an -- optionally empty -- list of sub-trees, here containing only the subtree \texttt{T}.
-A leaf is just a node with an empty list of sub-trees.
+we can see clearly in the eight argument the structure of one node of the tree: a label, the context and an -- optionally empty -- list of subtrees, here containing only the subtree \texttt{T}.
+A leaf is just a node with an empty list of subtrees.
 
 This term can be used in the end to reconstruct the actual proof tree by visiting it and -- for each formula of each node -- querying whether its variable is set to one, deleting it otherwise (this process is the same used in the proof for Theorem \ref{thm:soundness}).
 A tree without the focusing infrastructure may be built by removing all the nodes regarding the phases (i.e. $\displaytoasy$ $\displaytodelta$ and decide rules) and by rebuilding the original sequent by appending \texttt{A}, \texttt{U}, \texttt{D} and \texttt{Fs} together as explained in \cite{Focusing}. 

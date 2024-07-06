@@ -7,7 +7,7 @@ There are many ways in which our work may be expanded in the future, just to cit
 \begin{itemize}
 	\item our prover as of right now handles exponentials rather poorly (see Section \ref{sec:benchmarking}), research could be made to devise alternative heuristics or a more refined use of constraints;
 	\item a constraint calculus for intuitionistic linear logic (ILL) may be defined and a prover similar to ours implemented; the same could be said about the logic of bunched implications (BI) using the calculus described in \cite{HarlandPym};
-	\item more exotic uses of constraints may be explored, perhaps using disjunction on the axioms such that
+	\item more interesting uses of constraints may be explored, perhaps using disjunction on the axioms such that
 		$$ \vdash \af{a}{e_1}, \af{a}{e_2}, \af{\llnot{a}}{e_3} $$
 	generates the constraints
 		$$ ((\used{e_1} \wedge \avail{e_2}) \vee (\avail{e_1} \wedge \used{e_2})) \wedge \used{e_3} $$

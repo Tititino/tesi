@@ -9,15 +9,15 @@
 \begin{document}
 
 \section{Ente presso cui è stato svolto il lavoro di stage}
-Il lavoro di tirocinio è stato di tipologia interna presso il dipartimento di Informatica dell'Università degli Studi di Milano, sotto la supervisione del docente Alberto Momigliano e il docente Camillo Fiorentini.
+Il lavoro di tirocinio è stato di tipologia interna presso il dipartimento di Informatica dell'Università degli Studi di Milano, sotto la supervisione del docente prof. Alberto Momigliano e il docente prof. Camillo Fiorentini.
 
 \section{Contesto iniziale}
-Nell'ambito dei dimostratori automatici bottom-up per basati sul calcolo dei sequenti per la logica lineare, una delle principali fonti di complessità p un'operazione chiamata splitting.
+Nell'ambito dei dimostratori automatici bottom-up basati sul calcolo dei sequenti per la logica lineare, una delle principali fonti di complessità è un'operazione chiamata splitting.
 Questa richiede che ripetutamente durante la computazione della dimostrazione sia necessario partizionare le conclusioni o le assunzioni, portando ad una esplosione combinatoria che si aggiunge all'inerente complessità del proof searching.
 
 Il lavoro di tirocinio inizia da un articolo del 2001 di J. Harland e D. Pym \cite{HarlandPym} dove si propone un metodo alternativo per affrontare lo splitting affidandosi a vincoli booleani.
-I vincoli vengono generati in modo tale che se questi sono soddisfacibili, allora la dimostrazione è corretta. 
-In questo modo i multiset di formule non vengono mai effettivamente partizionati, e la complessità viene spostata dalla generazione della subscorretta, alla ricerca di un assegnamento per i vincoli booleani.
+I vincoli vengono generati in modo tale che se questi sono soddisfacibili, allora la dimostrazione è corretta;
+in questo modo i multiset di formule non vengono mai effettivamente partizionati, e la complessità viene spostata dalla generazione dei sottoinsiemi corretti, alla ricerca di un assegnamento per i vincoli booleani.
 
 \section{Obiettivi del lavoro}
 L'obiettivo principale del lavoro è stato implementare un prover basato sul calcolo di cui sopra e, una volta fatto questo, valutarne la efficacia anche rispetto ad altri prover esistenti.
@@ -25,8 +25,8 @@ L'obiettivo principale del lavoro è stato implementare un prover basato sul cal
 \section{Descrizione del lavoro svolto}
 Inizialmente è stato implementato un prover basato direttamente sul calcolo di \cite{HarlandPym}, ma questo si è rivelato inefficiente.
 Successivamente sono state applicate alcune modifiche ormai assodate nell'ambito del theorem proving quali la normalizzazione e il focusing \cite{Focusing}.
-Di questo nuovo calcolo è stato prima dimostrata la correttezza, esibendo una traduzione verso il calcolo triadico di \cite{Focusing}.
-Infine la nuova implementazione è stata confrontata con due altri prover: APLL \cite{APLL} e llprover \cite{llprover}.
+Di questo nuovo calcolo è stata prima dimostrata la correttezza, esibendo una traduzione verso il calcolo triadico di \cite{Focusing}, poi ne è stata fatta una implemetazione in Prolog.
+Infine il programma è stato confrontato con due altri prover simili: APLL \cite{APLL} e llprover \cite{llprover}.
 
 \section{Tecnologie coinvolte}
 Sono state coinvolte le seguenti tecnologie:
@@ -34,8 +34,7 @@ Sono state coinvolte le seguenti tecnologie:
 	\item il linguaggio SWI-Prolog per la scrittura del prover, con particolare enfasi sulle sue librerie per il constraint logic programming (CLP);
 	\item il linguaggio OCaML per la scrittura di un generatore di formule randomiche;
 	\item il linguaggio Python e Jupyter Notebook per l'infrastruttura necessaria per comparare diversi prover;
-	\item il linguaggio Nix (flake) e bash per l'automazione dei processi di compilazione e la
-generazione di ambienti di sviluppo riproducibili.
+	\item il linguaggio Nix (in particolar modo l'estensione dei flake) e bash per l'automazione dei processi di compilazione e la generazione di ambienti di sviluppo riproducibili.
 \end{itemize}
 
 \section{Competenze e risultati raggiunti}
@@ -44,7 +43,7 @@ I benchmark hanno evidenziato come l'utilizzo dei vincoli booleani, assieme al f
 Il lavoro di tirocinio mi ha dato l'opportunità di avvicinarmi all’ambito della dimostrazione automatica, e a familiarizzarmi con la notazione del calcolo dei sequenti.
 Inoltre l’utilizzo di Prolog per l'implementazione mi ha permesso di esplorare diversi ambiti della programmazione logica, ad esempio le CFG e CLP.
 
-Una delle problematiche principali si è rivelata essere la carenza di test senza esponenziali, infatti la quasi totalità dei dataset di formule di logica lineare è costituito da traduzioni di teoremi intuizionisti o di reti di Petri; entrambi casi caratterizzati da un alto numero di esponenziali.
+Una delle problematiche principali si è rivelata essere la carenza di test senza esponenziali -- un particolare tipo di connettivo della logica lineare; infatti la quasi totalità dei dataset di formule di logica lineare è costituito da traduzioni di teoremi intuizionisti o di reti di Petri, entrambi casi caratterizzati da un alto numero di esponenziali.
 Visto che il nostro obiettivo principale era di valutare il prover nel caso moltiplicativo, è stato necessario trovare fonti alternative di formule.
 A questo scopo si è modificato un generatore randomico di formule affinché producesse casi senza esponenziali.
 
