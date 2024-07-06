@@ -2,11 +2,11 @@
 \section{Infrastructure}
 The infrastructure for the project is divided in two parts:
 \begin{itemize}
-	\item the nix ``glue'',		% modifico
+	\item the Nix \cite{nix} ``glue'',		
 	\item some python utilities to call and confront provers.
 \end{itemize}
-In nix everything must be packaged as a derivation: a recipe specifying all the needed programs (as other derivations) and the steps needed to build the current one.
-These steps are then executed in a environment containing only the specified programs and little else.
+In nix everything must be packaged as something called a derivation: a declarative recipe specifying all the needed programs (as other derivations) and the steps necessary to build the source.
+These steps are executed in a environment containing only the specified programs and little else.
 
 Derivations are written for all the programs we interact with:
 \begin{itemize}
@@ -14,7 +14,7 @@ Derivations are written for all the programs we interact with:
 	\item the formula generator adapted from APLL described in Section \ref{sec:formula generator};
 	\item the LLTP parser.
 \end{itemize}
-All these, together with one for the python environment, are then used to define a single development environment to run the jupyter notebook with all the necessary dependencies.
+All these, together with one for the python environment, are then used to define a single development environment to run the Jupyter notebook with all the necessary dependencies.
 Furthermore, having used ``flakes'' (a nix experimental feature), all dependencies are locked to a certain commit thus ensuring better reproducibility.
 
 The main logic for the benchmarking and testing is defined in the python module \texttt{testprover.py}.
@@ -44,7 +44,7 @@ The library then provides two functions:
 	\item \texttt{benchmark} accepts a register and a test suite and returns the times and outcomes of each prover.
 		This function is used to compare different provers.
 \end{itemize}
-All the outputs of the functions above are pandas \texttt{DataFrame}s, which means that they can be easily queried, dumped to csv, aggregated, or visualized using most plotting libraries.
+All the outputs of the functions above are pandas \texttt{DataFrame}s, which means that they can be easily queried, dumped to CSV, aggregated, or visualized using most plotting libraries.
 For example let \texttt{out} be the output of a call to \texttt{testall} with some prover and test suite:
 \begin{minted}{python}
 out['outcome'].map(lambda x: x == Outcome.SUCCESS).all()
@@ -54,11 +54,11 @@ len(out[(out['outcome'] == Outcome.FAILURE)
 test respectively whether all the tests succeeded and the number of failed tests.
 
 \subsection{Prefix format}\label{sec:prefix}
-Since for benchmarking we will interface with a lot of different provers -- each with its own syntax for expressions -- the need arose for a common format which was easy to parse and translate.
+Since for benchmarking we may interface with many different provers -- each with its own syntax for expressions -- the need arose for a common format which was easy to parse and translate.
 For this purpose we define a prefix format for linear logic formulae inspired by the format used by \cite{TarauPaiva} for implicational formulae:
 \begin{table}[H]
 	\centering
-	\begin{tblr}{ colspec = {cc} }
+	\begin{tabular}{cc}
 		\hline
 			formula & symbol \\
 		\hline
@@ -71,7 +71,7 @@ For this purpose we define a prefix format for linear logic formulae inspired by
 			$\llnot{\phi_A}$        & \texttt{\^{}A} \\
 			$\llwn{\phi_A}$         & \texttt{?A} \\
 			$\llbang{\phi_A}$       & \texttt{!A} \\
-	\end{tblr}
+	\end{tabular}
 \end{table}
 Each single character not representing an operator is considered as a variable name.
 Longer names can be specified by enclosing them in single quotes as in \texttt{'varname'}.
@@ -86,13 +86,11 @@ $$ \mathrm{prefix}(\llnot{(a \llten b)} \lolli \llnot{a} \llpar \llnot{b}) = \te
 We use json as a standard format to store the tests, because of its vast adoption by most programming languages.
 A test suite is thus defined as a list of test cases; where a test case is just an object with these three mandatory fields:
 \begin{center}
-\begin{tblr}{ colspec = {l l}
-	    , cell{1,2,3}{2} = {cmd=\parbox{11cm}}
-	}
-	\textbf{id} & is a number with the sole purpose of tracing back the test case from the output; \\
-	\textbf{premises} & is a list of premises as prefix formulae; \\
-	\textbf{conclusions} & is a list of conclusions as prefix formulae. \\
-\end{tblr}
+\begin{tabular}{l l}
+	\textbf{id} &  		\parbox{11cm}{is a number with the sole purpose of tracing back the test case from the output;} \\
+	\textbf{premises} & 	\parbox{11cm}{is a list of premises as prefix formulae;} \\
+	\textbf{conclusions} & 	\parbox{11cm}{is a list of conclusions as prefix formulae.} \\
+\end{tabular}
 \end{center}
 For example
 \begin{minted}{json}
@@ -105,15 +103,13 @@ For example
 is the test case representing $\llnot{(a \llten b)} \vdash \llnot{a} \llpar \llnot{b}$.
 Other arbitrary fields may be present; for example we will use the following optional fields:
 \begin{center}
-\begin{tblr}{ colspec = {l l}
-	    , cell{1,2,3,4,5}{2} = {cmd=\parbox{11cm}}
-	}
-	\textbf{thm} & tells whether this test case is a tautology or not, may be null; \\
-	\textbf{*, +, ?, ...} & is the number of times a specific connective appears in the test case; \\
-	\textbf{notes} & is a human readable string about the test case, e.g. its infix representation; \\
-	\textbf{size} & is an indicative number of the size of the formula; \\
-	\textbf{atoms} & is the upper bound on the number of atoms.
-\end{tblr}
+	\begin{tabular}{ l l }
+		\textbf{thm} & 		\parbox{11cm}{tells whether this test case is a tautology or not, may be null;} \\
+		\textbf{*, +, ?, ...} & \parbox{11cm}{is the number of times a specific connective appears in the test case;} \\
+		\textbf{notes} & 	\parbox{11cm}{is a human readable string about the test case, e.g. its infix representation;} \\
+		\textbf{size} & 	\parbox{11cm}{is an indicative number of the size of the formula;} \\
+		\textbf{atoms} & 	\parbox{11cm}{is the upper bound on the number of atoms.}
+	\end{tabular}
 \end{center}
 The fields \texttt{size} and \texttt{atoms} will be further explained in Section \ref{sec:formula generator}.
 
@@ -122,7 +118,7 @@ One of the sources of formulae we'll use in Section \ref{sec:benchmarking} is AP
 The version we'll use is a slight modification of it, where:
 \begin{itemize}
 	\item the output is in the json format described in Section \ref{sec:file format};
-	\item one can whether choose to generate normalized formulae or not;
+	\item one can choose whether to generate normalized formulae or not;
 	\item one can choose which connectives appear in the generated formula.
 \end{itemize}
 % TODO: sistemo
@@ -151,7 +147,7 @@ Randomly generated formulae will be used only for non-exponential test for the f
 \begin{itemize}
 	\item datasets of linear logic theorems without exponentials are rare and most often the formulae in them do not have a significant size; 
 	\item when dealing with exponential formulae a prover may wrongfully deem a true formula false, just because it exhausted its bound.
-		This problem is exacerbated when dealing generated tests: since the expected output is not known we do not know if the prover terminated because of the bound, or if the test is actually a non-theorem.
+		This problem is exacerbated when dealing with generated tests: since the expected output is not known we do not know if the prover terminated because of the bound, or if the test is actually a non-theorem.
 \end{itemize}
 
 Using random formulae we can see that our prover outperforms APLL (and llprover) when dealing with formulae rich in multiplicatives (Figure \ref{fig:mll bars} and Table \ref{table:mll}).
@@ -159,13 +155,13 @@ Using random formulae we can see that our prover outperforms APLL (and llprover)
 	\centering
 	\begin{subfigure}{0.49\textwidth}
 		\centering
-		\includegraphics[scale=0.5]{mll.pdf}
+		\includegraphics[scale=0.5]{figures/mll.pdf}
 		\caption{Multiplicative case}
 		\label{fig:mll bars}
 	\end{subfigure}
 	\begin{subfigure}{0.49\textwidth}
 		\centering
-		\includegraphics[scale=0.5]{mall.pdf}
+		\includegraphics[scale=0.5]{figures/mall.pdf}
 		\caption{Multiplicative and additive case}
 		\label{fig:mall bars}
 	\end{subfigure}
@@ -174,39 +170,35 @@ Using random formulae we can see that our prover outperforms APLL (and llprover)
 \begin{table}[h!]
 	\begin{subtable}{\textwidth}
 		\centering
-		\begin{tblr}{ 
-			colspec = { | l c c c c | },
-			cells = { preto = {\footnotesize} },
-			row{1} = {cmd=\textbf}
-			}
+		{\footnotesize
+		\begin{tabular}{| l c c c c | }
 			\hline
-			prover & timeouts & successes & success rate & avg. time (succ.) \\
+			\textbf{prover} & \textbf{timeouts} & \textbf{successes} & \textbf{success rate} & \textbf{avg. time (succ.)} \\
 			\hline
 			\hline
 			APLL & 34 & 66 & $0.66$ & \qty{1.441}{\second}  \\
 			llprover & 50 & 50 & $0.50$ & \qty{3.006}{\second}  \\
 			sat-ll & 7 & 93 & $0.93$ & \qty{1.874}{\second} \\
 			\hline
-		\end{tblr}
+		\end{tabular}
+		}
 		\caption{Data corresponding to Figure \ref{fig:mll bars}}
 		\label{table:mll}
 	\end{subtable}\vspace{.5cm}
 	\begin{subtable}{\textwidth}
 		\centering
-		\begin{tblr}{ 
-			colspec = { | l c c c c | },
-			cells = { preto = {\footnotesize} },
-			row{1} = { cmd = \textbf }
-			}
+		{\footnotesize
+		\begin{tabular}{| l c c c c | }
 			\hline
-			prover & timeouts & successes & success rate & avg. time (succ.) \\
+			\textbf{prover} & \textbf{timeouts} & \textbf{successes} & \textbf{success rate} & \textbf{avg. time (succ.)} \\
 			\hline
 			\hline
 			APLL & 24 & 76 & $0.76 $ & \qty{1.213}{\second}  \\
 			llprover & 42 & 58 & $0.58$ & \qty{0.807}{\second}  \\
 			sat-ll & 7 & 93 & $0.93$ & \qty{1.289}{\second} \\
 			\hline
-		\end{tblr}
+		\end{tabular}
+		}
 		\caption{Data corresponding to Figure \ref{fig:mall bars}}
 		\label{table:mall}
 	\end{subtable}
@@ -224,39 +216,35 @@ All these test were done generating suites of 100 tests using a timeout of \qty{
 \begin{table}[h!]
 	\begin{subtable}{\textwidth}
 		\centering
-		\begin{tblr}{ 
-			colspec = { | l c c c c c c | },
-			cells = { preto = {\footnotesize} },
-			row{1} = { cmd = \textbf },
-			}
+		{\footnotesize
+		\begin{tabular}{ | l c c c c c c | }
 			\hline
-			prover & timeouts & failures & successes & success rate & avg. (succ.) & avg. (tot.) \\
+			\textbf{prover} & \textbf{timeouts} & \textbf{failures} & \textbf{successes} & \textbf{success rate} & \textbf{avg. (succ.)} & \textbf{avg. (tot.)} \\
 			\hline
 			\hline
 			APLL & 0 & 17 & 71 & $\approx 0.80$ & \qty{0.035}{\second} & \qty{0.326}{\second} \\
 			llprover & 20 & 6 & 62 & $\approx 0.70$ & \qty{0.981}{\second} & \qty{2.179}{\second} \\
 			sat-ll & 5 & 15 & 68 & $\approx 0.77$ & \qty{0.443}{\second} & \qty{0.496}{\second} \\
 			\hline
-		\end{tblr}
+		\end{tabular}
+		}
 		\caption{Outputs for KLE-cbv}
 		\label{table:KLE-cbv}
 	\end{subtable}\vspace{.5cm}
 	\begin{subtable}{\textwidth}
 		\centering
-		\begin{tblr}{ 
-			colspec = { | l c c c c c c | },
-			cells = { preto = {\footnotesize} },
-			row{1} = {cmd=\textbf}
-			}
+		{\footnotesize
+		\begin{tabular}{ | l c c c c c c | }
 			\hline
-			prover & timeouts & failures & successes & success rate & avg. (succ.) & avg. (tot.) \\
+			\textbf{prover} & \textbf{timeouts} & \textbf{failures} & \textbf{successes} & \textbf{success rate} & \textbf{avg. (succ.)} & \textbf{avg. (tot.)} \\
 			\hline
 			\hline
 			APLL & 0 & 16 & 72 & $\approx 0.80$ & \qty{0.037}{\second} & \qty{0.055}{\second} \\
 			llprover & 20 & 6 & 62 & $\approx 0.70$ & \qty{1.709}{\second} & \qty{3.253}{\second} \\
 			sat-ll & 4 & 18 & 66 & $\approx 0.75$ & \qty{0.130}{\second} & \qty{0.185}{\second} \\
 			\hline
-		\end{tblr}
+		\end{tabular}
+		}
 		\caption{Outputs for KLE-cbn}
 		\label{table:KLE-cbn}
 	\end{subtable}

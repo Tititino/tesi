@@ -1,18 +1,18 @@
 \chapter{Introduction}\label{chapter:intro}
 Sequent calculus is a formalism first introduced by G. Gentzen in 1934 \cite{Gentzen1935I, Gentzen1935II}.
-In classical logic, a sequent is just an implication between finite (possibly empty) sequences of formulae, such that
+In its classical interpretation, a sequent is just an implication between finite (possibly empty) sequences of formulae, such that
 $$ \Delta \vdash \Gamma $$ 
 is to be interpreted as
 $$ \bigwedge_{\phi \in \Delta} \phi \Rightarrow \bigvee_{\gamma \in \Gamma} \gamma $$
-where $\Delta$ is called the antecedent, and $\Gamma$ the succedent.
+and $\Delta$ is called the antecedent, and $\Gamma$ the succedent.
 
 Sequents are manipulated using rules that have sequents as premises and as a conclusion.
-These rules are used to describe connectives operationally: defining their behaviour by how they are derived from smaller formulae.
+These rules are used to describe connectives operationally: defining their behavior by how they are derived from smaller formulae.
 A rule acting on the antecedent is called a left rule whereas a rule acting on the succedent is called a right rule.
-A proof is then a tree where the root is the sequent to prove, and the inner nodes are the rules chained one to another by matching all the premises of a rule to the conclusion of another.
+A proof is then a tree where the root is the sequent to prove, and the inner nodes are the rules chained one to another by matching permises to conclusions.
 This way the leaves are just rules without any premises, also called axioms.
-In this context a theorem prover, or simply a prover, is an algorithm that tries to build a proof of a given sequent to determine if it is true or not.
-More precisely a bottom-up prover starts at the final sequent, and tries to build the proof tree by applying the rules of the calculus backwards, thus breaking down the formulae into their sub-formulae.
+In this context, a theorem prover -- or simply a prover -- is an algorithm that tries to build a proof of a given sequent to determine if it is true or not.
+More precisely a bottom-up prover starts at the final sequent, and tries to build the proof tree by applying the rules of the calculus backwards, breaking down the formulae into their subformulae.
 
 There are three special rules -- called structural rules -- often left implicit in proofs.
 We give their left versions:
@@ -36,17 +36,17 @@ We give their left versions:
 		\DP
 		$$
 \end{itemize}
-These do not directly specify the behaviour of some connective, but rather show the ways in which a formula may be moved inside the sequent.
+These do not directly specify the behavior of some connective, but rather show the ways in which a formula may be moved inside the sequent.
 Logics missing at least one of these three rules are called substructural; it is in this class that lies linear logic.
 
 Linear logic is a logic proposed by J.-Y. Girard in his seminal paper of 1987 \cite{LinearLogic}.
-The distinctive trait of this logic is that in general its formulae cannot be copied or discarded, but instead they are consumed.
-Put differently, its sequent calculus lacks the structural rules of weakening and contraction\footnote{There are logics where even the exchange rule is missing, these are called non-commutative because the order of the formulae in the sequent matters (e.g. Lambek calculus)}.
+The distinctive trait of this logic is that in general its formulae cannot be copied or discarded, but instead are consumed.
+Put differently, its sequent calculus lacks the structural rules of weakening and contraction\footnote{There are logics where even the exchange rule is missing, these are called non-commutative because the order of the formulae in the sequent matters (e.g. Lambek calculus).}.
 
-Under these assumptions a certain sequent (interpreting sequents as multisets) is provable if and only if all of its formulae get used exactly once; for this reason this logic is sometimes called a logic of resources, in the same way classical logic is a logic of truths and intuitionistic logic is a logic of proofs.
+Under these assumptions a certain sequent (here we are interpreting sequents as multisets) is provable if and only if all of its formulae get used exactly once; for this reason this logic is sometimes called a logic of resources, in the same way classical logic is a logic of truths and intuitionistic logic is a logic of proofs.
 % Questo particolare utilizzo delle formule permette di avere una logica che mantiene la simmetria delle logica classica, e il costruttivismo delle logica intuizionista.
 
-In linear logic each connective from classical logic has two versions: an additive one -- where the context is the same for all the premises, and a multiplicative one -- where the context is partitioned between the premises.
+In linear logic each connective from classical logic has two interpretations: an additive one -- where the context is the same for all the premises, and a multiplicative one -- where the context is partitioned between the premises.
 To better understand why, we analyze two rules for classic conjunction:
 $$
 \begin{array}{cc}
@@ -80,8 +80,7 @@ The same holds for the constants $\top$ and $\bot$, which also have two versions
 Table \ref{table:classic to linear} shows the linear logic connectives corresponding to the classical ones.
 
 Linear logic defined as of right now, albeit having the added complexity of splitting, is nonetheless decidable: since formulae are finite and they cannot be copied, it is possible to explore all the possibilities.
-Undecidability is reintroduced by localizing the uses of contraction and weakening by means of two modalities, called exponentials.
-These are  $\llbang{\phi}$ and $\llwn{\phi}$ -- called respectively ``of-course'' and ``why-not''.
+Undecidability is reintroduced by localizing the uses of contraction and weakening by means of two modalities --  ``of-course'', written $\llbang{\phi}$ and ``why-not'', written $\llwn{\phi}$ -- called exponentials.
 % Linear logic defined as of right now is decidable, since formulas cannot grow in size we can explore each possibility.
 % To be as strong as classical logic, there are two so called exponentials: bang or $!\phi$ and why not or $?\phi$.
 % Since undecidability may lead to non-termination during proof search, usally some kind of bound is put (e.g. on the number of contractions per branch).

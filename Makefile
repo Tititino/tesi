@@ -21,7 +21,7 @@ CHAPTERS=$(addprefix chapters/, $(addsuffix .tex, intro calculus implementation 
 APPENDIX=$(addprefix appendix/, $(addsuffix .tex, example))
 FIGURES=$(addprefix figures/, $(addsuffix .tex, hp-calculus asy-calculus sync-calculus id-dec-calculus triadic-calculus))
 
-thesis.pdf: thesis.tex thesis.sty $(CHAPTERS) $(APPENDIX) $(FIGURES)
+thesis.pdf: thesis.tex thesis.sty refs.bib $(CHAPTERS) $(APPENDIX) $(FIGURES)
 	sed 's/OPTIONS/$(OPTIONS)/' thesis.tex > out.tex
 	latexmk -pdf -$(LCC) -latexoption="-shell-escape" 	\
 		-pretex=$(PRETEX)				\

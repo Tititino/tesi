@@ -17,11 +17,10 @@ We will focus on the backwards algorithm for classic linear logic.
 
 The program is written in OCaML and implements a standard focused proof search on normalized formulae as seen in \cite{LiangMiller}.
 Sequent splitting when encountering a tensor is done by generating all the numbers up to $2^{|\Delta|}$ -- where $\Delta$ is the sequent -- and using the bit representation of those to create the two subsets.
-As we will see in \ref{sec:benchmarking} this implementation choice will result in a degradation of performance on formulae with a high number of multiplicatives.
+As we will see in Section \ref{sec:benchmarking} this implementation choice will result in a degradation of performance on formulae with a high number of multiplicatives.
 
-Their particular usage of why-not height and implementation of the decide rule was a major influence on our own implementation and thus has been already discussed in \S\ref{chapter:implementation}.
-For the sake of clarity the prover uses a fixed local bound.
-This bound does not represents the number of contraction per branch, but instead the number of times the unrestricted formulae can be copied in the queue per branch.
+Their particular usage of why-not height and implementation of the decide rule was a major influence for our own implementation and thus has been already discussed in \S\ref{chapter:implementation}.
+Still, for the sake of clarity, we repeat it here: the prover uses a fixed local bound; this bound does not represents the number of contraction per branch, but instead the number of times the unrestricted formulae can be copied in the queue per branch.
 
 \section{llprover}
 \texttt{llprover} is a prover written in Prolog by Naoyuki Tamura.

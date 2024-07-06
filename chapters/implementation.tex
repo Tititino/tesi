@@ -14,7 +14,7 @@ When explaining the code we will use some common names for Prolog variables:
 Prolog as a language and as an environment has been historically tied to automated theorem proving for its ability to express backtracking algorithms naturally.
 % In particular we chose SWI-Prolog because it offers a comprehensive and mature free Prolog environment.
 Most Prolog implementations also support CLP (constraint logic programming) through dedicated libraries.
-These allow to use constraints referring some attributes of Prolog variables in the body of clauses; in our case we will use \CLPB{} \cite{clpb}, which provides tools to deal with boolean constraints.
+These allow to use constraints referencing some attributes of Prolog variables in the body of clauses; in our case we will use \CLPB{} \cite{clpb}, which provides tools to deal with boolean constraints.
 Its implementation is based on reduced and ordered Binary Decision Diagrams (BDDs).
 A boolean expression, in this context, is an expression made up of Prolog variables and the constants 1 and 0, respectively true and false.
 The allowed operators are the usual ones one would expect, in our case we will use exclusively conjunction, negation and equality, respectively:
@@ -23,8 +23,8 @@ X * Y.
 ~ X.
 X =:= Y.
 \end{minted}
-Usually constraints will be accumulated in a list; for this reason \CLPB{} provides the functor \texttt{*(L)}, which is interpreted as the conjuction of the memebers of the list \texttt{L}.
-The main predicate of the library is \texttt{sat/1}, which checks for the satisfiability of a constraint.
+Usually constraints will be accumulated in a list; for this reason \CLPB{} provides the functor \texttt{*(L)}, which is interpreted as the conjunction of the members of the list \texttt{L}.
+Finally the main predicate of the library is \texttt{sat/1}, which checks for the satisfiability of a constraint.
 Since we only deal with conjunctions we define the helper predicate \texttt{check/1}
 \begin{minted}{prolog}
 check(L) :-
@@ -32,26 +32,26 @@ check(L) :-
 \end{minted}
 To better understand how the predicate works, we give some examples:
 \begin{itemize}
-	\item if the constraints are not instatiated enough, they simply get reduced:
+	\item if the constraints are not instantiated enough, they simply get reduced:
 \begin{minted}{prolog}
 ?- check([X * Y =:= 0]).
 sat(1#X*Y).
 \end{minted}
+	Here \texttt{\#} is exclusive or.
 	\item if the constraints are unsatisfiable, the predicate fails:
 \begin{minted}{prolog}
 ?- check([X * Y =:= 1, X =:= 0]).
 false.
 \end{minted}
-	Here \texttt{\#} is exclusive or.
 	\item if the constraints are satisfiable the Prolog variables are unified to their assigned value:
 \begin{minted}{prolog}
 ?- check([X * Y =:= 0, X =:= 1]).
 X = 1,
 Y = 0.
 \end{minted}
-	Here one constraint (\texttt{X =:= 1}) even forces the other variable (\texttt{Y}) to be unified to a value.
+	Here one constraint (\texttt{X =:= 1}) even forces the other variable (\texttt{Y}) to be unified.
 \end{itemize}
-The automatic unification of variable to their value after constraint satisfaction is used to implicitly deal with the propagation of solutions: as soon as a Prolog variable is unified in one branch of the proof, its value will be propagated to any other constraint containing it.
+The automatic unification of Prolog variables to their value after constraint satisfaction is used to implicitly deal with the propagation of solutions: as soon as one is unified in one branch of the proof, its value will be propagated to any other constraint containing it.
 
 We use the library with the flag \texttt{clpb\_monotonic} set to \texttt{true}.
 This makes the algorithm many orders of magnitude faster with the condition that adding constraints cannot yield new solutions. 
@@ -66,10 +66,10 @@ v(X) * v(Y) =:= 1
 This small explanation sums up the extent of the library we use in our prover.
 
 \section{Formula transformations}
-Before beginning the proof a sequent passes through a number of transformations.
-These transformations both preprocess the sequent to a more convenient form, and also add information about the sub-formulae.
+Before beginning the search a sequent passes through a number of transformations.
+These transformations both preprocess the sequent to a more convenient form, and also add information about the subformulae.
 
-As a first transformation the sequent gets normalized into a sequent in negated normal form (NNF) as defined in Definition \ref{def:nnf}.
+As a first transformation the sequent gets normalized into negated normal form (NNF) as defined in Definition \ref{def:nnf}.
 Normalization is a common technique used in all the provers we compare with.
 The implementation mirrors exactly the transformation from two-sided judgment to one-sided judgment of Section \ref{sec:normalization}:
 \begin{enumerate}
@@ -81,7 +81,7 @@ From an implementation point of view the purpose of normalization is to reduce t
 Next, to each formula we assign its why-not height, a measure borrowed from another prover's implementation (Section \ref{sec:apll}).
 \begin{define}[Why-not height]
 	\label{def:why-not height}
-	Why-not height is the maximum number of nested ``why-not''s in a formula, or for formulae as defined in Definition \ref{def:nnf}
+	Why-not height is the maximum number of nested ``why-not''s in a formula, or, for formulae as defined in Definition \ref{def:nnf},
 	$$ \mathrm{wnh}(\phi) = 
 	\begin{cases}	
 		0 & \text{if }\phi \in \{\llbot, \lltop, \llone, \llzero, \alpha, \llnot{\alpha} \} \\
@@ -101,7 +101,7 @@ This happens in three ways:
 	\item During the $D_2$ rule, the exponentials are tried in order of ascending why-not height.
 		This process is further explained in Section \ref{sec:decide}.
 \end{itemize}
-After this transformation formulae are attribute trees with at each node the why-not height.
+After this transformation, formulae are attribute trees with at each node the why-not height.
 For example the formula \texttt{*(a, ?(b))} becomes \texttt{*(a-0, ?(b-0)-1)-1}, or
 \begin{figure}[H]
 	\centering
@@ -155,7 +155,7 @@ Finally, it must be noted that there is no predicate implementing the concept of
 Focusing is implemented by two mutually defined predicates: \texttt{async/8} and \texttt{focus/8}, encoding respectively the asynchronous and the synchronous rules of Figure \ref{fig:calculus}.
 
 During the asynchronous phase there are two lists: \texttt{Fs} and \texttt{D}, representing $\Gamma$ and $\Delta$.
-The asynchrnous rules always work on the head of \texttt{Fs}, breaking it down into its sub-formulae.
+The asynchronous rules always work on the head of \texttt{Fs}, breaking it down into its sub-formulae.
 This process can be seen for example in the clause for with ($\displaywith$):
 \begin{minted}[linenos]{prolog}
 async(A, U, D, [F|Fs], S, M, L) :-
@@ -168,26 +168,26 @@ async(A, U, D, [F|Fs], S, M, L) :-
   ).
 \end{minted}
 Here, we chose this particular rule to also show how the prover is guided using why-not height (line 3) as mentioned in Definition \ref{def:why-not height}.
-Compare this with the \derRule{\displaywith} rule from Figure \ref{fig:calculus}.
-The cut at line 2 is present for all asynchronous connectives, and eliminates any choice point since this rule is deterministic.
+Comparing this with the \derRule{\displaywith} rule from Figure \ref{fig:calculus}, one can see that the implementation closely resembles the formal specification.
+The cut at line 2 is present in all the clauses for asynchronous connectives, and eliminates any choice point since these rules should be deterministic.
 
 If a formula cannot be further be broken apart -- i.e. it is either an atom, a negated atom, or it has a top-level synchronous connective -- then it is put to the side in \texttt{D}.
 This process goes on as long as \texttt{Fs} is not empty.
 
 When each formula is moved from \texttt{Fs} to \texttt{D}, the phase switches and the focusing process begins: a formula is chosen from either \texttt{D} or \texttt{U} by applying one of the decide rules.
-This formula gets broken down until either an asynchronous connective or a negated atom is left. 
-Unlike the asynchronous phase, the rules applied in this phase are non-deterministic and may be backtracked, so not cut is introduced.
-Other than this the implementation of the predicate \texttt{focus/8} is almost the same as \texttt{async/8}: the formula is broken down into its sub-formulae, and -- if necessary -- the why not heights are used to guide the proof searc.
 The decide rules will be discussed further ahead in Section \ref{sec:decide}.
+The chosen formula gets broken down until either an asynchronous connective or a negated atom is left. 
+Unlike the asynchronous phase, the rules applied in this phase are non-deterministic and may be backtracked, so not cut is introduced.
+Other than this the implementation of the predicate \texttt{focus/8} is almost the same as \texttt{async/8}: the formula is broken down into its sub-formulae, and -- if necessary -- the why not heights are used to guide the proof search.
 
 \subsection{Identity rules}\label{sec:identity}
-This process of alternating asynchronous and synchronous phases in normal focusing (i.e. without constraints) goes on until only a positive literal (in our case a negated atom) in \texttt{Fs} is left, and the corresponding negative literal (in our case just an atom) in either \texttt{U} or \texttt{D}.
-When this happens the axioms -- rules \derRule[A]{\displayid[1]} or \derRule[A]{\displayid[2]} -- are applied to close the proof.
+This process of alternating asynchronous and synchronous phases in normal focusing (i.e. without constraints) goes on until only a positive literal (in our case a negated atom) in \texttt{Fs} is left, and the corresponding negative literal (in our case just an atom) in either present in \texttt{U} or \texttt{D}.
+When this happens, the axioms -- rules \derRule[A]{\displayid[1]} or \derRule[A]{\displayid[2]} -- are applied to close the proof.
 In our case when the prover is focusing and it encounters a positive literal in \texttt{Fs}, it checks whether the corresponding negative literal exists in \texttt{D}.
 If this is true, then the helper predicate \texttt{set\_to\_zero/2} implementing ``$\avail{-}$'' is used to generate the constraints for \texttt{D}, these are appended to the constraints gathered up to that point and then checked.
 A slightly different approach is taken for \derRule{\displayid[2]}.
 The rule would call for us to search a matching atom in $\Psi$, corresponding to \texttt{U}.
-Instead the prover keeps a set of only unrestricted atoms, called \texttt{A}, separated from the rest of the unrestriched formulae.
+Instead the prover keeps a set of only unrestricted atoms, called \texttt{A}, separated from the rest of the unrestricted formulae.
 \begin{minted}[linenos]{prolog}
 focus(A, U, D, F, _, _, L) :-
   F = af(((~ T)-_), _, E),
@@ -198,10 +198,10 @@ focus(A, U, D, F, _, _, L) :-
   check(Cns).
 \end{minted}
 This small modification is based on the fact that once a negative literal is put to the side (be it in $\Delta$ or in $\Psi$), it stays there for the rest of the proof.
-So we chose to segregate the unrestriched atoms in a separate set, non polluting the one containing formulae which can be focused on.
+So we chose to segregate the unrestricted atoms in a separate set, non polluting the one containing formulae which can be focused on.
 
 \subsection{Decide rules}\label{sec:decide}
-For the decide rules, particularly for \derRule{\displaydecide[2]}, we use a modified version the heuristic of another prover which will be discussed later (Section \ref{sec:apll}).
+For the decide rules, particularly for \derRule{\displaydecide[2]}, we use a modified version of another prover's (Section \ref{sec:apll}) heuristic.
 The method consists of not using directly the set $\Psi$ in the \derRule{\displaydecide[2]} rule, but instead keeping a queue of ordered unrestricted formulae which can be refilled only a certain number of times per-branch.
 This can be seen in the clause of \texttt{async/8} implementing the rule:
 \begin{minted}[linenos]{prolog}
@@ -247,14 +247,14 @@ This is due to the fact that if the branch was not provable and we instead calle
 What \texttt{early\_stop/7} does is fail if the queue has just been refilled and it turns out the branch was not provable.
 
 All of this is done to prevent loops introduced by the use of exponentials.
-For example if the first formula in \texttt{U} is an asynchronous one and the prover is at a dead-end, the following loop will arise:
+For example, if no such measures where taken and the first formula in \texttt{U} was an asynchronous one and the prover is at a dead-end, the following loop would arise:
 \begin{enumerate}
 	\item the prover contracts the asynchronous formula out of \texttt{U} using \derRule{\displaydecide[2]};
 	\item the rule \derRule{\displaytoasy} is applied;
-	\item the asynchronous formula is broken down untill \texttt{Fs} is empty;
+	\item the asynchronous formula is broken down until \texttt{Fs} is empty;
 	\item repeat from step 1.
 \end{enumerate}
-This method forces the prover to try all the other unrestriched formulae before trying one a second time, and the bound completely eliminates the problem of loops, although obvously making some sequents unprovable.
+This method forces the prover to try all the other unrestricted formulae before trying one a second time, and the bound completely eliminates the problem of loops, although obviously making some true sequents unprovable.
 
 The rules \derRule{\displaydecide[1]}, \derRule{\displayid[1]} are defined before the unrestricted counterparts, so that they are tried first.
 

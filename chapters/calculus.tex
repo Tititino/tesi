@@ -2,8 +2,8 @@
 % Before describing the calculus we must give some preliminary definitions
 
 % Explaination on constraints why we use them ecc ecc ecc
-In this chapter we will define the focused one sided constraint calculus for full linear logic.
-This calculus is a hybrid between the one defined in \cite{HarlandPym} and the triadic calculus in \cite{Focusing}.
+In this chapter we will define a focused one sided constraint calculus for full linear logic.
+This calculus is a hybrid between the one defined in \cite{HarlandPym} and the triadic calculus of \cite{Focusing}.
 Before all, we give the definition of a linear logic formula.
 \begin{define}[Linear logic formula]
 	\label{def:ll formula}
@@ -65,14 +65,14 @@ and transforms it into a one-sided judgment
 $$ \vdash \Delta' $$
 where the right side is composed of the normalization of $\Gamma$ and $\llnot{\Delta}$.
 
-Normalization has some implementation-wise advantages, but for now it is only important because it shrinks the size of the complete calculus by roughly half since only the right rules remain, thus making the calculus easier to represent (see. Figure \ref{fig:hp calculus} and \ref{fig:calculus}) and making the proof of Theorem \ref{thm:soundness} significantly shorter.
+Normalization has some implementation-wise advantages, but for now it is only important because it shrinks the size of the complete calculus by roughly a half since only the right rules remain, thus making the calculus easier to represent (see. Figure \ref{fig:hp calculus} and \ref{fig:calculus}) and making the proof of Theorem \ref{thm:soundness} significantly shorter.
 
 \section{Focusing}
 Focusing is a technique described by Andreoli in his seminal paper \cite{Focusing}.
 In it he recognizes two alternating phases in a proof: a deterministic phase -- called asynchronous phase; and a non-deterministic phase -- called synchronous phase or focused phase.
 In the asynchronous phase the applicable rules are all invertible, making their order of application irrelevant.
-For this reason these rules are called asynchronous rules, wheareas the non-invertible ones are called synchronous.
-In this system to each formula is assigned a positive or neagative polarity based on its top-level connective:
+For this reason these rules are called asynchronous rules, whereas the non-invertible ones are called synchronous.
+In this system to each formula is assigned a positive or negative polarity based on its top-level connective:
 \begin{itemize}
 	\item connectives with a synchronous right rule are defined to have a positive polarity, these are:
 		$$ \displayten, \displayplus, \displaybang, \displayone$$
@@ -103,19 +103,17 @@ An arrow pointing up symbolizes the asynchronous phase, and an arrow pointing do
 Phase switching happens using the decide rules (\derRule[A]{\displaydecide[1]}, \derRule[A]{\displaydecide[2]}), which non-deterministically choose a formula to focus on.
 
 \section{Constraints}
-During proof search constraint are generated as the formulae get broken up.
-These are generated in a particular way, such that if an assignment exists that satisfies the constraints, then the formulae have been used linearly.
+During proof search constraints are generated as the formulae get broken up.
+These are created in a particular way, as to guarantee that if an assignment exists that satisfies them, then the formulae have been used linearly.
 \begin{define}[Variables, expressions]
 	\label{def:bool expr}
 	A boolean variable is simply a symbol to which one can associate a value of true or false.
-	A boolean expression, in our case, is just a conjunction of possibly negated boolean variables as 
-	$$\begin{array}{cccccr}
-		x & ::=  & x_i &\mid& \overline{x_i} & \text{(Variable)}\\
-		e & ::=  & x \wedge e    &\mid& x & \text{(Expression)} \\
-	\end{array}$$
+	A boolean expression, in our case, is just a conjunction of possibly negated boolean variables as follows
+	$$ e ::= x \wedge e \mid \overline{x} \wedge e \mid x $$
 	We will call $e$ such a conjunction and $x$ the single boolean variables.
 	Given a boolean expression $e$ we write
-	$$ \mathrm{vars}(e) = \{ x_i \mid x_i \in e \} $$
+	$$ \vars{e} = \{ x_i \mid x_i \in e \} $$
+	as the set of the variables appearing in the expression.
 \end{define}
 
 \begin{define}[Annotated formula]
@@ -147,7 +145,7 @@ The above constraints may be only of two kinds: ``$\avail{e}$'' and ``$\used{e}$
 	\label{def:constraints}
 	Given an annotated formula $\af{\phi}{e}$ as in Definition \ref{def:annotated}, a constraint $\lambda$ is either
 	\begin{itemize}
-		\item ``$\used{e}$'', which states that the formula $\phi$ gets consumed in this branch of the proof.
+		\item ``$\used{e}$'', which states that the formula $\phi$ gets consumed in this branch of the proof;
 		\item ``$\avail{e}$'', which states that the formula $\phi$ does not get consumed in this branch of the proof, and thus is available to be used in another branch.
 	\end{itemize}
 	We then extend these constraints to sequents, such that
@@ -212,10 +210,10 @@ We now expand the concept of triadic judgment from \cite{Focusing} (Figure \ref{
 	Where 
 	\begin{itemize}
 		\item $\Psi$ is the same as the triadic calculus of \cite{Focusing}: a set of unrestricted non annotated formulae, or all formulae that can be freely discarded or duplicated.
-		\item $\Delta$ and $\Gamma$ are multi-sets of linear (annotated) formulae, these are respectively the formulas ``put to the side'' and the formulae which are being ``worked on'' during a certain moment of the asynchronous phase;
+		\item $\Delta$ and $\Gamma$ are multisets of linear (annotated) formulae, these are respectively the formulae ``put to the side'' and the formulae which are being ``worked on'' during a certain moment of the asynchronous phase;
 		\item $\Lambda$ and V are the constraints and the assignment as defined in Definition \ref{def:sat}.
 			By adding these members we make the flow of constraints through the proof tree explicit, leaving no ambiguity to where the constraints should be checked.
-			This approach to constraints differs from the one in \cite{HarlandPym}, which prioritizes generality.
+			This approach to constraints differs from the one in \cite{HarlandPym}.
 			The choice of letters is mainly a mnemonic one, constraints $\Lambda$ ``go-up'' the proof tree and solutions V ``come down'' from the leaves.
 	\end{itemize}
 \end{define}
@@ -249,26 +247,13 @@ this is split into
 % TODO: expand
 Figure \ref{fig:hp calculus} shows the calculus of \cite{HarlandPym} using our notation of explicit constraints, Figure \ref{fig:calculus} shows our focused calculus instead.
 Pym and Harland in \cite{HarlandPym} describe a number different ways of accumulating and checking constraints, roughly comparable to breadth first search, depth first search and a third intermediate method.
-Figure \ref{fig:calculus} and \ref{fig:hp calculus} represent what the \cite{HarlandPym} calls a ``lazy'' strategy, corresponding to a DFS.
-In both the calculi it is easy to see that most of the rules simply make sure the constraints remain consistent, and only the axioms (\derRule{\displayid[1]}, \derRule{\displayid[2]}, \derRule[PH]{A}, $\dots$) and the tensor (\derRule{\displayten}, \derRule[PH]{\displayten}) actyally introduce new variables or significant constraints.
-\begin{figure}[h!]
+Figure \ref{fig:hp calculus} and \ref{fig:calculus} represent what \cite{HarlandPym} calls a ``lazy'' strategy, corresponding to a DFS.
+In both the calculi it is easy to see that most of the rules simply make sure the constraints remain consistent, and only the axioms (\derRule{\displayid[1]}, \derRule{\displayid[2]}, \derRule[PH]{A}, $\dots$) and the tensor (\derRule{\displayten}, \derRule[PH]{\displayten}) actually introduce new variables or significant constraints.
+\begin{figure}[p]
 	\centering
 	\input{figures/hp-calculus}
 	\caption{The one sided version of the calculus from \cite{HarlandPym} with explicit constraint propagation.\label{fig:hp calculus}}
 \end{figure}
-\begin{lemma}
-	\label{lemma:cap}
-	For all sequents $\Delta$ and assignments $\mathV$ which cover $\vars{\Delta} \cup X$:
-	$$ \Delta_L^X[\mathV] \cap \Delta_R^X[\mathV] = \varnothing $$
-\end{lemma}
-\begin{proof}
-	This is a simple consequence of the fact that if $\phi \in \Delta_L^X[\mathV]$ there is a annotated formula $\af{\phi}{e} \in \Delta$ such that 
-	$$ e[\mathV] = \top $$
-	Since $e$ is defined as a conjunction on boolean variables, all the variables in it must evaluate to true.
-	It is straightforward to see that if the variable added by the split in $\Delta_L^X$ is $x_i$, and the corresponding one in $\Delta_R^X$ is $\varNot{x_i}$, then when $x_i$ is true in the assignment V, $\llnot{x_i}$ is false.
-	Hence $\phi \not \in \Delta_R^X[\mathV]$.
-	The same can be done to show that if $\phi \in \Delta_R^X[\mathV]$ then $\phi \not \in \Delta_L^X[\mathV]$.
-\end{proof}
 \begin{figure}[p]
 	\begin{subfigure}{\textwidth}
 		\centering
@@ -342,6 +327,20 @@ In both the calculi it is easy to see that most of the rules simply make sure th
 \end{define}
 
 \begin{lemma}
+	\label{lemma:cap}
+	For all sequents $\Delta$ and assignments $\mathV$ which cover $\vars{\Delta} \cup X$:
+	$$ \Delta_L^X[\mathV] \cap \Delta_R^X[\mathV] = \varnothing $$
+\end{lemma}
+\begin{proof}
+	This is a simple consequence of the fact that if $\phi \in \Delta_L^X[\mathV]$ there is a annotated formula $\af{\phi}{e} \in \Delta$ such that 
+	$$ e[\mathV] = \top $$
+	Since $e$ is defined as a conjunction on boolean variables, all the variables in it must evaluate to true.
+	It is straightforward to see that if the variable added by the split in $\Delta_L^X$ is $x_i$, and the corresponding one in $\Delta_R^X$ is $\varNot{x_i}$, then when $x_i$ is true in the assignment V, $\llnot{x_i}$ is false.
+	Hence $\phi \not \in \Delta_R^X[\mathV]$.
+	The same can be done to show that if $\phi \in \Delta_R^X[\mathV]$ then $\phi \not \in \Delta_L^X[\mathV]$.
+\end{proof}
+
+\begin{lemma}
 	\label{lemma:cup}
 	For all sequents $\Delta$ and assignments $\mathV$ which cover $\vars{\Delta} \cup X$,
 	$$ \Delta[\mathV] = \Delta_L^X[\mathV] \cup \Delta_R^X[\mathV] $$
@@ -362,17 +361,13 @@ In both the calculi it is easy to see that most of the rules simply make sure th
 \begin{teor}[Soundness]\label{thm:soundness}
 	For any judgment in our constraint calculus:
 	\begin{itemize}
-		\item if $ \async{\Psi}{\Delta}{\Gamma} \separator \constr{\Lambda}{\mathV} $, then $ \vDash\; \llwn{\Psi}, \Delta, \Gamma $
-		\item if $ \focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} $, then $ \vDash\; \llwn{\Psi}, \Delta, \phi $
+		\item if $ \async{\Psi}{\Delta}{\Gamma} \separator \constr{\Lambda}{\mathV} $, then $ \async[A]{\Psi}{\Delta}{\Gamma}$;
+		\item if $ \focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} $, then $ \focus[A]{\Psi}{\Delta}{\phi}$.
 	\end{itemize}
+	Where $A$ is the triadic calculus of \cite{Focusing} (Figure \ref{fig:triadic}).
 \end{teor}
 \begin{proof}
-	As a soundness proof we give a translation from our constraint calculus to the triadic calculus of \cite{Focusing} defined in Figure \ref{fig:triadic}.
-	By mutual induction on the structure of the given derivation we will show that
-	\begin{align*}
-		\async{\Psi}{\Delta}{\Gamma} \separator \constr{\Lambda}{\mathV} &\Rightarrow \async[A]{\Psi}{\Delta[\mathV]}{\Gamma[\mathV]} \\
-		\focus{\Psi}{\Delta}{\af{\phi}{e}} \separator \constr{\Lambda}{\mathV} &\Rightarrow \focus[A]{\Psi}{\Delta[\mathV]}{\phi}
-	\end{align*}
+	We will proceed by mutual induction on the structure of the given derivation.
 	The four base cases are proved essentially in the same way, with the exception of top ($\displaytop$):
 	\begin{itemize}
 		\indCase{\displayid[1]} Given the rule \derRule{\displayid[1]}
