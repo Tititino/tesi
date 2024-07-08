@@ -3,7 +3,7 @@ OPTIONS=[]
 
 ifeq ($(LCC), lualatex)
 	PRETEX="\pdfvariable suppressoptionalinfo 512\relax"
-else ifeq ($(LCC), pdflatex)		# i can't find the forum answer with the other pretextes
+else ifeq ($(LCC), pdflatex)
 	PRETEX="\pdftrailerid{}"
 else ifeq ($(LCC), xetex)
 	PRETEX="\special{pdf:trailerid [\
@@ -29,7 +29,7 @@ thesis.pdf: thesis.tex thesis.sty refs.bib $(CHAPTERS) $(APPENDIX) $(FIGURES)
 		out.tex				
 	mv out.pdf thesis.pdf
 
-riassunto.pdf: riassunto.tex
+riassunto.pdf: riassunto.tex refs.bib
 	latexmk -pdf -$(LCC) -latexoption="-shell-escape" 	\
 		-pretex=$(PRETEX)				\
 		-usepretex					\

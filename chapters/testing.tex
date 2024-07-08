@@ -48,7 +48,7 @@ All the outputs of the functions above are pandas \texttt{DataFrame}s, which mea
 For example let \texttt{out} be the output of a call to \texttt{testall} with some prover and test suite:
 \begin{minted}{python}
 out['outcome'].map(lambda x: x == Outcome.SUCCESS).all()
-len(out[(out['outcome'] == Outcome.FAILURE) 
+len(out[ (out['outcome'] == Outcome.FAILURE) 
        | (out['outcome'] == Outcome.TIMEOUT)])
 \end{minted}
 test respectively whether all the tests succeeded and the number of failed tests.
@@ -87,9 +87,9 @@ We use json as a standard format to store the tests, because of its vast adoptio
 A test suite is thus defined as a list of test cases; where a test case is just an object with these three mandatory fields:
 \begin{center}
 \begin{tabular}{l l}
-	\textbf{id} &  		\parbox{11cm}{is a number with the sole purpose of tracing back the test case from the output;} \\
-	\textbf{premises} & 	\parbox{11cm}{is a list of premises as prefix formulae;} \\
-	\textbf{conclusions} & 	\parbox{11cm}{is a list of conclusions as prefix formulae.} \\
+	\textbf{id} &  		\parbox{11cm}{is a number with the sole purpose of tracing back the test case from the output;} \\[7pt]
+	\textbf{premises} & 	\parbox{11cm}{is a list of premises as prefix formulae;} \\[7pt]
+	\textbf{conclusions} & 	\parbox{11cm}{is a list of conclusions as prefix formulae.} \\[7pt]
 \end{tabular}
 \end{center}
 For example
@@ -104,10 +104,10 @@ is the test case representing $\llnot{(a \llten b)} \vdash \llnot{a} \llpar \lln
 Other arbitrary fields may be present; for example we will use the following optional fields:
 \begin{center}
 	\begin{tabular}{ l l }
-		\textbf{thm} & 		\parbox{11cm}{tells whether this test case is a tautology or not, may be null;} \\
-		\textbf{*, +, ?, ...} & \parbox{11cm}{is the number of times a specific connective appears in the test case;} \\
-		\textbf{notes} & 	\parbox{11cm}{is a human readable string about the test case, e.g. its infix representation;} \\
-		\textbf{size} & 	\parbox{11cm}{is an indicative number of the size of the formula;} \\
+		\textbf{thm} & 		\parbox{11cm}{tells whether this test case is a tautology or not, may be null;} \\[7pt]
+		\textbf{*, +, ?, ...} & \parbox{11cm}{is the number of times a specific connective appears in the test case;} \\[7pt]
+		\textbf{notes} & 	\parbox{11cm}{is a human readable string about the test case, e.g. its infix representation;} \\[7pt]
+		\textbf{size} & 	\parbox{11cm}{is an indicative number of the size of the formula;} \\[7pt]
 		\textbf{atoms} & 	\parbox{11cm}{is the upper bound on the number of atoms.}
 	\end{tabular}
 \end{center}

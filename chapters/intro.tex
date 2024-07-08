@@ -7,7 +7,7 @@ $$ \bigwedge_{\phi \in \Delta} \phi \Rightarrow \bigvee_{\gamma \in \Gamma} \gam
 and $\Delta$ is called the antecedent, and $\Gamma$ the succedent.
 
 Sequents are manipulated using rules that have sequents as premises and as a conclusion.
-These rules are used to describe connectives operationally: defining their behavior by how they are derived from smaller formulae.
+These rules are usually used to describe connectives operationally: defining their behavior by how they are derived from smaller formulae.
 A rule acting on the antecedent is called a left rule whereas a rule acting on the succedent is called a right rule.
 A proof is then a tree where the root is the sequent to prove, and the inner nodes are the rules chained one to another by matching permises to conclusions.
 This way the leaves are just rules without any premises, also called axioms.
@@ -40,7 +40,7 @@ These do not directly specify the behavior of some connective, but rather show t
 Logics missing at least one of these three rules are called substructural; it is in this class that lies linear logic.
 
 Linear logic is a logic proposed by J.-Y. Girard in his seminal paper of 1987 \cite{LinearLogic}.
-The distinctive trait of this logic is that in general its formulae cannot be copied or discarded, but instead are consumed.
+The distinctive trait of this logic is that in general its formulae cannot be copied nor discarded, but instead are consumed.
 Put differently, its sequent calculus lacks the structural rules of weakening and contraction\footnote{There are logics where even the exchange rule is missing, these are called non-commutative because the order of the formulae in the sequent matters (e.g. Lambek calculus).}.
 
 Under these assumptions a certain sequent (here we are interpreting sequents as multisets) is provable if and only if all of its formulae get used exactly once; for this reason this logic is sometimes called a logic of resources, in the same way classical logic is a logic of truths and intuitionistic logic is a logic of proofs.
