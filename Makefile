@@ -15,7 +15,7 @@ else
 endif
 
 .PHONY: all draft clean
-all: thesis.pdf riassunto.pdf
+all: thesis.pdf riassunto.pdf presentazione.pdf
 
 CHAPTERS=$(addprefix chapters/, $(addsuffix .tex, intro calculus implementation related-work testing conclusion))
 APPENDIX=$(addprefix appendix/, $(addsuffix .tex, example))
@@ -34,6 +34,12 @@ riassunto.pdf: riassunto.tex refs.bib
 		-pretex=$(PRETEX)				\
 		-usepretex					\
 		riassunto.tex				
+
+presentazione.pdf: presentazione.tex 
+	latexmk -pdf -$(LCC) -latexoption="-shell-escape" 	\
+		-pretex=$(PRETEX)				\
+		-usepretex					\
+		presentazione.tex				
 
 clean:
 	rm -f out.*

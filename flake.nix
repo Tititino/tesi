@@ -18,13 +18,17 @@
 	      amscls
 	      amstex
 	      babel-italian
+	      beamer
 	      bussproofs
+	      caladea
 	      cancel
+	      carlito
 	      caption
 	      embedall
 	      epstopdf
 	      epstopdf-pkg
 	      float
+	      fontaxes
 	      geometry
 	      grfext
 	      hyperref
@@ -33,10 +37,12 @@
 	      latex-bin
 	      listings
 	      minted
+	      multirow
 	      ninecolors
 	      pdfx
 	      setspace
 	      siunitx
+	      stmaryrd
 	      tabularray
 	      todonotes
 	      url

@@ -2,65 +2,65 @@
 $$
 \begin{array}{ cc }
 	\multicolumn{2}{c}{
-	\AX$\vdash_\text{PH} \Delta, \af{\phi_1}{e}, \af{\phi_2}{e}\fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+	\AX$\vdash_\text{PH} \af{\phi_1}{e}, \af{\phi_2}{e}, \Delta \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
 	\LeftLabel{\derRule[PH]{\displaypar}}
-	\UI$\vdash_\text{PH} \Delta, \af{\phi_1 \llpar \phi_2}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
+	\UI$\vdash_\text{PH} \af{\phi_1 \llpar \phi_2}{e}, \Delta \fCenter \separator \constr{\Lambda}{\mathV}$
 	\DP
 	}
 	\\[30pt]
 	\AX$\vdash_\text{PH} \Delta \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
 	\LeftLabel{\derRule[PH]{\displaybot}}
-	\UI$\vdash_\text{PH} \Delta, \af{\llbot}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
+	\UI$\vdash_\text{PH} \af{\llbot}{e}, \Delta \fCenter \separator \constr{\Lambda}{\mathV}$
 	\DP
 	&
 	\AXC{}
 	\LeftLabel{\derRule[PH]{\displaytop}}
-	\UIC{$\vdash_\text{PH} \Delta, \af{\lltop}{-} \separator \constr{\Lambda}{\mathV}$}
+	\UIC{$\vdash_\text{PH} \af{\lltop}{-}, \Delta \separator \constr{\Lambda}{\mathV}$}
 	\DP
 	\\[30pt]
 	\multicolumn{2}{c}{
-	\AX$\vdash_\text{PH} \Delta, \af{\phi_1}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV''}$
+	\AX$\vdash_\text{PH} \af{\phi_1}{e}, \Delta \fCenter \separator \constr{\used{e}, \Lambda}{\mathV''}$
 	\noLine
-	\UI$\vdash_\text{PH} \Delta, \af{\phi_2}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV'}$
+	\UI$\vdash_\text{PH} \af{\phi_2}{e}, \Delta \fCenter \separator \constr{\used{e}, \Lambda}{\mathV'}$
 	\AXC{$\mathV' \sim_{\vars{\Delta, \Gamma}} \mathV''$}
 	\LeftLabel{\derRule[PH]{\displaywith}}
-	\BIC{$\vdash_\text{PH} \Delta, \af{\phi_1 \llwith \phi_2}{e} \separator \constr{\Lambda}{\mathV''}$}	
+	\BIC{$\vdash_\text{PH} \af{\phi_1 \llwith \phi_2}{e}, \Delta \separator \constr{\Lambda}{\mathV''}$}	
 	\DP
 	}
 	\\[30pt]
 	\multicolumn{2}{c}{
 	\AXC{$\new{X}$}
-	\AX$\vdash_\text{PH} \Delta_L^X, \af{\phi_1}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV'}$
+	\AX$\vdash_\text{PH} \af{\phi_1}{e}, \Delta_L^X \fCenter \separator \constr{\used{e}, \Lambda}{\mathV'}$
 	\noLine
-	\UI$\vdash_\text{PH} \Delta_R^X, \af{\phi_2}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV''}$
+	\UI$\vdash_\text{PH} \af{\phi_2}{e}, \Delta_R^X \fCenter \separator \constr{\used{e}, \Lambda}{\mathV''}$
 	\AXC{$\mathV' \sim_{\vars{\Delta}, X} \mathV''$}
 	\LeftLabel{\derRule[PH]{\displayten}}
-	\TIC{$\vdash_\text{PH} \Delta, \af{\phi_1 \llten \phi_2}{e} \separator \constr{\Lambda}{\mathV''}$}	% capisco il movimento dei constraint
+	\TIC{$\vdash_\text{PH} \af{\phi_1 \llten \phi_2}{e}, \Delta \separator \constr{\Lambda}{\mathV''}$}	% capisco il movimento dei constraint
 	\DP
 	}
 	\\[30pt]
 	\multicolumn{2}{c}{
 	\AXC{$\new{x}$}
-	\AXC{$\vdash_\text{PH} \Delta, \af{\phi_1}{x}, \af{\phi_2}{\varNot{x}} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$}
+	\AXC{$\vdash_\text{PH} \af{\phi_1}{x}, \af{\phi_2}{\varNot{x}}, \Delta \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$}
 	\LeftLabel{\derRule[PH]{\displayplus}}
-	\BIC{$\vdash_\text{PH} \Delta, \af{\phi_1 \llplus \phi_2}{e} \fCenter \separator \constr{\Lambda}{\mathV}$}
+	\BIC{$\vdash_\text{PH} \af{\phi_1 \llplus \phi_2}{e}, \Delta \fCenter \separator \constr{\Lambda}{\mathV}$}
 	\DP
 	}
 	\\[30pt]
 	\AXC{$\sat{ \used{e}, \Lambda, \avail{\Delta}}{\mathV}$}
 	\LeftLabel{\derRule[PH]{\displayone}}
-	\UIC{$\vdash_\text{PH} \Delta, \af{\llone}{e} \separator \constr{\Lambda}{\mathV}$}
+	\UIC{$\vdash_\text{PH} \af{\llone}{e}, \Delta \separator \constr{\Lambda}{\mathV}$}
 	\DP
 	&
-	\AX$\vdash_\text{PH} \llwn{\Delta}, \af{\phi}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+	\AX$\vdash_\text{PH} \af{\phi}{e}, \llwn{\Delta} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
 	\LeftLabel{\derRule[PH]{\displaybang}}
-	\UI$\vdash_\text{PH} \llwn{\Delta}, \af{\llbang{\phi}}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
+	\UI$\vdash_\text{PH} \af{\llbang{\phi}}{e}, \llwn{\Delta} \fCenter \separator \constr{\Lambda}{\mathV}$
 	\DP
 	\\[30pt]
 	\multicolumn{2}{c}{
-	\AX$\vdash_\text{PH} \Delta, \af{\phi}{e} \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
+	\AX$\vdash_\text{PH} \af{\phi}{e}, \Delta \fCenter \separator \constr{\used{e}, \Lambda}{\mathV}$
 	\LeftLabel{\derRule[PH]{\displaywn}}
-	\UI$\vdash_\text{PH} \Delta, \af{\llwn{\phi}}{e} \fCenter \separator \constr{\Lambda}{\mathV}$
+	\UI$\vdash_\text{PH} \af{\llwn{\phi}}{e}, \Delta \fCenter \separator \constr{\Lambda}{\mathV}$
 	\DP
 	}
 	\\[30pt]

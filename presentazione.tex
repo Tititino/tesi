@@ -1,0 +1,172 @@
+\documentclass{beamer}
+\usepackage{amsfonts,amsmath}
+\usetheme{-statale}
+\usefonttheme[onlymath]{serif}
+
+\usepackage[italian]{babel}
+\usepackage{bussproofs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{tabularray}
+
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usepackage{stmaryrd}
+
+\EnableBpAbbreviations
+
+\newcommand{\testcolor}[1]{\colorbox{#1}{\textcolor{#1}{test}}~\texttt{#1}}
+\newcommand{\hrefcol}[2]{\textcolor{cyan}{\href{#1}{#2}}}
+
+
+\newcommand{\llpar}{\rotatebox[origin=c]{180}{$\&$}}
+\newcommand{\llten}{\otimes}
+\newcommand{\llwith}{\&}
+\newcommand{\llplus}{\oplus}
+\newcommand{\llbot}{\bot}
+\newcommand{\lltop}{\top}
+\newcommand{\llone}{1}
+\newcommand{\llzero}{0}
+
+\titlebackground*{images/theme/background}
+
+% ==================///==================///==================///
+% ==================/// SPLASH PAGE
+% ==================///==================///==================///
+
+\title{Proof Search in Propositional Linear Logic via Boolean Constraints Satisfaction}
+\course{Laurea Triennale in Informatica}
+\author{Martino D'Adda}
+\IDnumber{964827}
+
+% ==================///==================///==================///
+% ==================/// START PRESENTATION
+% ==================///==================///==================///
+
+\begin{document}
+
+\maketitle
+
+\footlinecolor{maincolor}
+
+\section{Introduzione}
+\begin{frame}{Calcolo dei sequenti}
+	Il calcolo dei sequenti (G. Ghentzen, 1934) è un formalismo per rappresentare un calcolo logico e strutturarne dimostrazioni.
+	I concetti principali sono due:
+	\begin{itemize}
+		\item il sequente $\Delta \vdash \Gamma$, che esprime una implicazione tra la congiunzione di $\Delta$ e la disgiunzione di $\Gamma$;
+		\item la regola, che descrive come si possono comporre i sequenti,
+			$$
+			\AXC{$\overbrace{\Delta \vdash \phi', \Gamma}^{\Pi'}$}
+			\AXC{$\overbrace{\Delta \vdash \phi'', \Gamma}^{\Pi''}$}
+			\LeftLabel{$\wedge$}
+			\BIC{$\underbrace{\Delta \vdash \phi' \wedge \phi'', \Gamma}_{\Pi}$}
+			\DP
+			$$
+ 		in questo caso se valgono $\Pi'$ e $\Pi''$, allora vale $\Pi$.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Calcolo dei sequenti cont'd}
+	Una dimostrazione consiste in un albero avente come radice il sequente da dimostrare e ottenuto concatendo regole.
+	$$
+	\AXC{}
+	\LeftLabel{$A$}
+	\UIC{$a, b \vdash b$}
+	\AXC{}
+	\LeftLabel{$A$}
+	\UIC{$a, b \vdash a$}
+	\LeftLabel{$\wedge_R$}
+	\BIC{$a, b \vdash b \wedge a$}
+	\LeftLabel{$\wedge_L$}
+	\UIC{$a \wedge b \vdash b \wedge a$}
+	\DP
+	$$
+	Un theorem prover è un programma che, dato un sequente, prova a costruirne la dimosrazione applicando le regole di sopra.
+	Nello specifico un theorem prover è detto bottom-up se parte dal sequente da dimostrare, e lo continua a scomporre applicando le regole ``al contrario''.
+\end{frame}
+
+\begin{frame}{Logica lineare}
+	La \textbf{logica lineare} (J.-Y. Girard, 1987) è una logica la cui caratteristica principale è che è generalmente proibita la duplicazione o l'eliminazione di formule durante il processo di dimostrazione, operazioni che altresì sono spesso lasciate implicito.
+	Questa scelta porta ad alcune proprietà particolari, tra cui la duplicazione dei connettivi della logica classica secondo due interpretazioni diverse, una detta moltiplicativa ed l'altra additiva.
+	\begin{center}
+		\begin{tabular}{cccc}
+			$\wedge$ &\multirow{4}{.5cm}{$\rightarrow$} & $\llten$ & $\llwith$ \\
+			$\vee$   &                                  & $\llpar$ & $\llplus$ \\
+			$\top$   &                                  & $\llone$ & $\lltop$ \\
+			$\bot$   &                                  & $\llbot$ & $\llzero$ \\
+		\end{tabular}
+	\end{center}
+\end{frame}
+\begin{frame}{Splitting}
+	Durante il proof searching bottom-up uno dei problemi pincipali è quello dello \textbf{splitting}.
+	$$
+	\AXC{$\vdash \Delta', \phi'$}
+	\AXC{$\vdash \Delta'', \phi''$}
+	\LeftLabel{$\llten$}
+	\BIC{$\vdash \Delta', \Delta'', \phi' \llten \phi''$}
+	\DP
+	$$
+	La decomposizione del tensore (regola di qui sopra) comporta il partizionamento di $\Delta$ in $\Delta'$ e $\Delta''$ per continuare la dimostrazione.
+	Questa operazione può richiedere un numero esponenziale di tentativi.
+
+	Nel 2001 D.Pym e J.Harland propongono un metodo per gestire lo splitting utilizzando vincoli booleani generati a partire da espressioni associate a ogni singola formula.
+\end{frame}
+
+\section{Il calcolo}
+% ==================///==================///==================///
+% ==================/// BODY'S PRESENTATION
+% ==================///==================///==================///
+
+% \input{sections/introduction}
+
+% \input{sections/analysis}
+
+% \input{sections/conclusions}
+
+\begin{frame}{Focusing e normalizzazione}
+	Partendo dal calcolo citato sopra di D.Pym e J.Harland, abbiamo applicato due classiche modifiche nell'ambito del proof searching (i.e. normalizzazione e focusing), e abbiamo mostrato la correttezza del nuovo calcolo esibendo una traduzione ad un calcolo intermedio tale che il sequente diagramma commuta:
+	\begin{center}
+		\begin{tikzpicture}
+			\node (our-calc) {$C$};
+			\node (andreoli) [right=of our-calc] {$A$};
+			\node (classic)  [below=of andreoli] {$LL$};
+
+			\draw[->] (our-calc) to node[above] {\tiny $\llbracket - \rrbracket_C$} (andreoli);
+			\draw[->] (andreoli) to node[right] {\tiny $\llbracket - \rrbracket_A$} (classic);
+			\draw[->] (our-calc) to node[below left] {\tiny $\llbracket - \rrbracket_A \circ \llbracket - \rrbracket_C$} (classic);
+		\end{tikzpicture}
+	\end{center}
+\end{frame}
+
+\begin{frame}{Implementazione}
+	Per il calcolo di sopra:
+	\begin{itemize}
+		\item è stata fatta un'implementazione in SWI-Prolog;
+		\item è stato scritto un generatore di test in OCaML;
+		\item è stato architettato un sistema per il testing e il benchmarking in Python.
+	\end{itemize}
+	Infine l'infrastruttura per tutti i programmi è stata gestita con Nix.
+	\begin{center}
+		\begin{tabular}{*{4}{wc{2cm}}}
+			\includegraphics[width=1.5cm]{images/prolog-logo} &
+			\includegraphics[width=1.5cm]{images/ocaml-logo} &
+			\includegraphics[width=1.5cm]{images/python-logo} &
+			\includegraphics[width=1.5cm]{images/nix-logo}
+		\end{tabular}
+	\end{center}
+\end{frame}
+
+\section{Conclusione}
+
+% ==================///==================///==================///
+% ==================/// END PRESENTATION
+% ==================///==================///==================///
+
+\backmatter[notitle]
+
+%=======================================================================
+
+\end{document}
