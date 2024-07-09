@@ -14,12 +14,17 @@
 \usepackage{tikz}
 \usetikzlibrary{positioning}
 \usepackage{stmaryrd}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{siunitx}
 
 \EnableBpAbbreviations
 
 \newcommand{\testcolor}[1]{\colorbox{#1}{\textcolor{#1}{test}}~\texttt{#1}}
 \newcommand{\hrefcol}[2]{\textcolor{cyan}{\href{#1}{#2}}}
 
+\definecolor{lightbluestatale}{RGB}{34, 167, 229}
+\definecolor{darkbluestatale}{RGB}{0, 51, 102}
 
 \newcommand{\llpar}{\rotatebox[origin=c]{180}{$\&$}}
 \newcommand{\llten}{\otimes}
@@ -93,7 +98,7 @@
 	Questa scelta porta ad alcune proprietà particolari, tra cui la duplicazione dei connettivi della logica classica secondo due interpretazioni diverse, una detta moltiplicativa ed l'altra additiva.
 	\begin{center}
 		\begin{tabular}{cccc}
-			$\wedge$ &\multirow{4}{.5cm}{$\rightarrow$} & $\llten$ & $\llwith$ \\
+			$\wedge$ &\multirow{4}{.3cm}{$\rightarrow$} & $\llten$ & $\llwith$ \\
 			$\vee$   &                                  & $\llpar$ & $\llplus$ \\
 			$\top$   &                                  & $\llone$ & $\lltop$ \\
 			$\bot$   &                                  & $\llbot$ & $\llzero$ \\
@@ -127,7 +132,8 @@
 % \input{sections/conclusions}
 
 \begin{frame}{Focusing e normalizzazione}
-	Partendo dal calcolo citato sopra di D.Pym e J.Harland, abbiamo applicato due classiche modifiche nell'ambito del proof searching (i.e. normalizzazione e focusing), e abbiamo mostrato la correttezza del nuovo calcolo esibendo una traduzione ad un calcolo intermedio tale che il sequente diagramma commuta:
+	Partendo dal calcolo citato sopra di D.Pym e J.Harland, abbiamo applicato due classiche modifiche nell'ambito del proof searching (i.e. normalizzazione e focusing).
+	Di questo nuovo calcolo -- che chiameremo $C$ -- abbiamo mostrato la correttezza esibendo una traduzione verso un calcolo intermedio ($A$) tale che il seguente diagramma commuta:
 	\begin{center}
 		\begin{tikzpicture}
 			\node (our-calc) {$C$};
@@ -136,30 +142,83 @@
 
 			\draw[->] (our-calc) to node[above] {\tiny $\llbracket - \rrbracket_C$} (andreoli);
 			\draw[->] (andreoli) to node[right] {\tiny $\llbracket - \rrbracket_A$} (classic);
-			\draw[->] (our-calc) to node[below left] {\tiny $\llbracket - \rrbracket_A \circ \llbracket - \rrbracket_C$} (classic);
+			\draw[->, dashed] (our-calc) to node[below left] {\tiny $\llbracket - \rrbracket_A \circ \llbracket - \rrbracket_C$} (classic);
 		\end{tikzpicture}
 	\end{center}
+	con $LL$ il calolo classico della logica lineare e $\llbracket - \rrbracket$ le traduzioni.
 \end{frame}
-
 \begin{frame}{Implementazione}
 	Per il calcolo di sopra:
 	\begin{itemize}
-		\item è stata fatta un'implementazione in SWI-Prolog;
-		\item è stato scritto un generatore di test in OCaML;
-		\item è stato architettato un sistema per il testing e il benchmarking in Python.
+		\item<1-> è stata fatta un'implementazione in SWI-Prolog;
+		\item<2-> è stato scritto un generatore di test in OCaml;
+		\item<3-> è stato architettato un sistema per il testing e il benchmarking in Python.
 	\end{itemize}
-	Infine l'infrastruttura per tutti i programmi è stata gestita con Nix.
+	\onslide<4->{Infine l'infrastruttura per tutti i programmi di sopra è stata gestita con Nix.}
 	\begin{center}
 		\begin{tabular}{*{4}{wc{2cm}}}
-			\includegraphics[width=1.5cm]{images/prolog-logo} &
-			\includegraphics[width=1.5cm]{images/ocaml-logo} &
-			\includegraphics[width=1.5cm]{images/python-logo} &
-			\includegraphics[width=1.5cm]{images/nix-logo}
+			\onslide<1->{\includegraphics[width=1.5cm]{images/prolog-logo}} &
+			\onslide<2->{\includegraphics[width=1.5cm]{images/ocaml-logo}} &
+			\onslide<3->{\includegraphics[width=1.5cm]{images/python-logo}} &
+			\onslide<4->{\includegraphics[width=1.5cm]{images/nix-logo}} \\
 		\end{tabular}
 	\end{center}
 \end{frame}
 
 \section{Conclusione}
+\begin{frame}{Risultati -- caso moltiplicativo}
+	\begin{columns}
+		\begin{column}{.5\textwidth}
+	Una volta implementato il prover lo si è confrontato con altri due prover basati a grandi linee sullo stesso algoritmo (i.e. bottom-up focused proof search): llprover (1997) e APLL (2016).
+	Nel caso moltiplicativo, quello principalemente soggetto al problema dello splitting, i risultati sono buoni:
+		\end{column}
+		\begin{column}{.5\textwidth}
+			\begin{figure}[H]
+				\centering
+				\includegraphics[scale=.4]{images/graph}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+\begin{frame}{Risultato -- caso generale}
+	Nel caso dei test esponenziali utilizziamo due dataset preesistenti e vediamo che i risultati si livellano:
+	\begin{table}[h!]
+		\begin{subtable}{\textwidth}
+			\centering
+			{\footnotesize
+			\begin{tabular}{ | l c c c c c c | }
+				\hline
+				\textbf{prover} & \textbf{timeouts} & \textbf{failures} & \textbf{successes} & \textbf{success rate} & \textbf{avg. (succ.)} & \textbf{avg. (tot.)} \\
+				\hline
+				\hline
+				APLL     & $0$  & $17$ & $71$ & \color{darkbluestatale}{$\approx 0.80$} & \qty{0.035}{\second} & \qty{0.326}{\second} \\
+				llprover & $20$ & $6$  & $62$ & \color{darkbluestatale}{$\approx 0.70$} & \qty{0.981}{\second} & \qty{2.179}{\second} \\
+				sat-ll   & $5$  & $15$ & $68$ & \color{darkbluestatale}{$\approx 0.77$} & \qty{0.443}{\second} & \qty{0.496}{\second} \\
+				\hline
+			\end{tabular}
+			}
+			\caption{Outputs for KLE-cbv}
+			\label{table:KLE-cbv}
+		\end{subtable}
+		\begin{subtable}{\textwidth}
+			\centering
+			{\footnotesize
+			\begin{tabular}{ | l c c c c c c | }
+				\hline
+				\textbf{prover} & \textbf{timeouts} & \textbf{failures} & \textbf{successes} & \textbf{success rate} & \textbf{avg. (succ.)} & \textbf{avg. (tot.)} \\
+				\hline
+				\hline
+				APLL     & $0$  & $16$ & $72$ & \color{darkbluestatale}{$\approx 0.80$} & \qty{0.037}{\second} & \qty{0.055}{\second} \\
+				llprover & $20$ & $6$  & $62$ & \color{darkbluestatale}{$\approx 0.70$} & \qty{1.709}{\second} & \qty{3.253}{\second} \\
+				sat-ll   & $4$  & $18$ & $66$ & \color{darkbluestatale}{$\approx 0.75$} & \qty{0.130}{\second} & \qty{0.185}{\second} \\
+				\hline
+			\end{tabular}
+			}
+			\caption{Outputs for KLE-cbn}
+			\label{table:KLE-cbn}
+		\end{subtable}
+	\end{table}
+\end{frame}
 
 % ==================///==================///==================///
 % ==================/// END PRESENTATION

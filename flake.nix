@@ -79,13 +79,14 @@
 
               installPhase = ''
 		  mkdir -p $out
-		  cp thesis.pdf $out/${fname}.pdf
+		  cp ${fname}.pdf $out/${fname}.pdf
 	      '';
             };
 	in rec {
 	  thesis = makePdf "thesis" [];
 	  debug = makePdf "thesis" ["dbg"];
 	  riassunto = makePdf "riassunto" [];
+	  presentazione = makePdf "presentazione" [];
 	  default = thesis;
         };
 
