@@ -1,0 +1,11 @@
+*.aux
+*.bbl
+*.out
+*.nav
+*.fls
+*.log
+*.tex.bak
+*.toc
+*.snm
+*.fdb_latexmk
+_minted-*
