@@ -61,8 +61,8 @@
 	Il calcolo dei sequenti (G. Ghentzen, 1934) è un formalismo per rappresentare un calcolo logico e strutturarne dimostrazioni.
 	I concetti principali sono due:
 	\begin{itemize}
-		\item il sequente $\Delta \vdash \Gamma$, che esprime una implicazione tra la congiunzione di $\Delta$ e la disgiunzione di $\Gamma$;
-		\item la regola, che descrive come si possono comporre i sequenti,
+		\item \onslide<2->{il sequente $\Delta \vdash \Gamma$, che esprime una implicazione tra la congiunzione di $\Delta$ e la disgiunzione di $\Gamma$;}
+		\item \onslide<3->{la regola, che descrive come si possono comporre i sequenti, ad esempio
 			$$
 			\AXC{$\overbrace{\Delta \vdash \phi', \Gamma}^{\Pi'}$}
 			\AXC{$\overbrace{\Delta \vdash \phi'', \Gamma}^{\Pi''}$}
@@ -70,7 +70,7 @@
 			\BIC{$\underbrace{\Delta \vdash \phi' \wedge \phi'', \Gamma}_{\Pi}$}
 			\DP
 			$$
- 		in questo caso se valgono $\Pi'$ e $\Pi''$, allora vale $\Pi$.
+		stabilisce che se valgono $\Pi'$ e $\Pi''$, allora vale $\Pi$.}
 	\end{itemize}
 \end{frame}
 
@@ -89,12 +89,12 @@
 	\UIC{$a \wedge b \vdash b \wedge a$}
 	\DP
 	$$
-	Un theorem prover è un programma che, dato un sequente, prova a costruirne la dimosrazione applicando le regole di sopra.
+	Un \textbf{theorem prover} è un programma che, dato un sequente, prova a costruirne la dimosrazione applicando le regole di sopra.
 	Nello specifico un theorem prover è detto bottom-up se parte dal sequente da dimostrare, e lo continua a scomporre applicando le regole ``al contrario''.
 \end{frame}
 
 \begin{frame}{Logica lineare}
-	La \textbf{logica lineare} (J.-Y. Girard, 1987) è una logica la cui caratteristica principale è che è generalmente proibita la duplicazione o l'eliminazione di formule durante il processo di dimostrazione, operazioni che altrimenti sono spesso lasciate implicite.
+	La \textbf{logica lineare} (J.-Y. Girard, 1987) è una logica la cui caratteristica principale è che è generalmente proibita la duplicazione o l'eliminazione di formule, operazioni che altrimenti sono spesso lasciate implicite.
 	Questa scelta porta ad alcune proprietà particolari, tra cui la duplicazione dei connettivi della logica classica secondo due interpretazioni diverse, una detta moltiplicativa e l'altra additiva.
 	\begin{center}
 		\begin{tabular}{c|cccc|}
@@ -150,22 +150,22 @@
 			\draw[->, dashed] (our-calc) to node[below left] {\tiny $\llbracket - \rrbracket_A \circ \llbracket - \rrbracket_C$} (classic);
 		\end{tikzpicture}
 	\end{center}
-	con $LL$ il calcolo classico della logica lineare e $\llbracket - \rrbracket$ le traduzioni.
+	con $LL$ il calcolo classico della logica lineare e $\llbracket - \rrbracket$ le rispettive traduzioni.
 \end{frame}
 \begin{frame}{Implementazione}
 	Per il calcolo di sopra sono state scritte:
 	\begin{itemize}
-		\item<1-> un'implementazione in SWI-Prolog;
-		\item<2-> un generatore di test in OCaml;
-		\item<3-> un sistema per il testing e il benchmarking in Python.
+		\item<2-> un'implementazione in SWI-Prolog;
+		\item<3-> un generatore di test in OCaml;
+		\item<4-> una libreria per il testing e il benchmarking in Python.
 	\end{itemize}
-	\onslide<4->{Infine l'infrastruttura per tutti i programmi di sopra è stata gestita con Nix.}
+	\onslide<5->{Infine l'infrastruttura per tutti i programmi di sopra è stata gestita con Nix.}
 	\begin{center}
 		\begin{tabular}{*{4}{wc{2cm}}}
-			\onslide<1->{\includegraphics[width=1.5cm]{images/prolog-logo}} &
-			\onslide<2->{\includegraphics[width=1.5cm]{images/ocaml-logo}} &
-			\onslide<3->{\includegraphics[width=1.5cm]{images/python-logo}} &
-			\onslide<4->{\includegraphics[width=1.5cm]{images/nix-logo}} \\
+			\onslide<2->{\includegraphics[width=1.5cm]{images/prolog-logo}} &
+			\onslide<3->{\includegraphics[width=1.5cm]{images/ocaml-logo}} &
+			\onslide<4->{\includegraphics[width=1.5cm]{images/python-logo}} &
+			\onslide<5->{\includegraphics[width=1.5cm]{images/nix-logo}} \\
 		\end{tabular}
 	\end{center}
 \end{frame}
@@ -175,7 +175,7 @@
 	\begin{columns}
 		\begin{column}{.5\textwidth}
 	Una volta implementato il prover lo si è confrontato con altri due prover basati a grandi linee sullo stesso algoritmo (i.e. bottom-up focused proof search): llprover (1997) e APLL (2016).
-	Nel caso moltiplicativo, quello principalmente soggetto al problema dello splitting, i risultati sono buoni:
+	Nel caso moltiplicativo -- quello principalmente soggetto al problema dello splitting -- i risultati sono buoni:
 		\end{column}
 		\begin{column}{.5\textwidth}
 			\begin{figure}[H]
