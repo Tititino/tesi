@@ -94,14 +94,19 @@
 \end{frame}
 
 \begin{frame}{Logica lineare}
-	La \textbf{logica lineare} (J.-Y. Girard, 1987) è una logica la cui caratteristica principale è che è generalmente proibita la duplicazione o l'eliminazione di formule durante il processo di dimostrazione, operazioni che altresì sono spesso lasciate implicito.
-	Questa scelta porta ad alcune proprietà particolari, tra cui la duplicazione dei connettivi della logica classica secondo due interpretazioni diverse, una detta moltiplicativa ed l'altra additiva.
+	La \textbf{logica lineare} (J.-Y. Girard, 1987) è una logica la cui caratteristica principale è che è generalmente proibita la duplicazione o l'eliminazione di formule durante il processo di dimostrazione, operazioni che altrimenti sono spesso lasciate implicite.
+	Questa scelta porta ad alcune proprietà particolari, tra cui la duplicazione dei connettivi della logica classica secondo due interpretazioni diverse, una detta moltiplicativa e l'altra additiva.
 	\begin{center}
-		\begin{tabular}{cccc}
-			$\wedge$ &\multirow{4}{.3cm}{$\rightarrow$} & $\llten$ & $\llwith$ \\
-			$\vee$   &                                  & $\llpar$ & $\llplus$ \\
-			$\top$   &                                  & $\llone$ & $\lltop$ \\
-			$\bot$   &                                  & $\llbot$ & $\llzero$ \\
+		\begin{tabular}{c|cccc|}
+			\cline{2-5}
+				 & $\wedge$ & $\vee$   & $\top$   & $\bot$ \\
+			\cline{2-5}
+			\noalign{\vskip\doublerulesep
+         			\vskip-\arrayrulewidth}
+			\cline{2-5}
+			Molt.    & $\llten$  & $\llpar$  & $\llone$ & $\llbot$ \\
+			Add.	 & $\llwith$ & $\llplus$ & $\lltop$ & $\llzero$ \\
+			\cline{2-5}
 		\end{tabular}
 	\end{center}
 \end{frame}
@@ -114,7 +119,7 @@
 	\BIC{$\vdash \Delta', \Delta'', \phi' \llten \phi''$}
 	\DP
 	$$
-	La decomposizione del tensore (regola di qui sopra) comporta il partizionamento di $\Delta$ in $\Delta'$ e $\Delta''$ per continuare la dimostrazione.
+	La scomposizione dei moltiplicativi, ad esempio nella regola del tensore di cui sopra, comporta il partizionamento di $\Delta$ in $\Delta'$ e $\Delta''$ per continuare la dimostrazione.
 	Questa operazione può richiedere un numero esponenziale di tentativi.
 
 	Nel 2001 D.Pym e J.Harland propongono un metodo per gestire lo splitting utilizzando vincoli booleani generati a partire da espressioni associate a ogni singola formula.
@@ -133,7 +138,7 @@
 
 \begin{frame}{Focusing e normalizzazione}
 	Partendo dal calcolo citato sopra di D.Pym e J.Harland, abbiamo applicato due classiche modifiche nell'ambito del proof searching (i.e. normalizzazione e focusing).
-	Di questo nuovo calcolo -- che chiameremo $C$ -- abbiamo mostrato la correttezza esibendo una traduzione verso un calcolo intermedio ($A$) tale che il seguente diagramma commuta:
+	Di questo nuovo calcolo -- che chiameremo $C$ -- abbiamo poi mostrato la correttezza esibendo una traduzione verso un calcolo intermedio ($A$) tale che il seguente diagramma commuta:
 	\begin{center}
 		\begin{tikzpicture}
 			\node (our-calc) {$C$};
@@ -145,14 +150,14 @@
 			\draw[->, dashed] (our-calc) to node[below left] {\tiny $\llbracket - \rrbracket_A \circ \llbracket - \rrbracket_C$} (classic);
 		\end{tikzpicture}
 	\end{center}
-	con $LL$ il calolo classico della logica lineare e $\llbracket - \rrbracket$ le traduzioni.
+	con $LL$ il calcolo classico della logica lineare e $\llbracket - \rrbracket$ le traduzioni.
 \end{frame}
 \begin{frame}{Implementazione}
-	Per il calcolo di sopra:
+	Per il calcolo di sopra sono state scritte:
 	\begin{itemize}
-		\item<1-> è stata fatta un'implementazione in SWI-Prolog;
-		\item<2-> è stato scritto un generatore di test in OCaml;
-		\item<3-> è stato architettato un sistema per il testing e il benchmarking in Python.
+		\item<1-> un'implementazione in SWI-Prolog;
+		\item<2-> un generatore di test in OCaml;
+		\item<3-> un sistema per il testing e il benchmarking in Python.
 	\end{itemize}
 	\onslide<4->{Infine l'infrastruttura per tutti i programmi di sopra è stata gestita con Nix.}
 	\begin{center}
@@ -170,7 +175,7 @@
 	\begin{columns}
 		\begin{column}{.5\textwidth}
 	Una volta implementato il prover lo si è confrontato con altri due prover basati a grandi linee sullo stesso algoritmo (i.e. bottom-up focused proof search): llprover (1997) e APLL (2016).
-	Nel caso moltiplicativo, quello principalemente soggetto al problema dello splitting, i risultati sono buoni:
+	Nel caso moltiplicativo, quello principalmente soggetto al problema dello splitting, i risultati sono buoni:
 		\end{column}
 		\begin{column}{.5\textwidth}
 			\begin{figure}[H]
@@ -180,7 +185,7 @@
 		\end{column}
 	\end{columns}
 \end{frame}
-\begin{frame}{Risultato -- caso generale}
+\begin{frame}{Risultati -- caso generale}
 	Nel caso dei test esponenziali utilizziamo due dataset preesistenti e vediamo che i risultati si livellano:
 	\begin{table}[h!]
 		\begin{subtable}{\textwidth}
@@ -197,7 +202,7 @@
 				\hline
 			\end{tabular}
 			}
-			\caption{Outputs for KLE-cbv}
+			\caption{Output per KLE-cbv}
 			\label{table:KLE-cbv}
 		\end{subtable}
 		\begin{subtable}{\textwidth}
@@ -214,7 +219,7 @@
 				\hline
 			\end{tabular}
 			}
-			\caption{Outputs for KLE-cbn}
+			\caption{Output per KLE-cbn}
 			\label{table:KLE-cbn}
 		\end{subtable}
 	\end{table}
