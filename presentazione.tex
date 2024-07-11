@@ -76,42 +76,28 @@
 
 \begin{frame}{Calcolo dei sequenti cont'd}
 	Una dimostrazione consiste in un albero avente come radice il sequente da dimostrare e ottenuto concatendo regole.
-	$$
-	\AXC{}
-	\LeftLabel{$A$}
-	\UIC{$a, b \vdash b$}
-	\AXC{}
-	\LeftLabel{$A$}
-	\UIC{$a, b \vdash a$}
-	\LeftLabel{$\wedge_R$}
-	\BIC{$a, b \vdash b \wedge a$}
-	\LeftLabel{$\wedge_L$}
-	\UIC{$a \wedge b \vdash b \wedge a$}
-	\DP
-	$$
 	Un \textbf{theorem prover} è un programma che, dato un sequente, prova a costruirne la dimosrazione.
-	Nello specifico un theorem prover è detto bottom-up se parte dal sequente da dimostrare, e lo continua a scomporre applicando le regole ``al contrario''.
+	Nello specifico la versione bottom-up mantiene un insieme di sequenti da dimostrare, detti ``goal'', e ad ogni iterazione:
+	\begin{enumerate}
+		\item si sceglie un nuovo goal;
+		\item lo si scompone applicando una regola ``al contrario'';
+		\item si aggiugnono i nuovi goal al working-set.
+	\end{enumerate}
+	Nella maggior parte dei casi la scelta della regola è non-deterministica.
 \end{frame}
 
 \begin{frame}{Logica lineare}
-	La \textbf{logica lineare} (J.-Y. Girard, 1987) è una logica la cui caratteristica principale è che è generalmente proibita la duplicazione o l'eliminazione di formule, operazioni che altrimenti sono spesso lasciate implicite.
-	Questa scelta porta ad alcune proprietà particolari, tra cui la duplicazione dei connettivi della logica classica secondo due interpretazioni diverse, una detta moltiplicativa e l'altra additiva.
-	\begin{center}
-		\begin{tabular}{c|cccc|}
-			\cline{2-5}
-				 & $\wedge$ & $\vee$   & $\top$   & $\bot$ \\
-			\cline{2-5}
-			\noalign{\vskip\doublerulesep
-         			\vskip-\arrayrulewidth}
-			\cline{2-5}
-			Molt.    & $\llten$  & $\llpar$  & $\llone$ & $\llbot$ \\
-			Add.	 & $\llwith$ & $\llplus$ & $\lltop$ & $\llzero$ \\
-			\cline{2-5}
-		\end{tabular}
-	\end{center}
+	La logica lineare è una logica avente le seguenti caratteristiche:
+	\begin{itemize}
+		\item è generalmente proibita la duplicazione o l'eliminazione di formule, tutte le formule devono essere usate una e una sola volta;
+		\item la negazione è simmetrica e un'involuzione;
+		\item ogni connettivo ammette due versioni, una additiva ed una moltiplicativa, corrispondenti a due diverse interpretazioni dei connettivi classici;
+		\item degli speciali connettivi ($?, !$), chiamati esponenziali, permettono di localizzare la copia e l'eliminazione di formule.
+	\end{itemize}
 \end{frame}
+
 \begin{frame}{Splitting}
-	Durante il proof searching bottom-up uno dei problemi pincipali è quello dello \textbf{splitting}.
+	Durante il proof searching bottom-up in logica lineare un'ulteriore fonte di non-determinismo è l'operazione di \textbf{splitting}.
 	$$
 	\AXC{$\vdash \Delta', \phi'$}
 	\AXC{$\vdash \Delta'', \phi''$}
@@ -119,10 +105,7 @@
 	\BIC{$\vdash \Delta', \Delta'', \phi' \llten \phi''$}
 	\DP
 	$$
-	La scomposizione dei moltiplicativi, ad esempio nella regola del tensore di cui sopra, comporta il partizionamento di $\Delta$ in $\Delta'$ e $\Delta''$ per continuare la dimostrazione.
-	Questa operazione può richiedere un numero esponenziale di tentativi.
-
-	Nel 2001 D.Pym e J.Harland propongono un metodo per gestire lo splitting utilizzando vincoli booleani generati a partire da espressioni associate a ogni singola formula.
+	La scomposizione dei moltiplicativi comporta il partizionamento del contesto in $\Delta'$ e $\Delta''$ per continuare la dimostrazione.
 \end{frame}
 
 \section{Il calcolo}
@@ -135,31 +118,63 @@
 % \input{sections/analysis}
 
 % \input{sections/conclusions}
-
+\begin{frame}{Calcolo dei vincoli}
+	Nel 2001 D.Pym e J.Harland propongono un algoritmo alternativo per gestire le risorse (nello specifico lo splitting) basato su vincoli booleani.
+	Questi possono essere solo di due tipi:
+	\begin{itemize}
+		\item una certa formula è stata usata per dimostrare questo goal, e non può essere usata altrove;
+		\item una certa formula non è stata usata per dimostrare questo goal, e deve essere utilizzata per un altro.
+	\end{itemize}
+	Se i vincoli sono soddisfacibili, allora la dimostrazione utilizza le formule in modo corretto.
+\end{frame}
 \begin{frame}{Focusing e normalizzazione}
-	Partendo dal calcolo citato sopra di D.Pym e J.Harland, abbiamo applicato due classiche modifiche nell'ambito del proof searching (i.e. normalizzazione e focusing).
-	Di questo nuovo calcolo -- che chiameremo $C$ -- abbiamo poi mostrato la correttezza esibendo una traduzione verso un calcolo intermedio ($A$) tale che il seguente diagramma commuta:
-	\begin{center}
-		\begin{tikzpicture}
-			\node (our-calc) {$C$};
-			\node (andreoli) [right=of our-calc] {$A$};
-			\node (classic)  [below=of andreoli] {$LL$};
+	Al calcolo abbiamo applicato due classiche modifiche nell'ambito del proof searching:
+	\begin{itemize}
+		\item<2-> la normalizzazione permette di ridurre il numero delle regole e di lavorare solo con sequenti one-sided
+			$$\Gamma \vdash \Delta \Rightarrow \;\vdash \Delta $$
+		\item<3-> il focusing suddivide la dimostrazione in due fasi che si alternano:
+			\begin{itemize}
+				\item una fase (asincrona) in cui sono ammesse solo regole invertibili, cioè il cui ordine di applicazione non è importante;
+				\item una fase (sincrona) in cui ci si concentra su una formula e si continuano ad applicare regole non invertibili, con la possibilità di dover fare backtracking.
+			\end{itemize}
+			In questo modo si minimizza il non-determinismo don't-care.
+	\end{itemize}
+\end{frame}
+\begin{frame}{Correttezza}
+	\begin{columns}
+		\begin{column}{.6\textwidth}
+			Del nuovo calcolo mostriamo la correttezza esibendo una traduzione tale che il diagramma a lato commuta.
+			Con:
+			\begin{itemize}
+				\item $C$ il nostro calcolo;
+				\item $A$ il calcolo focused senza constraint;
+				\item $LL$ il calcolo classico della logica lineare.
+			\end{itemize}
+			e $\llbracket-\rrbracket$ le rispettive traduzioni.
+		\end{column}
+		\begin{column}{.4\textwidth}
+			\begin{center}
+				\begin{tikzpicture}[scale=1.5, every node/.style={transform shape}]
+					\node (our-calc) {$C$};
+					\node (andreoli) [right=of our-calc] {$A$};
+					\node (classic)  [below=of andreoli] {$LL$};
 
-			\draw[->] (our-calc) to node[above] {\tiny $\llbracket - \rrbracket_C$} (andreoli);
-			\draw[->] (andreoli) to node[right] {\tiny $\llbracket - \rrbracket_A$} (classic);
-			\draw[->, dashed] (our-calc) to node[below left] {\tiny $\llbracket - \rrbracket_A \circ \llbracket - \rrbracket_C$} (classic);
-		\end{tikzpicture}
-	\end{center}
-	con $LL$ il calcolo classico della logica lineare e $\llbracket - \rrbracket$ le rispettive traduzioni.
+					\draw[->] (our-calc) to node[above] {\tiny $\llbracket - \rrbracket_C$} (andreoli);
+					\draw[->] (andreoli) to node[right] {\tiny $\llbracket - \rrbracket_A$} (classic);
+					\draw[->, dashed] (our-calc) to node[below left] {\tiny $\llbracket - \rrbracket_A \circ \llbracket - \rrbracket_C$} (classic);
+				\end{tikzpicture}
+			\end{center}
+		\end{column}
+	\end{columns}
 \end{frame}
 \begin{frame}{Implementazione}
 	Per il calcolo di sopra sono state scritte:
 	\begin{itemize}
-		\item<2-> un'implementazione in SWI-Prolog;
+		\item<2-> un'implementazione in SWI-Prolog, sfruttando le librerie per il CLP;
 		\item<3-> un generatore di test in OCaml;
 		\item<4-> una libreria per il testing e il benchmarking in Python.
 	\end{itemize}
-	\onslide<5->{Infine l'infrastruttura per tutti i programmi di sopra è stata gestita con Nix.}
+	\onslide<5->{Infine l'infrastruttura è stata gestita con Nix.}
 	\begin{center}
 		\begin{tabular}{*{4}{wc{2cm}}}
 			\onslide<2->{\includegraphics[width=1.5cm]{images/prolog-logo}} &
@@ -174,8 +189,11 @@
 \begin{frame}{Risultati -- caso moltiplicativo}
 	\begin{columns}
 		\begin{column}{.5\textwidth}
-	Una volta implementato il prover lo si è confrontato con altri due prover basati a grandi linee sullo stesso algoritmo (i.e. bottom-up focused proof search): llprover (1997) e APLL (2016).
-	Nel caso moltiplicativo -- quello principalmente soggetto al problema dello splitting -- i risultati sono buoni:
+			Una volta implementato il prover lo si è confrontato con altri due prover:
+			\begin{itemize}
+				\item llprover (1997)
+				\item APLL (2019)
+			\end{itemize}
 		\end{column}
 		\begin{column}{.5\textwidth}
 			\begin{figure}[H]
@@ -186,7 +204,7 @@
 	\end{columns}
 \end{frame}
 \begin{frame}{Risultati -- caso generale}
-	Nel caso dei test esponenziali utilizziamo due dataset preesistenti e vediamo che i risultati si livellano:
+	Nel caso dei test esponenziali i risultati si livellano:
 	\begin{table}[h!]
 		\begin{subtable}{\textwidth}
 			\centering
