@@ -1,0 +1,48 @@
+- oggetto è la dimostrabilità di teoremi in certe logiche proposizionali non calssiche
+
+- usiamo tecniche di teoria della dimostrazione, in particolare proof search nei calcolo dei sequenti
+
+  -- struttura del sequente
+
+  -- regole di left/right che corrispondono a eliminazione e introduzione dei connettivi logici
+
+ -- regole strutturali a seconda della nozione di conseguenza logica sottostante (e. weakening corrisponde alla monotonia)
+
+- la ricerca di una prova nei sequnti è troppo poco struttturata (qualunque regola è applicabile a ogni momento)
+
+ -- Analisi delle regole: certe sono invertibili e possono essere applicate in qualunque ordine senza perdere completezza, altre invece richiedono scelte e creano punti di backtracking
+
+-- la nozione di focusing codifica queste osservazioni e rende la proof search fattibile
+
+==========================
+
+La logica lineare è una logica di risorse etc basata sulla osservazione della assoluta rielevanza delle regole strutturali, nel senso che abbandonandole si ottengono logiche che catturano fenomeni diversi.
+
+Proof search in LL è particolarmente difficile perché
+
+ -- in generale indedicibile anche al proposiozionale (ma in questa tesi non ce ne occupiamo se con sistemi standard di bounds
+
+-- nasce il problema del resource managment nelle regole moltiplicative
+
+   --- splitting fisico della lista è troppo costoso
+
+-> idea di H & Pym: no splitting ma lo status de utilizzo delle formule in una prova è riassunti
+da un vincolo  boolena tale che se è soddisfacibile allora esiste uno splitting che rende la prova fattibile
+
+==============================
+
+Contrbuto della tesi
+
+- implementazione di un prover per intera logica lineare classica, basata su focusing e CLP(B)
+
+-- usiamo Prolog perchè
+
+--- codifica dichiarativa delle regole
+
+--- backtracking incorporato
+
+--- estesione CLP ci da risolutore di vincoli a gratis compatibile con unificazione
+
+ ++ tra le varie strategie di risoluzione dei vincoli, questo ci porta a una mista  --> controllo incrimentale della soddisfacibilità e poi nelle foglie (ma è vero?)
+
+=======================0
