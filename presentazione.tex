@@ -8,6 +8,7 @@
 \usepackage{tabularx}
 \usepackage{multirow}
 \usepackage{tabularray}
+\usepackage[makeroom, thicklines]{cancel}
 
 \usepackage{float}
 \usepackage{subcaption}
@@ -51,82 +52,133 @@
 \section{Introduzione}
 \begin{frame}{Calcolo dei sequenti}
 	Il calcolo dei sequenti (G. Gentzen, 1934) è un formalismo per rappresentare un calcolo logico e strutturarne dimostrazioni.
-	I concetti principali sono due:
+	I concetti principali sono:
 	\begin{itemize}
-		\item \onslide<2->{il sequente $\Delta \vdash \Gamma$, che rappresenta una implicazione tra la congiunzione e la disgiunzione di sequenze di formule;}
-		\item \onslide<3->{la regola, che descrive come si possono manipolare i sequenti, ad esempio
-			$$
-			\AXC{$\overbrace{\Delta \vdash \phi', \Gamma}^{\Pi'}$}
-			\AXC{$\overbrace{\Delta \vdash \phi'', \Gamma}^{\Pi''}$}
-			\LeftLabel{$\wedge$}
-			\BIC{$\underbrace{\Delta \vdash \phi' \wedge \phi'', \Gamma}_{\Pi}$}
-			\DP
-			$$
-		stabilisce che se valgono $\Pi'$ e $\Pi''$, allora vale $\Pi$.}
+		\item<2-> il sequente $\Delta \vdash \Gamma$, di solito interpretato come
+			$$ \delta_1 \wedge \dots \wedge \delta_n \rightarrow \gamma_1 \vee \dots \vee \gamma_m $$
+		\item<3-> la regola, per manipolare i sequenti
+			\begin{itemize}
+				\item descrive la semantica di un connettivo (introduzione e eliminazione):
+					\vspace*{.1cm}
+					\begin{center}
+						\begin{tabular}{cc}
+							$$
+							\AXC{$\Delta \vdash \phi', \Gamma$}
+							\AXC{$\Delta \vdash \phi'', \Gamma$}
+							\LeftLabel{$\text{intro} \wedge$}
+							\BIC{$\Delta \vdash \phi' \wedge \phi'', \Gamma$}
+							\DP
+							$$
+							&
+							$$
+							\AXC{$\Delta, \phi', \phi'' \vdash \Gamma$}
+							\LeftLabel{$\text{elim} \wedge$}
+							\UIC{$\Delta, \phi' \wedge \phi'' \vdash \Gamma$}
+							\DP
+							$$
+						\end{tabular}
+					\end{center}
+					\vspace*{.1cm}
+				\item descrive come trattare le formule all'interno del sequente (regole strutturali).
+			\end{itemize}
+		\item<4-> la dimostrazione, un albero avente come radice il sequente da dimostrare e ottenuto concatenando regole.
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Calcolo dei sequenti cont'd}
-	Una dimostrazione consiste in un albero avente come radice il sequente da dimostrare e ottenuto concatendo regole.
-	Un \textbf{theorem prover} è un programma che, dato un sequente, prova a costruirne la dimosrazione.
-	Nello specifico la versione bottom-up mantiene un insieme di sequenti da dimostrare, detti ``goal'', e ad ogni iterazione:
+\begin{frame}{Theorem prover}
+	Un \textbf{theorem prover} è un programma che, dato un sequente, prova a costruirne la dimostrazione.
+	Nello specifico la versione bottom-up:
 	\begin{enumerate}
-		\item si sceglie un nuovo goal;
-		\item lo si scompone applicando una regola ``al contrario'';
-		\item si aggiugnono i nuovi goal al working-set.
+		\item inizia con un singolo \textit{goal}, cioè il sequente iniziale
+		\item sceglie un nuovo goal;
+		\item lo scompone applicando una regola ``al contrario'' ad una delle formule nel goal:
+			\begin{itemize}
+				\item non-determinismo don't-care: tutte le scelte sono equivalenti equivalenti;
+				\item non-determinismo don't-know: non tutte le scelte sono equivalenti e può essere necessario del backtracking;
+			\end{itemize}
+		\item aggiunge i nuovi goal al working-set;
+		\item si ripete dal passo 2 fino a che ci sono goal.
 	\end{enumerate}
-	Nella maggior parte dei casi la scelta della regola è non-deterministica.
 \end{frame}
+
+\begin{frame}{Focusing}
+	Le regole di un calcolo possono essere suddivise in due classi:
+	\begin{itemize}
+		\item invertibili: l'ordine di applicazione non è importante;
+		\item non invertibili: sono necessarie scelte che potrebbero necessitare backtracking.
+	\end{itemize}
+	Il \textbf{focusing} è una tecnica che suddivide la dimostrazione in due fasi che si alternano:
+	\begin{itemize}
+		\item una fase (asincrona) in cui si applicano eagerly solo regole invertibili;
+		\item una fase (sincrona) in cui ci si concentra su una formula e si continuano ad applicare regole non invertibili.
+	\end{itemize}
+	In questo modo si minimizza il non-determinismo don't-care.
+\end{frame}
+
 
 \begin{frame}{Logica lineare}
-	La logica lineare classica è una logica dove le formule sono viste come \textbf{risorse}
+	La \textbf{logica lineare} nasce dall'analisi delle regole strutturali e dall'abbandono di due di esse:
 	\begin{itemize}
-		\item è generalmente proibita la duplicazione o l'eliminazione di formule, quindi tutte le formule devono essere usate una e una sola volta;
-%		\item la negazione è simmetrica e un'involuzione;
-		\item ogni connettivo ammette due versioni, una additiva ed una moltiplicativa, corrispondenti a due diverse interpretazioni dei connettivi classici;
-		\item degli speciali connettivi ($?, !$), chiamati esponenziali, permettono di localizzare la copia e l'eliminazione di formule.
+		\item \textit{weakening}: nel sequente si possono sempre aggiungere formule;
+		\item \textit{contraction}: due copie della stessa formula possono essere contratte.
 	\end{itemize}
+	Nella logica che ne risulta:
+	\begin{itemize}
+		\item è generalmente proibita la duplicazione o l'eliminazione di formule;
+		\item le formule possono essere viste come \textbf{risorse};
+		\item ogni connettivo ammette due versioni, una additiva ed una moltiplicativa, corrispondenti a due diverse interpretazioni dei connettivi classici;
+	\end{itemize}
+	Degli speciali connettivi ($?, !$), chiamati esponenziali, permettono di localizzare la copia e l'eliminazione di formule.
 \end{frame}
 
-\begin{frame}{Splitting}
-	Durante il proof searching bottom-up in logica lineare un'ulteriore fonte di non-determinismo è l'operazione di \textbf{splitting}.
+\begin{frame}{Gestione delle risorse}
+	Durante il proof searching bottom-up in logica lineare un'ulteriore fonte di non-determinismo è la gestione delle risorse.
 	$$
-	\AXC{$\vdash \Delta', \phi'$}
-	\AXC{$\vdash \Delta'', \phi''$}
-	\LeftLabel{$\llten$}
-	\BIC{$\vdash \Delta', \Delta'', \phi' \llten \phi''$}
+	\AXC{}
+	\LeftLabel{$A$}
+	\UIC{$\beta \vdash \beta$}
+	\AXC{}
+	\LeftLabel{$A$}
+	\UIC{$\alpha \vdash \alpha$}
+	\LeftLabel{$\llten_R$}
+	\BIC{$\alpha, \beta \vdash \beta \llten \alpha$}
+	\LeftLabel{$\llten_L$}
+	\UIC{$\alpha \llten \beta \vdash \beta \llten \alpha$}
 	\DP
 	$$
-	La scomposizione dei moltiplicativi comporta il partizionamento del contesto in $\Delta'$ e $\Delta''$ per continuare la dimostrazione.
+	Nello specifico la scomposizione dei moltiplicativi spesso comporta un'operazione chiamata \textbf{splitting}, cioè il partizionamento del contesto.
 \end{frame}
-
 \section{Il calcolo}
 \begin{frame}{Calcolo dei vincoli}
-	Nel 2001 D.Pym e J.Harland propongono un algoritmo alternativo per gestire le risorse (nello specifico lo splitting) basato su vincoli booleani.
-	Questi possono essere solo di due tipi:
+	Nel 2001 D.Pym e J.Harland propongono un di gestione delle risorse basato su vincoli booleani.
+	Questi
 	\begin{itemize}
-		\item una certa formula è stata usata per dimostrare questo goal, e non può essere usata altrove;
-		\item una certa formula non è stata usata per dimostrare questo goal, e deve essere utilizzata per un altro.
-	\end{itemize}
-	Se i vincoli sono soddisfacibili, allora la dimostrazione utilizza le formule in modo corretto.
-\end{frame}
-\begin{frame}{Focusing e normalizzazione}
-	Al calcolo abbiamo applicato due classiche modifiche nell'ambito del proof searching:
-	\begin{itemize}
-		\item<2-> la normalizzazione permette di ridurre il numero delle regole e di lavorare solo con sequenti one-sided
-			$$\Gamma \vdash \Delta \Rightarrow \;\vdash \Delta $$
-		\item<3-> il focusing suddivide la dimostrazione in due fasi che si alternano:
+		\item sono generati durante la proof-search a partire da espressioni associate alle formule;
+		\item possono essere solo di due tipi:
 			\begin{itemize}
-				\item una fase (asincrona) in cui sono ammesse solo regole invertibili, cioè il cui ordine di applicazione non è importante;
-				\item una fase (sincrona) in cui ci si concentra su una formula e si continuano ad applicare regole non invertibili, con la possibilità di dover fare backtracking.
+				\item una certa formula è stata usata in questo goal, e non può essere usata altrove;
+				\item una certa formula non è stata usata in questo goal, e deve essere usata altrove;
 			\end{itemize}
-			In questo modo si minimizza il non-determinismo don't-care.
 	\end{itemize}
+	In questo modo è possibile non partizionare fisicamente il contesto
+	$$
+	\AXC{}
+	\LeftLabel{$A$}
+	\UIC{${\color{statalelightgrey}\alpha}, \beta \vdash \beta$}
+	\AXC{}
+	\LeftLabel{$A$}
+	\UIC{$\alpha, {\color{statalelightgrey}\beta} \vdash \alpha$}
+	\LeftLabel{$\llten_R$}
+	\BIC{$\alpha, \beta \vdash \beta \llten \alpha $}
+	\LeftLabel{$\llten_L$}
+	\UIC{$\alpha \llten \beta \vdash \beta \llten \alpha $}
+	\DP
+	$$
 \end{frame}
-\begin{frame}{Correttezza}
+\begin{frame}{Calcolo dei vincoli cont'd}
 	\begin{columns}
 		\begin{column}{.6\textwidth}
-			Del nuovo calcolo mostriamo la correttezza esibendo una traduzione tale che il diagramma a lato commuta.
+			Rendiamo il calcolo dei vincoli focused, e di questo nuovo calcolo mostriamo la correttezza esibendo una traduzione tale che il diagramma a lato commuta.
 			Con:
 			\begin{itemize}
 				\item $C$ il nostro calcolo;
@@ -153,7 +205,7 @@
 \begin{frame}{Implementazione}
 	Per il calcolo di sopra sono state scritte:
 	\begin{itemize}
-		\item<2-> un'implementazione in SWI-Prolog, sfruttando le librerie per il CLP;
+		\item<2-> un'implementazione in SWI-Prolog;
 		\item<3-> un generatore di test in OCaml;
 		\item<4-> una libreria per il testing e il benchmarking in Python.
 	\end{itemize}
@@ -167,15 +219,29 @@
 		\end{tabular}
 	\end{center}
 \end{frame}
+\begin{frame}{SWI-Prolog}
+	Nello specifico è stato scelto SWI-Prolog per:
+	\begin{itemize}
+		\item la sua capacità di esprimere le regole in modo dichiarativo;
+		\item il suo supporto di prim'ordine per il backtracking;
+		\item le sue librerie per il constraint logic programming (CLP), che offrono una elegante interfaccia verso risolutori di vincoli booleani;
+		\item l'unificazione permette di gestire in automatico la propagazione degli assegnamenti delle variabili booleane.
+	\end{itemize}
+\end{frame}
 
-\section{Sperimentazione}
-\begin{frame}{Risultati -- caso moltiplicativo}
+\section{Conclusione}
+\begin{frame}{Risultati}
 	\begin{columns}
 		\begin{column}{.5\textwidth}
-			Una volta implementato il prover lo si è confrontato con altri due prover:
+			Il prover è stato confrontato con altri due prover:
 			\begin{itemize}
-				\item llprover (1997)
-				\item APLL (2019)
+				\item llprover (Prolog, 1997)
+				\item APLL (OCaml, 2019)
+			\end{itemize}
+			Le fonti dei test sono state principalmente due:
+			\begin{itemize}
+				\item test generati (MLL e MALL);
+				\item un dataset di traduzioni dalla logica intuizionista per i test esponenziali.
 			\end{itemize}
 		\end{column}
 		\begin{column}{.5\textwidth}
@@ -186,53 +252,19 @@
 		\end{column}
 	\end{columns}
 \end{frame}
-\begin{frame}{Risultati -- caso generale}
-	Nel caso dei test esponenziali i risultati si livellano:
-	\begin{table}[h!]
-		\begin{subtable}{\textwidth}
-			\centering
-			{\footnotesize
-			\begin{tabular}{ | l c c c c c c | }
-				\hline
-				\textbf{prover} & \textbf{timeouts} & \textbf{failures} & \textbf{successes} & \textbf{success rate} & \textbf{avg. (succ.)} & \textbf{avg. (tot.)} \\
-				\hline
-				\hline
-				APLL     & $0$  & $17$ & $71$ & \color{darkbluestatale}{$\approx 0.80$} & \qty{0.035}{\second} & \qty{0.326}{\second} \\
-				llprover & $20$ & $6$  & $62$ & \color{darkbluestatale}{$\approx 0.70$} & \qty{0.981}{\second} & \qty{2.179}{\second} \\
-				sat-ll   & $5$  & $15$ & $68$ & \color{darkbluestatale}{$\approx 0.77$} & \qty{0.443}{\second} & \qty{0.496}{\second} \\
-				\hline
-			\end{tabular}
-			}
-			\caption{Output per KLE-cbv}
-			\label{table:KLE-cbv}
-		\end{subtable}
-		\begin{subtable}{\textwidth}
-			\centering
-			{\footnotesize
-			\begin{tabular}{ | l c c c c c c | }
-				\hline
-				\textbf{prover} & \textbf{timeouts} & \textbf{failures} & \textbf{successes} & \textbf{success rate} & \textbf{avg. (succ.)} & \textbf{avg. (tot.)} \\
-				\hline
-				\hline
-				APLL     & $0$  & $16$ & $72$ & \color{darkbluestatale}{$\approx 0.80$} & \qty{0.037}{\second} & \qty{0.055}{\second} \\
-				llprover & $20$ & $6$  & $62$ & \color{darkbluestatale}{$\approx 0.70$} & \qty{1.709}{\second} & \qty{3.253}{\second} \\
-				sat-ll   & $4$  & $18$ & $66$ & \color{darkbluestatale}{$\approx 0.75$} & \qty{0.130}{\second} & \qty{0.185}{\second} \\
-				\hline
-			\end{tabular}
-			}
-			\caption{Output per KLE-cbn}
-			\label{table:KLE-cbn}
-		\end{subtable}
-	\end{table}
-\end{frame}
 
-\begin{frame}
-  \frametitle{Conclusione e lavori futuri}
-  \begin{itemize}
-  \item riassumere
-    
-  \item come andare avanti
-  \end{itemize}
+\begin{frame}{Conclusione e lavori futuri}
+	Quindi del calcolo dei vincoli
+	\begin{itemize}
+		\item abbiamo fornito un nuovo calcolo che utilizzi il focusing, di cui abbiamo dimostrato la correttezza;
+		\item abbiamo fornito un'implementazione in Prolog;
+		\item abbiamo confrontato questa implementazione con altri prover simili e mostrato che nel caso moltiplicativo si ottengono buoni risultati.
+	\end{itemize}
+  	Possibili sviluppi futuri possono essere:
+	\begin{itemize}
+		\item affinamento dell'algoritmo nel caso esponenziale;
+		\item scrittura di altri calcoli e prover simili per altre logiche con moltiplicativi (ILL, BI, ...).
+	\end{itemize}
 \end{frame}
 
 \backmatter[notitle]

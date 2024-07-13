@@ -35,7 +35,6 @@
 	      infwarerr
 	      latexmk
 	      latex-bin
-	      listings
 	      minted
 	      multirow
 	      ninecolors

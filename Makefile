@@ -35,7 +35,7 @@ riassunto.pdf: riassunto.tex refs.bib
 		-usepretex					\
 		riassunto.tex				
 
-presentazione.pdf: presentazione.tex 
+presentazione.pdf: presentazione.tex images/graph.pdf
 	latexmk -pdf -$(LCC) -latexoption="-shell-escape" 	\
 		-pretex=$(PRETEX)				\
 		-usepretex					\
