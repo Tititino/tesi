@@ -51,8 +51,8 @@
 
 \section{Introduzione}
 \begin{frame}{Calcolo dei sequenti}
-	Il calcolo dei sequenti (G. Gentzen, 1934) è un formalismo per rappresentare un calcolo logico e strutturarne dimostrazioni.
-	I concetti principali sono:
+  Il calcolo dei sequenti  è un sistema formale logico introdotto da Gentzen nel 1935 che può essere usato per specificate la ricerca di prove "<proof serach"> in logica:
+%	I concetti principali sono:
 	\begin{itemize}
 		\item<2-> il sequente $\Delta \vdash \Gamma$, di solito interpretato come
 			$$ \delta_1 \wedge \dots \wedge \delta_n \rightarrow \gamma_1 \vee \dots \vee \gamma_m $$
@@ -85,34 +85,34 @@
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Theorem prover}
+\begin{frame}{Proof search}
 	Un \textbf{theorem prover} è un programma che, dato un sequente, prova a costruirne la dimostrazione.
 	Nello specifico la versione bottom-up:
 	\begin{enumerate}
 		\item inizia con un singolo \textit{goal}, cioè il sequente iniziale
-		\item sceglie un nuovo goal;
-		\item lo scompone applicando una regola ``al contrario'' ad una delle formule nel goal:
-			\begin{itemize}
-				\item non-determinismo don't-care: tutte le scelte sono equivalenti equivalenti;
-				\item non-determinismo don't-know: non tutte le scelte sono equivalenti e può essere necessario del backtracking;
+%		\item sceglie un nuovo goal;
+		\item lo scompone applicando una regola  ad una delle formule nel goal:
+			% \begin{itemize}
+			% 	\item non-determinismo don't-care: tutte le scelte sono equivalenti equivalenti;
+			% 	\item non-determinismo don't-know: non tutte le scelte sono equivalenti e può essere necessario del backtracking;
 			\end{itemize}
 		\item aggiunge i nuovi goal al working-set;
-		\item si ripete dal passo 2 fino a che ci sono goal irrisolti.
+		\item si ripete dal passo 1 fino a che ci sono goal irrisolti.
 	\end{enumerate}
 \end{frame}
 
 \begin{frame}{Focusing}
 	Le regole di un calcolo possono essere suddivise in due classi:
 	\begin{itemize}
-		\item invertibili: l'ordine di applicazione non è importante;
-		\item non invertibili: sono necessarie scelte che potrebbero necessitare backtracking.
+		\item invertibili: l'ordine di applicazione non è importante "<determinismo don't-care:">;
+		\item non invertibili: sono necessarie scelte che potrebbero necessitare backtracking "<determinismo don't-care:">.
 	\end{itemize}
 	Il \textbf{focusing} è una tecnica che suddivide la dimostrazione in due fasi che si alternano:
 	\begin{itemize}
 		\item una fase (asincrona) in cui si applicano eagerly solo regole invertibili;
 		\item una fase (sincrona) in cui ci si concentra su una formula e si continuano ad applicare regole non invertibili.
 	\end{itemize}
-	In questo modo si minimizza il non-determinismo don't-care.
+%	In questo modo si minimizza il non-determinismo don't-care.
 \end{frame}
 
 
@@ -124,11 +124,13 @@
 	\end{itemize}
 	Nella logica che ne risulta:
 	\begin{itemize}
-		\item è generalmente proibita la duplicazione o l'eliminazione di formule;
-		\item le formule possono essere viste come \textbf{risorse};
+%		\item è generalmente proibita la duplicazione o l'eliminazione di formule;
+        \item le formule possono essere viste come \textbf{risorse};
+          
+        \item ongni formula deve essere usata esattamente una volta
 		\item ogni connettivo ammette due versioni, una additiva ed una moltiplicativa, corrispondenti a due diverse interpretazioni dei connettivi classici;
 	\end{itemize}
-	Degli speciali connettivi ($?, !$), chiamati esponenziali, permettono di localizzare la copia e l'eliminazione di formule.
+	Degli speciali connettivi ($?, !$), chiamati esponenziali, permettono di localizzare weakening e contrazione.
 \end{frame}
 
 \begin{frame}{Gestione delle risorse}
@@ -148,9 +150,9 @@
 	$$
 	Nello specifico la scomposizione dei moltiplicativi spesso comporta un'operazione chiamata \textbf{splitting}, cioè il partizionamento del contesto.
 \end{frame}
-\section{Il calcolo}
+\section{Il nostro calcolo}
 \begin{frame}{Calcolo dei vincoli}
-	Nel 2001 D.Pym e J.Harland propongono un di gestione delle risorse basato su vincoli booleani.
+	Nel 2001 D.Pym e J.Harland propongono una gestione delle risorse basato su \textbf{vincoli booleani}.
 	Questi
 	\begin{itemize}
 		\item sono generati durante la proof-search a partire da espressioni associate alle formule;
@@ -223,13 +225,13 @@
 	Nello specifico è stato scelto SWI-Prolog per:
 	\begin{itemize}
 		\item la sua capacità di esprimere le regole in modo dichiarativo;
-		\item il suo supporto di prim'ordine per il backtracking;
+		\item il suo supporto per il backtracking;
 		\item le sue librerie per il constraint logic programming (CLP), che offrono una elegante interfaccia verso risolutori di vincoli booleani;
-		\item l'unificazione permette di gestire in automatico la propagazione degli assegnamenti delle variabili booleane.
+		\item l'unificazione che permette di gestire in automatico la propagazione degli assegnamenti delle variabili booleane.
 	\end{itemize}
 \end{frame}
 
-\section{Conclusione}
+\section{Sperimentazione}
 \begin{frame}{Risultati}
 	\begin{columns}
 		\begin{column}{.5\textwidth}
@@ -263,7 +265,7 @@
   	Possibili sviluppi futuri possono essere:
 	\begin{itemize}
 		\item affinamento dell'algoritmo nel caso esponenziale;
-		\item scrittura di altri calcoli e prover simili per altre logiche con moltiplicativi (ILL, BI, ...).
+		\item scrittura di altri calcoli e prover simili per altre logiche sotto-strutturali (ILL, BI, ...).
 	\end{itemize}
 \end{frame}
 
