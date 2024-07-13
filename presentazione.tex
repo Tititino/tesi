@@ -87,30 +87,26 @@
 
 \begin{frame}{Theorem prover}
 	Un \textbf{theorem prover} è un programma che, dato un sequente, prova a costruirne la dimostrazione.
-	Nello specifico la versione bottom-up:
+	Nello specifico nella versione bottom-up:
 	\begin{enumerate}
-		\item inizia con un singolo \textit{goal}, cioè il sequente iniziale
-		\item sceglie un nuovo goal;
-		\item lo scompone applicando una regola ``al contrario'' ad una delle formule nel goal:
-			\begin{itemize}
-				\item non-determinismo don't-care: tutte le scelte sono equivalenti equivalenti;
-				\item non-determinismo don't-know: non tutte le scelte sono equivalenti e può essere necessario del backtracking;
-			\end{itemize}
-		\item aggiunge i nuovi goal al working-set;
+		\item si inizia con un singolo \textit{goal}, cioè il sequente iniziale;
+		\item si sceglie un nuovo goal;
+		\item lo si scompone applicando una regola ``al contrario'' ad una delle formule nel goal;
+		\item si aggiungono i nuovi goal al working-set;
 		\item si ripete dal passo 2 fino a che ci sono goal irrisolti.
 	\end{enumerate}
 \end{frame}
 
 \begin{frame}{Focusing}
-	Le regole di un calcolo possono essere suddivise in due classi:
+	Nella maggior parte dei casi ci saranno più regole applicabili ad un sequente, ma non tutte le scelte sono uguali:
 	\begin{itemize}
-		\item invertibili: l'ordine di applicazione non è importante;
-		\item non invertibili: sono necessarie scelte che potrebbero necessitare backtracking.
+		\item certe sono invertibili e possono essere applicate in qualunque ordine senza perdere completezza (non-determinismo don't-care),
+		\item altre richiedono scelte e creano punti di backtracking (non-determinismo don't-know).
 	\end{itemize}
 	Il \textbf{focusing} è una tecnica che suddivide la dimostrazione in due fasi che si alternano:
 	\begin{itemize}
-		\item una fase (asincrona) in cui si applicano eagerly solo regole invertibili;
-		\item una fase (sincrona) in cui ci si concentra su una formula e si continuano ad applicare regole non invertibili.
+		\item asincrona: si applicano eagerly solo regole invertibili (non-determinismo don't-care);
+		\item sincrona: ci si concentra su una formula e si continuano ad applicare regole non invertibili (non-determinismo don't-know).
 	\end{itemize}
 	In questo modo si minimizza il non-determinismo don't-care.
 \end{frame}
@@ -128,7 +124,7 @@
 		\item le formule possono essere viste come \textbf{risorse};
 		\item ogni connettivo ammette due versioni, una additiva ed una moltiplicativa, corrispondenti a due diverse interpretazioni dei connettivi classici;
 	\end{itemize}
-	Degli speciali connettivi ($?, !$), chiamati esponenziali, permettono di localizzare la copia e l'eliminazione di formule.
+	Degli speciali connettivi chiamati esponenziali permettono di localizzare la copia e l'eliminazione di formule.
 \end{frame}
 
 \begin{frame}{Gestione delle risorse}
