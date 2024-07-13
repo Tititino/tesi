@@ -87,8 +87,9 @@
 
 \begin{frame}{Proof search}
 	Un \textbf{theorem prover} è un programma che, dato un sequente, prova a costruirne la dimostrazione.
-	Nello specifico la versione bottom-up:
+	Nello specifico nella versione bottom-up:
 	\begin{enumerate}
+
 		\item inizia con un singolo \textit{goal}, cioè il sequente iniziale
 %		\item sceglie un nuovo goal;
 		\item lo scompone applicando una regola  ad una delle formule nel goal:
@@ -102,15 +103,15 @@
 \end{frame}
 
 \begin{frame}{Focusing}
-	Le regole di un calcolo possono essere suddivise in due classi:
+	Nella maggior parte dei casi ci saranno più regole applicabili ad un sequente, ma non tutte le scelte sono uguali:
 	\begin{itemize}
-		\item invertibili: l'ordine di applicazione non è importante "<determinismo don't-care:">;
-		\item non invertibili: sono necessarie scelte che potrebbero necessitare backtracking "<determinismo don't-care:">.
+		\item certe sono invertibili e possono essere applicate in qualunque ordine senza perdere completezza (non-determinismo don't-care),
+		\item altre richiedono scelte e creano punti di backtracking (non-determinismo don't-know).
 	\end{itemize}
 	Il \textbf{focusing} è una tecnica che suddivide la dimostrazione in due fasi che si alternano:
 	\begin{itemize}
-		\item una fase (asincrona) in cui si applicano eagerly solo regole invertibili;
-		\item una fase (sincrona) in cui ci si concentra su una formula e si continuano ad applicare regole non invertibili.
+		\item asincrona: si applicano eagerly solo regole invertibili (non-determinismo don't-care);
+		\item sincrona: ci si concentra su una formula e si continuano ad applicare regole non invertibili (non-determinismo don't-know).
 	\end{itemize}
 %	In questo modo si minimizza il non-determinismo don't-care.
 \end{frame}
