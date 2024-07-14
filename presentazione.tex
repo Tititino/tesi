@@ -51,12 +51,12 @@
 
 \section{Introduzione}
 \begin{frame}{Calcolo dei sequenti}
-  Il calcolo dei sequenti  è un sistema formale logico introdotto da Gentzen nel 1935 che può essere usato per specificate la ricerca di prove "<proof serach"> in logica:
+	Il calcolo dei sequenti  è un sistema formale logico introdotto da Gentzen nel 1935 che può essere usato per specificare la ricerca di prove (\textit{proof search}) in logica:
 %	I concetti principali sono:
 	\begin{itemize}
 		\item<2-> il sequente $\Delta \vdash \Gamma$, di solito interpretato come
 			$$ \delta_1 \wedge \dots \wedge \delta_n \rightarrow \gamma_1 \vee \dots \vee \gamma_m $$
-		\item<3-> la regola, per manipolare i sequenti
+		\item<3-> la regola, che descrive come manipolare i sequenti
 			\begin{itemize}
 				\item descrive la semantica di un connettivo (introduzione e eliminazione):
 					\vspace*{.1cm}
@@ -89,15 +89,9 @@
 	Un \textbf{theorem prover} è un programma che, dato un sequente, prova a costruirne la dimostrazione.
 	Nello specifico nella versione bottom-up:
 	\begin{enumerate}
-
-		\item inizia con un singolo \textit{goal}, cioè il sequente iniziale
-%		\item sceglie un nuovo goal;
-		\item lo scompone applicando una regola  ad una delle formule nel goal:
-			% \begin{itemize}
-			% 	\item non-determinismo don't-care: tutte le scelte sono equivalenti equivalenti;
-			% 	\item non-determinismo don't-know: non tutte le scelte sono equivalenti e può essere necessario del backtracking;
-			\end{itemize}
-		\item aggiunge i nuovi goal al working-set;
+		\item si sceglie un \textit{goal}, inizialmente il sequente iniziale;
+		\item lo si scompone applicando una regola ad una delle formule nel goal;
+		\item si aggiungono i nuovi goal al working-set;
 		\item si ripete dal passo 1 fino a che ci sono goal irrisolti.
 	\end{enumerate}
 \end{frame}
@@ -105,7 +99,7 @@
 \begin{frame}{Focusing}
 	Nella maggior parte dei casi ci saranno più regole applicabili ad un sequente, ma non tutte le scelte sono uguali:
 	\begin{itemize}
-		\item certe sono invertibili e possono essere applicate in qualunque ordine senza perdere completezza (non-determinismo don't-care),
+		\item certe sono \textit{invertibili} e possono essere applicate in qualunque ordine senza perdere completezza (non-determinismo don't-care),
 		\item altre richiedono scelte e creano punti di backtracking (non-determinismo don't-know).
 	\end{itemize}
 	Il \textbf{focusing} è una tecnica che suddivide la dimostrazione in due fasi che si alternano:
@@ -128,10 +122,10 @@
 %		\item è generalmente proibita la duplicazione o l'eliminazione di formule;
         \item le formule possono essere viste come \textbf{risorse};
           
-        \item ongni formula deve essere usata esattamente una volta
+        \item ogni formula deve essere usata esattamente una volta
 		\item ogni connettivo ammette due versioni, una additiva ed una moltiplicativa, corrispondenti a due diverse interpretazioni dei connettivi classici;
 	\end{itemize}
-	Degli speciali connettivi ($?, !$), chiamati esponenziali, permettono di localizzare weakening e contrazione.
+	Degli speciali connettivi, chiamati esponenziali, permettono di localizzare weakening e contrazione.
 \end{frame}
 
 \begin{frame}{Gestione delle risorse}
