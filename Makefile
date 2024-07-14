@@ -35,7 +35,7 @@ riassunto.pdf: riassunto.tex refs.bib
 		-usepretex					\
 		riassunto.tex				
 
-presentazione.pdf: presentazione.tex images/graph.pdf
+presentazione.pdf: presentazione.tex images/graph.pdf beamertheme-statale.sty statale-colors.sty
 	latexmk -pdf -$(LCC) -latexoption="-shell-escape" 	\
 		-pretex=$(PRETEX)				\
 		-usepretex					\

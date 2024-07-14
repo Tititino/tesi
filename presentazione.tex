@@ -133,18 +133,18 @@
 	$$
 	\AXC{}
 	\LeftLabel{$A$}
-	\UIC{$\beta \vdash \beta$}
+	\UIC{$\phi' \vdash \phi'' $}
 	\AXC{}
 	\LeftLabel{$A$}
-	\UIC{$\alpha \vdash \alpha$}
+	\UIC{$\phi' \vdash \phi'' $}
 	\LeftLabel{$\llten_R$}
-	\BIC{$\alpha, \beta \vdash \beta \llten \alpha$}
+	\BIC{$\phi', \phi'' \vdash \phi'' \llten \phi' $}
 	\LeftLabel{$\llten_L$}
-	\UIC{$\alpha \llten \beta \vdash \beta \llten \alpha$}
+	\UIC{$\phi' \llten \phi'' \vdash \phi' \llten \phi''$}
 	\DP
 	$$
 
-        Le regole moltiplicative richiedono di sciegliere un partizionamento corretto del contesto (\textbf{splitting}), operazione potenzialmente esponenziale.
+        Le regole moltiplicative richiedono di scegliere un partizionamento corretto del contesto (\textbf{splitting}), operazione potenzialmente esponenziale.
         
 \end{frame}
 \section{Il nostro calcolo}
@@ -163,14 +163,14 @@
 	$$
 	\AXC{}
 	\LeftLabel{$A$}
-	\UIC{${\color{statalelightgrey}\alpha}, \beta \vdash \beta$}
+	\UIC{$\cancel{\phi'}, \phi'' \vdash \phi'' $}
 	\AXC{}
 	\LeftLabel{$A$}
-	\UIC{$\alpha, {\color{statalelightgrey}\beta} \vdash \alpha$}
+	\UIC{$\phi', \cancel{\phi''} \vdash \phi'$}
 	\LeftLabel{$\llten_R$}
-	\BIC{$\alpha, \beta \vdash \beta \llten \alpha $}
+	\BIC{$\phi', \phi'' \vdash \phi'' \llten \phi' $}
 	\LeftLabel{$\llten_L$}
-	\UIC{$\alpha \llten \beta \vdash \beta \llten \alpha $}
+	\UIC{$\phi' \llten \phi'' \vdash \phi'' \llten \phi' $}
 	\DP
 	$$
 \end{frame}
