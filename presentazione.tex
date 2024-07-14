@@ -51,7 +51,7 @@
 
 \section{Introduzione}
 \begin{frame}{Calcolo dei sequenti}
-	Il calcolo dei sequenti  è un sistema formale logico introdotto da Gentzen nel 1935 che può essere usato per specificare la ricerca di prove (\textit{proof search}) in logica:
+	Il calcolo dei sequenti  è un sistema formale  introdotto da Gentzen nel 1935 che può essere usato per specificare la ricerca di prove (\textit{proof search}) in logica, basato su:
 %	I concetti principali sono:
 	\begin{itemize}
 		\item<2-> il sequente $\Delta \vdash \Gamma$, di solito interpretato come
@@ -143,21 +143,23 @@
 	\UIC{$\alpha \llten \beta \vdash \beta \llten \alpha$}
 	\DP
 	$$
-	Nello specifico la scomposizione dei moltiplicativi spesso comporta un'operazione chiamata \textbf{splitting}, cioè il partizionamento del contesto.
+
+        Le regole moltiplicative richiedono di sciegliere un partizionamento corretto del contesto (\textbf{splitting}), operazione potenzialmente esponenziale.
+        
 \end{frame}
 \section{Il nostro calcolo}
 \begin{frame}{Calcolo dei vincoli}
 	Nel 2001 D.Pym e J.Harland propongono una gestione delle risorse basato su \textbf{vincoli booleani}.
 	Questi
 	\begin{itemize}
-		\item sono generati durante la proof-search a partire da espressioni associate alle formule;
-		\item possono essere solo di due tipi:
+		\item generati durante la proof-search a partire da espressioni associate alle formule;
+		\item  due tipi:
 			\begin{itemize}
-				\item una certa formula è stata usata in questo goal, e non può essere usata altrove;
-				\item una certa formula non è stata usata in questo goal, e deve essere usata altrove;
+				\item una certa formula è stata usata nel goal corrente, e non può essere usata altrove;
+				\item una certa formula non è stata usata, ed è disponibile altrove;
 			\end{itemize}
 	\end{itemize}
-	In questo modo è possibile non partizionare fisicamente il contesto
+	La soddisfacibilità del vincolo rimpiazza lo splitting del   contesto
 	$$
 	\AXC{}
 	\LeftLabel{$A$}
@@ -200,7 +202,7 @@
 	\end{columns}
 \end{frame}
 \begin{frame}{Implementazione}
-	Per il calcolo di sopra sono state scritte:
+	Per il nostro calcolo  abbiamo scritto:
 	\begin{itemize}
 		\item<2-> un'implementazione in SWI-Prolog;
 		\item<3-> un generatore di test in OCaml;
@@ -216,8 +218,8 @@
 		\end{tabular}
 	\end{center}
 \end{frame}
-\begin{frame}{SWI-Prolog}
-	Nello specifico è stato scelto SWI-Prolog per:
+\begin{frame}{Prolog}
+	Abbiamo scelto SWI-Prolog per:
 	\begin{itemize}
 		\item la sua capacità di esprimere le regole in modo dichiarativo;
 		\item il suo supporto per il backtracking;
@@ -230,14 +232,14 @@
 \begin{frame}{Risultati}
 	\begin{columns}
 		\begin{column}{.5\textwidth}
-			Il prover è stato confrontato con altri due prover:
+			Il nostro prover è stato confrontato con altri due prover:
 			\begin{itemize}
 				\item llprover (Prolog, 1997)
 				\item APLL (OCaml, 2019)
 			\end{itemize}
 			Le fonti dei test sono state principalmente due:
 			\begin{itemize}
-				\item test generati (MLL e MALL);
+				\item test generati randomicamente (MLL e MALL);
 				\item un dataset di traduzioni dalla logica intuizionista per i test esponenziali.
 			\end{itemize}
 		\end{column}
