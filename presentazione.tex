@@ -51,8 +51,7 @@
 
 \section{Introduzione}
 \begin{frame}{Calcolo dei sequenti}
-	Il calcolo dei sequenti  è un sistema formale  introdotto da Gentzen nel 1935 che può essere usato per specificare la ricerca di prove (\textit{proof search}) in logica, basato su:
-%	I concetti principali sono:
+	Il calcolo dei sequenti  è un sistema formale  introdotto da G.Gentzen nel 1935 che può essere usato per specificare la ricerca di prove (\textit{proof search}) in logica, basato su:
 	\begin{itemize}
 		\item<2-> il sequente $\Delta \vdash \Gamma$, di solito interpretato come
 			$$ \delta_1 \wedge \dots \wedge \delta_n \rightarrow \gamma_1 \vee \dots \vee \gamma_m $$
@@ -107,9 +106,7 @@
 		\item asincrona: si applicano eagerly solo regole invertibili (non-determinismo don't-care);
 		\item sincrona: ci si concentra su una formula e si continuano ad applicare regole non invertibili (non-determinismo don't-know).
 	\end{itemize}
-%	In questo modo si minimizza il non-determinismo don't-care.
 \end{frame}
-
 
 \begin{frame}{Logica lineare}
 	La \textbf{logica lineare} nasce dall'analisi delle regole strutturali e dall'abbandono di due di esse:
@@ -119,10 +116,8 @@
 	\end{itemize}
 	Nella logica che ne risulta:
 	\begin{itemize}
-%		\item è generalmente proibita la duplicazione o l'eliminazione di formule;
-        \item le formule possono essere viste come \textbf{risorse};
-          
-        \item ogni formula deve essere usata esattamente una volta
+        	\item ogni formula deve essere usata esattamente una volta;
+        	\item le formule possono essere viste come \textbf{risorse};
 		\item ogni connettivo ammette due versioni, una additiva ed una moltiplicativa, corrispondenti a due diverse interpretazioni dei connettivi classici;
 	\end{itemize}
 	Degli speciali connettivi, chiamati esponenziali, permettono di localizzare weakening e contrazione.
@@ -234,8 +229,8 @@
 		\begin{column}{.5\textwidth}
 			Il nostro prover è stato confrontato con altri due prover:
 			\begin{itemize}
-				\item llprover (Prolog, 1997)
-				\item APLL (OCaml, 2019)
+				\item llprover (Prolog, 1997),
+				\item APLL (OCaml, 2019).
 			\end{itemize}
 			Le fonti dei test sono state principalmente due:
 			\begin{itemize}
